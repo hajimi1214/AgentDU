@@ -239,7 +239,19 @@ class RuntimeTests(unittest.TestCase):
             git_executable = Path(__file__).resolve().parents[1] / ".tools" / "mingit" / "cmd" / "git.exe"
             if not git_executable.is_file():
                 self.skipTest("Bundled Git is unavailable for the project integration test")
-            subprocess.run([str(git_executable), "-C", str(root), "init"], check=True, capture_output=True)
+            git_environment = os.environ.copy()
+            git_environment.update(
+                {
+                    "AGENTDU_GIT_EXECUTABLE": str(git_executable),
+                    "GIT_CONFIG_COUNT": "0",
+                }
+            )
+            subprocess.run(
+                [str(git_executable), "-C", str(root), "init"],
+                check=True,
+                capture_output=True,
+                env=git_environment,
+            )
             (root / "app.py").write_text(
                 "def combine(left, right):\n    return left - right\n", encoding="utf-8"
             )
@@ -260,6 +272,7 @@ class RuntimeTests(unittest.TestCase):
                 [str(git_executable), "-C", str(root), "add", "app.py", "test_app.py", "README.md"],
                 check=True,
                 capture_output=True,
+                env=git_environment,
             )
             subprocess.run(
                 [
@@ -276,10 +289,15 @@ class RuntimeTests(unittest.TestCase):
                 ],
                 check=True,
                 capture_output=True,
+                env=git_environment,
             )
-            previous_git = os.environ.get("AGENTDU_GIT_EXECUTABLE")
-            os.environ["AGENTDU_GIT_EXECUTABLE"] = str(git_executable)
-            try:
+            with patch.dict(
+                os.environ,
+                {
+                    "AGENTDU_GIT_EXECUTABLE": str(git_executable),
+                    "GIT_CONFIG_COUNT": "0",
+                },
+            ):
                 model = RepairModel()
                 registry = ToolRegistry(root, AllowAllPolicy())
                 for tool in create_builtin_tools():
@@ -306,11 +324,6 @@ class RuntimeTests(unittest.TestCase):
                     "# Example app\n\ncombine(left, right) adds the right operand.\n",
                 )
                 self.assertIn("verified the test suite", result.content)
-            finally:
-                if previous_git is None:
-                    os.environ.pop("AGENTDU_GIT_EXECUTABLE", None)
-                else:
-                    os.environ["AGENTDU_GIT_EXECUTABLE"] = previous_git
 
     def test_extension_can_register_tool_and_observe_events(self) -> None:
         class EchoExtension:

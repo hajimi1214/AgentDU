@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import threading
+from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
@@ -33,11 +34,16 @@ class TruncatedResponseError(RuntimeError):
     pass
 
 
+class ModelCallBudgetExceeded(RuntimeError):
+    pass
+
+
 @dataclass(frozen=True)
 class RunResult:
     session_id: str
     content: str
     model_steps: int
+    model_calls: int = 0
 
 
 class AgentRuntime:
@@ -53,9 +59,13 @@ class AgentRuntime:
         extensions: Sequence[Extension] = (),
         system_prompt: str = DEFAULT_SYSTEM_PROMPT,
         max_steps: int = 40,
+        max_model_calls: int | None = None,
+        include_builtin_tools: bool = True,
     ) -> None:
         if max_steps < 1:
             raise ValueError("max_steps must be positive")
+        if max_model_calls is not None and max_model_calls < 1:
+            raise ValueError("max_model_calls must be positive")
         self.model = model
         self.tools = tools
         self.sessions = sessions
@@ -63,9 +73,14 @@ class AgentRuntime:
         self.event_bus = event_bus or EventBus()
         self.system_prompt = system_prompt
         self.max_steps = max_steps
-        for tool in create_builtin_tools():
-            if tool.name not in {schema["function"]["name"] for schema in tools.model_schemas()}:
-                tools.register(tool)
+        self.max_model_calls = max_model_calls
+        self._model_call_count: ContextVar[int] = ContextVar(
+            f"agentdu_model_calls_{id(self)}", default=0
+        )
+        if include_builtin_tools:
+            for tool in create_builtin_tools():
+                if tool.name not in {schema["function"]["name"] for schema in tools.model_schemas()}:
+                    tools.register(tool)
         for extension in extensions:
             extension.register_tools(tools)
             self.event_bus.subscribe(extension.on_event)
@@ -90,6 +105,7 @@ class AgentRuntime:
             lock.release()
             raise
         process_lock = None
+        call_count_token = self._model_call_count.set(0)
         try:
             process_lock_task = asyncio.create_task(
                 asyncio.to_thread(self.sessions.acquire_process_lock, session_id)
@@ -116,7 +132,11 @@ class AgentRuntime:
                     },
                 )
             messages = self.sessions.read_messages(session_id)
-            if not any(message.get("role") == "system" for message in messages):
+            if not any(
+                message.get("role") == "system"
+                and message.get("content") == self.system_prompt
+                for message in messages
+            ):
                 self.sessions.append_message(
                     session_id, {"role": "system", "content": self.system_prompt}
                 )
@@ -151,7 +171,12 @@ class AgentRuntime:
                         "run_completed",
                         {"step": step, "response_chars": len(content)},
                     )
-                    return RunResult(session_id, content, step)
+                    return RunResult(
+                        session_id,
+                        content,
+                        step,
+                        self._model_call_count.get(),
+                    )
 
                 for call in answer.tool_calls:
                     await self._emit(
@@ -169,6 +194,7 @@ class AgentRuntime:
             await self._emit(session_id, "run_stopped", {"reason": "max_steps", "limit": self.max_steps})
             raise MaxStepsExceeded(f"Agent stopped after {self.max_steps} model steps")
         finally:
+            self._model_call_count.reset(call_count_token)
             if process_lock is not None:
                 process_lock.release()
             lock.release()
@@ -197,7 +223,18 @@ class AgentRuntime:
     ) -> AssistantMessage:
         retries = 0
         while True:
+            model_calls = self._model_call_count.get()
+            if self.max_model_calls is not None and model_calls >= self.max_model_calls:
+                await self._emit(
+                    session_id,
+                    "run_stopped",
+                    {"reason": "model_call_budget", "limit": self.max_model_calls},
+                )
+                raise ModelCallBudgetExceeded(
+                    f"Agent stopped after {self.max_model_calls} model requests"
+                )
             try:
+                self._model_call_count.set(model_calls + 1)
                 return await self._request_model_once(session_id, step, messages)
             except ProviderError as error:
                 partial_output = getattr(error, "partial_output", False)
@@ -266,7 +303,7 @@ class AgentRuntime:
         return answer
 
     async def _execute_tool(self, session_id: str, call: ToolCall) -> None:
-        result = await self.tools.execute(call.name, call.arguments)
+        result = await self.tools.execute(call.name, call.arguments, session_id)
         self.sessions.append_message(
             session_id,
             {
@@ -301,6 +338,8 @@ def build_default_runtime(
     max_steps: int = 40,
     extensions: Sequence[Extension] = (),
     system_prompt: str = DEFAULT_SYSTEM_PROMPT,
+    max_model_calls: int | None = None,
+    include_builtin_tools: bool = True,
 ) -> AgentRuntime:
     if not callable(getattr(permission_policy, "authorize", None)):
         raise TypeError("permission_policy must implement authorize(request)")
@@ -314,6 +353,8 @@ def build_default_runtime(
         extensions=extensions,
         system_prompt=_workspace_system_prompt(workspace, system_prompt),
         max_steps=max_steps,
+        max_model_calls=max_model_calls,
+        include_builtin_tools=include_builtin_tools,
     )
 
 

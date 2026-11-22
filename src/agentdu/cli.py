@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import os
 import sys
+import threading
 from pathlib import Path
 
 from .agent import AgentRuntime, build_default_runtime
@@ -12,13 +13,17 @@ from .events import AgentEvent
 from .git_workspaces import GitWorkspaceError, GitWorkspaces
 from .handoff import HandoffLedger
 from .permissions import ApproveWorkspaceActionsPolicy, PermissionRequest
+from .orchestration import AutonomousCoordinator
 from .provider import OpenAICompatibleModel
 from .sessions import SessionStore
 from .settings import ModelSettings, default_config_path, resolve_model_options
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="agentdu", description="Run the AgentDU coding agent")
+    parser = argparse.ArgumentParser(
+        prog="agentdu",
+        description="Run the AgentDU coding agent in smart autonomous collaboration mode",
+    )
     parser.add_argument("prompt", nargs="?", help="Task for the agent")
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     parser.add_argument("--session", help="Resume a session by id")
@@ -39,6 +44,15 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--api-key", help="Override the selected profile's API key")
     parser.add_argument("--handoff-profile", help="Run a second model as the handoff receiver")
+    parser.add_argument(
+        "--solo",
+        action="store_true",
+        help="Disable autonomous model collaboration for a single-model baseline",
+    )
+    parser.add_argument("--collaboration-concurrency", type=int, default=2)
+    parser.add_argument("--collaboration-max-tasks", type=int, default=8)
+    parser.add_argument("--collaboration-max-model-calls", type=int, default=80)
+    parser.add_argument("--collaboration-task-model-calls", type=int, default=20)
     parser.add_argument(
         "--check",
         action="append",
@@ -63,6 +77,8 @@ def main() -> int:
         _parser().error("prompt is required when stdin is not interactive")
     if args.handoff_profile and (interactive or not args.prompt):
         _parser().error("--handoff-profile requires a single prompt and cannot be combined with --interactive")
+    if args.handoff_profile and args.solo:
+        _parser().error("--solo cannot be combined with --handoff-profile")
     if args.check and not args.handoff_profile:
         _parser().error("--check requires --handoff-profile")
     workspace = args.workspace.resolve()
@@ -111,6 +127,7 @@ def main() -> int:
         finally:
             lock.release()
     policy = ApproveWorkspaceActionsPolicy() if args.yes else _InteractivePolicy()
+    coordinator: AutonomousCoordinator | None = None
     try:
         settings = ModelSettings.load(args.config)
         if args.handoff_profile:
@@ -153,8 +170,34 @@ def main() -> int:
                 context_tokens=args.context_tokens,
                 max_steps=args.max_steps,
             )
+            if not args.solo:
+                candidate_coordinator = AutonomousCoordinator(
+                    workspace,
+                    settings,
+                    options,
+                    policy,
+                    context_tokens=args.context_tokens,
+                    max_steps=args.max_steps,
+                    max_concurrency=args.collaboration_concurrency,
+                    max_tasks=args.collaboration_max_tasks,
+                    total_model_calls=args.collaboration_max_model_calls,
+                    task_model_calls=args.collaboration_task_model_calls,
+                )
+                if candidate_coordinator.available:
+                    candidate_coordinator.install(runtime)
+                    coordinator = candidate_coordinator
+                else:
+                    candidate_coordinator.close(wait=False)
             runtime.event_bus.subscribe(_terminal_output)
-            session_id = asyncio.run(_run_prompts(runtime, args.prompt, args.session, interactive))
+            session_id = asyncio.run(
+                _run_with_coordinator(
+                    runtime,
+                    args.prompt,
+                    args.session,
+                    interactive,
+                    coordinator,
+                )
+            )
     except KeyboardInterrupt:
         print("AgentDU interrupted", file=sys.stderr)
         return 130
@@ -190,27 +233,63 @@ async def _run_prompts(
     return current_session
 
 
+async def _run_with_coordinator(
+    runtime: AgentRuntime,
+    prompt: str | None,
+    session_id: str | None,
+    interactive: bool,
+    coordinator: AutonomousCoordinator | None,
+) -> str | None:
+    session_id = await _run_prompts(runtime, prompt, session_id, interactive)
+    if coordinator is None or session_id is None:
+        return session_id
+    tasks = await asyncio.to_thread(coordinator.finish_session, session_id)
+    pending = [
+        task
+        for task in tasks
+        if task.get("status") in {"failed", "blocked", "interrupted"}
+        or (task.get("kind") == "implementation" and task.get("status") == "completed")
+    ]
+    if pending:
+        details = ", ".join(f"{task['task_id']}={task['status']}" for task in pending)
+        print(f"\n[AgentDU] Collaboration follow-up required: {details}", file=sys.stderr)
+    return session_id
+
+
 def _terminal_output(event: AgentEvent) -> None:
     if event.kind == "assistant_delta":
         sys.stdout.write(event.payload["text"])
         sys.stdout.flush()
     elif event.kind == "run_completed":
         print()
+    elif event.kind == "collaboration_progress":
+        payload = event.payload
+        detail = payload.get("tool_name") or payload.get("event") or payload.get("kind")
+        print(f"\n[AgentDU task {payload['task_id']}] {detail}")
 
 
 class _InteractivePolicy:
+    def __init__(self) -> None:
+        self._approval_lock = threading.Lock()
+
     def authorize(self, request: PermissionRequest) -> bool:
         if request.permission == "read":
             return True
-        if not sys.stdin.isatty():
-            print(
-                f"Denied {request.tool_name}: approval requires an interactive terminal (or --yes).",
-                file=sys.stderr,
+        with self._approval_lock:
+            if not sys.stdin.isatty():
+                print(
+                    f"Denied {request.tool_name}: approval requires an interactive terminal (or --yes).",
+                    file=sys.stderr,
+                )
+                return False
+            detail = (
+                request.arguments.get("command")
+                or request.arguments.get("task")
+                or request.arguments.get("question")
+                or request.arguments.get("task_id", "")
             )
-            return False
-        detail = request.arguments.get("command", request.arguments.get("path", ""))
-        answer = input(f"Allow {request.tool_name} {detail!r}? [y/N] ")
-        return answer.strip().lower() in {"y", "yes"}
+            answer = input(f"Allow {request.tool_name} {detail!r}? [y/N] ")
+            return answer.strip().lower() in {"y", "yes"}
 
 
 if __name__ == "__main__":

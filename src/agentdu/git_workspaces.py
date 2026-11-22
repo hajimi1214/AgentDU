@@ -4,7 +4,9 @@ import hashlib
 import os
 import shutil
 import subprocess
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Any, Callable, Iterator
 
 from .sessions import SessionProcessLock
 
@@ -41,6 +43,14 @@ class GitWorkspaces:
     def acquire_handoff_lock(self) -> SessionProcessLock:
         return SessionProcessLock(self.common_dir / "agentdu-handoff.lock").acquire()
 
+    @contextmanager
+    def handoff_lock(self) -> Iterator[None]:
+        lock = self.acquire_handoff_lock()
+        try:
+            yield
+        finally:
+            lock.release()
+
     def try_acquire_handoff_lock(self) -> SessionProcessLock | None:
         lock = SessionProcessLock(self.common_dir / "agentdu-handoff.lock")
         return lock if lock.try_acquire() else None
@@ -68,7 +78,11 @@ class GitWorkspaces:
         )
         if check and result.returncode != 0:
             detail = result.stderr.decode("utf-8", errors="replace").strip()
-            raise GitWorkspaceError(detail or f"Git exited with status {result.returncode}")
+            command = " ".join(arguments)
+            raise GitWorkspaceError(
+                f"Git command failed ({command}): "
+                f"{detail or f'exit status {result.returncode}'}"
+            )
         return result
 
     def head(self, cwd: Path | None = None) -> str:
@@ -105,6 +119,12 @@ class GitWorkspaces:
         worktree = self.worktree_path(handoff_id, role)
         worktree.parent.mkdir(parents=True, exist_ok=True)
         self.git(self.root, "worktree", "add", "--quiet", "-b", branch, str(worktree), commit)
+        return worktree / self.workspace_relative
+
+    def add_readonly_worktree(self, task_id: str, role: str, commit: str) -> Path:
+        worktree = self.worktree_path(task_id, role)
+        worktree.parent.mkdir(parents=True, exist_ok=True)
+        self.git(self.root, "worktree", "add", "--quiet", "--detach", str(worktree), commit)
         return worktree / self.workspace_relative
 
     def commit_changes(self, cwd: Path, message: str) -> str:
@@ -191,3 +211,76 @@ class GitWorkspaces:
         self.git(self.root, "merge", "--ff-only", "--no-edit", result_commit)
         if self.head() != result_commit:
             raise GitWorkspaceError("Git did not advance to the verified handoff commit")
+
+    def merge_verified_result(
+        self,
+        base_commit: str,
+        result_commit: str,
+        expected_files: list[str],
+        expected_digest: str,
+        acceptance_check: Callable[[Path], list[dict[str, Any]]],
+        message: str,
+        attempt_id: str,
+        on_candidate_commit: Callable[[str], None],
+    ) -> tuple[str, list[dict[str, Any]], bool]:
+        self.verify_snapshot(base_commit, result_commit, expected_files, expected_digest)
+        if self.status():
+            raise GitWorkspaceError("The main worktree must be clean before result integration")
+        current_head = self.head()
+        if not self.is_ancestor(base_commit, current_head):
+            raise GitWorkspaceError("The task baseline is no longer an ancestor of the main branch")
+        if self.is_ancestor(result_commit, current_head):
+            before_checks = self.status()
+            evidence = acceptance_check(self.root)
+            if not evidence or any(not item.get("passed", False) for item in evidence):
+                raise GitWorkspaceError("Acceptance checks did not all pass")
+            if self.status() != before_checks:
+                raise GitWorkspaceError("Acceptance checks changed the main worktree")
+            return current_head, evidence, True
+
+        candidate = self.add_readonly_worktree(attempt_id, "integration", current_head)
+        merge = self.git(
+            candidate,
+            "-c",
+            "user.name=AgentDU Integration",
+            "-c",
+            "user.email=agentdu@localhost",
+            "merge",
+            "--no-commit",
+            "--no-ff",
+            "--no-edit",
+            result_commit,
+            check=False,
+        )
+        if merge.returncode != 0:
+            detail = merge.stderr.decode("utf-8", errors="replace").strip()
+            self.git(candidate, "merge", "--abort", check=False)
+            raise GitWorkspaceError(detail or "Git could not merge the task result cleanly")
+
+        try:
+            before_checks = self.status(candidate)
+            evidence = acceptance_check(candidate)
+            if not evidence or any(not item.get("passed", False) for item in evidence):
+                raise GitWorkspaceError("Acceptance checks did not all pass")
+            if self.status(candidate) != before_checks:
+                raise GitWorkspaceError(
+                    "Acceptance checks changed the integration worktree"
+                )
+            candidate_commit = self.commit_changes(candidate, message)
+            if (
+                not self.is_ancestor(result_commit, candidate_commit)
+                or not self.is_ancestor(current_head, candidate_commit)
+                or self.status(candidate)
+            ):
+                raise GitWorkspaceError("Git did not leave a clean candidate containing the result")
+            on_candidate_commit(candidate_commit)
+            if self.head() != current_head or self.status():
+                raise GitWorkspaceError("The main branch changed during task integration")
+            self.git(self.root, "merge", "--ff-only", "--no-edit", candidate_commit)
+            integrated_commit = self.head()
+            if integrated_commit != candidate_commit or self.status():
+                raise GitWorkspaceError("Git did not advance cleanly to the verified task result")
+            return integrated_commit, evidence, False
+        except BaseException:
+            self.git(candidate, "merge", "--abort", check=False)
+            raise

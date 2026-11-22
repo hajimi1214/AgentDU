@@ -1,4 +1,4 @@
-# AgentDU V0.3 Architecture
+# AgentDU V0.5 Architecture
 
 ## Runtime Shape
 
@@ -13,11 +13,19 @@ flowchart TD
     Tools --> Policy[PermissionPolicy]
     Runtime --> Events[EventBus]
     Runtime --> Store[JSONL SessionStore]
+    Runtime --> Orchestrator[AutonomousCoordinator tools]
+    Orchestrator --> Scheduler[Bounded task scheduler]
+    Scheduler --> WorkerA[Private AgentRuntime]
+    Scheduler --> WorkerB[Private AgentRuntime]
+    Orchestrator --> TaskState[Per-session task state]
+    Scheduler --> Git[Isolated Git worktrees]
+    WorkerA --> Events
+    WorkerB --> Events
     Extensions[Extensions] --> Tools
     Extensions --> Events
 ```
 
-`AgentRuntime.run(prompt, session_id)` is the execution entry point. It takes both an in-process lock and a per-session cross-process file lock, restores the transcript, closes tool calls left pending by a previous process without replaying them, appends the user message, selects a bounded request context, and calls one `ChatModel`. Assistant tool calls are persisted before serial execution. Each result is persisted before the next model request. The loop ends when the model returns without tool calls, returns a truncated response, fails, or reaches the configured step limit.
+`AgentRuntime.run(prompt, session_id)` is the execution entry point for the main brain and every child agent. It takes both an in-process lock and a per-session cross-process file lock, restores the transcript, closes tool calls left pending by a previous process without replaying them, appends the user message, selects a bounded request context, and calls one `ChatModel`. Assistant tool calls are persisted before execution. Each result is persisted before the next model request. The loop ends when the model returns without tool calls, returns a truncated response, fails, or reaches a configured step or provider-call limit.
 
 ## Contracts
 
@@ -25,18 +33,35 @@ flowchart TD
 | --- | --- |
 | `models.py` | `ChatModel.complete(messages, tools)` returns a normalized `AssistantMessage`. Streaming providers emit `ModelStreamEvent` values. Provider-specific request and response types stay outside the loop. |
 | `provider.py` | `OpenAICompatibleModel` maps the normalized contract to Chat Completions JSON or SSE, reassembles streamed tool calls, and classifies transient HTTP and transport errors for bounded retry. It uses Python's standard-library HTTP client. |
-| `settings.py` | TOML profiles select an OpenAI-compatible base URL, model, environment variable for an API key, timeout, temperature, and streaming mode. CLI flags and environment variables provide overrides. |
+| `settings.py` | TOML profiles select an OpenAI-compatible base URL, model, environment variable for an API key, timeout, temperature, streaming mode, and optional capability hints. CLI flags and environment variables provide overrides. |
 | `tools.py` | `ToolRegistry` publishes JSON Schema function definitions, validates the supported schema subset, requests permission, and executes registered handlers. Built-ins list, search, read, and edit workspace files, write one file atomically, run shell commands, and inspect Git status/diff/log. |
-| `permissions.py` | `PermissionPolicy.authorize(request)` is the policy boundary. The CLI allows reads and asks before writes or execution. `--yes` approves all built-in writes and shell commands for the run. |
+| `permissions.py` | `PermissionPolicy.authorize(request)` is the policy boundary. The CLI allows reads and asks before collaboration, writes, or execution. `--yes` approves these actions for the run. |
 | `sessions.py` | Each session is an append-only JSONL event file with contiguous sequence numbers. A per-session OS file lock serializes writers across processes. Incomplete final records are repaired before the next append. |
 | `events.py` | Lifecycle events are persisted once and then delivered to extension observers. Streaming text deltas are delivered to observers but are not stored as separate events. Observer exceptions are logged and do not stop the agent run. |
 | `context.py` | A conservative character estimate selects complete recent turns and accounts for tool schemas while retaining system instructions and matched tool-call/result groups. The canonical transcript remains intact. |
 | `extensions.py` | An extension registers tools and subscribes to lifecycle events. Dynamic module loading and third-party code installation are outside this phase. |
-| `collaboration.py` | `HandoffCoordinator` runs the source and receiving runtimes serially with separate profiles, sessions, and Git worktrees. It packages bounded task and evidence metadata, verifies the received commit, runs explicit acceptance commands, and integrates only a verified result. |
+| `collaboration.py` | `HandoffCoordinator` retains the V0.4 fixed source-to-receiver workflow with separate profiles, sessions, and Git worktrees. |
+| `orchestration.py` | `AutonomousCoordinator` exposes asynchronous implementation, consultation, review, status, result, wait, and integration tools only to the main brain. It maintains per-session task state, dependency gates, bounded concurrency and model-request budgets, child progress, result snapshots, and non-recursive private AgentRuntime instances. |
 | `handoff.py` | `HandoffLedger` persists versioned state transitions and execution evidence as JSONL events. Expected versions and owners are checked before transitions. |
-| `git_workspaces.py` | `GitWorkspaces` requires a clean initial baseline, creates separate source and receiver worktrees, hashes commit diffs, and fast-forwards a verified result only while the original baseline remains unchanged. A repository-level process lock serializes handoffs and CLI abandonment. |
+| `git_workspaces.py` | `GitWorkspaces` creates isolated branch and read-only worktrees, hashes immutable snapshots, verifies task results, and tests merge candidates away from the main worktree. Integration advances the main branch only after acceptance commands pass and the main baseline remains a descendant. A repository-level process lock serializes collaboration Git operations. |
 
 Each `AgentRuntime` has one model. V0.4 creates two independent runtimes in sequence. The source agent's conversation remains in its private session. The receiver sees the original task and a bounded package containing the source report, source and base commit IDs, changed files, a SHA-256 digest of the source diff, command evidence, and explicit acceptance commands. The user-facing coordinator session records state changes and final reports without concatenating private transcripts.
+
+## V0.5 Smart Autonomous Mode
+
+When the configuration provides a profile with a distinct endpoint-and-model pair, the CLI installs collaboration tools into the main `AgentRuntime`. The main brain retains every ordinary coding tool and chooses whether to work independently, request bounded consultation, dispatch an implementation, request an independent review, or integrate a completed result. Profile capability strings are hints for model selection. AgentDU does not benchmark profiles or infer their strengths.
+
+Implementation and review dispatch require a Git repository with an initial commit and a clean main worktree. Each task gets a unique worktree rooted at the current `HEAD`, a private session transcript, a profile owner while running, and a versioned status record. The main agent can edit its checkout after dispatch. A later task dispatch or integration requires the main checkout to be clean, so the main agent must commit its own changes before those operations.
+
+The default scheduler limits are two concurrent workers, eight tasks per user session, 80 child provider requests per session, and 20 provider requests per task. The provider-request budget counts retries and does not estimate monetary cost. The main runtime has a separate model-step budget. A task can depend only on existing tasks in the same user session, which prevents dependency cycles. Consultation and review dependencies require completion. Implementation dependencies require integration before they can start. Failed prerequisites block their dependent tasks.
+
+Consultation uses only the question and bounded context supplied by the main brain, has no registered tools, and persists its own transcript. A review uses a separate read-only worktree and policy. An implementation agent uses its own Git branch, private context, and the configured permission policy. Child runtimes never receive the collaboration tools, so recursive delegation is unavailable.
+
+Progress events are published to the main session event bus while each task's bounded event history and state are atomically persisted under `.agentdu/agents/<session-id>/tasks.json`. Task completion captures the branch commit, changed-file list, and binary diff digest. `get_agent_task_result` revalidates the stored snapshot before exposing it.
+
+`integrate_agent_task` requires one or more acceptance commands. AgentDU merges the worker commit into an isolated candidate worktree based on the current main `HEAD`, runs the checks there under the execution permission policy, verifies the candidate did not change during the checks, creates an integration commit, and fast-forwards the main branch only if its `HEAD` is still unchanged. A conflict or failed check leaves the main worktree untouched. Candidate and worker worktrees remain for audit. The CLI completes already-started and runnable queued tasks before exiting, and marks tasks whose dependency was not integrated as blocked.
+
+The task status flow is `queued -> running -> completed -> integrating -> integrated`. Consultation and review finish at `completed`. Errors lead to `failed`; failed or interrupted prerequisites lead to `blocked`. A process restart marks queued and running tasks as `interrupted`. Their worktrees remain available for inspection, and AgentDU does not resume an uncertain model turn automatically.
 
 The handoff state machine is `source_running -> offered -> accepted -> receiver_running -> verified -> integrated`, with `offered -> rejected` available when the receiving model declines or fails to acknowledge. The source owns the record until it offers its result. The receiver must explicitly return `Handoff: ACCEPT` during a read-only AgentRuntime turn before ownership transfers. The coordinator owns stale, abandoned, failed, rejected, and integrated terminal states. Every transition checks the expected state version and current owner. Evidence events are tied to the current owner and version. At least one explicit `--check` command is required, each must succeed, and any remaining change in the receiver worktree prevents integration.
 
@@ -76,7 +101,12 @@ These are source-level design references, not claims that the upstream projects 
 - File writes use atomic replacement for one file. There is no multi-file transaction, diff review UI, Git checkpoint, or automatic validation stage. The agent must use command and Git tools to run tests and inspect changes.
 - A shell command that exits after starting a child which keeps stdout open triggers process-tree cleanup and a warning. On Windows, descendants may survive if the shell already exited before cleanup could reach them.
 - Streaming cancellation closes an established HTTP response. Cancellation while waiting for connection setup or response headers can wait for the configured network timeout. Approved tool execution is allowed to settle before session locks are released.
-- V0.4 handoff is a fixed two-role serial workflow. It does not route among arbitrary model pools, schedule parallel agents, resume an interrupted model turn, or make autonomous delegation decisions.
+- V0.5 profile selection is based on configured names and optional capability hints. No live comparative quality, latency, or cost data is collected, and a profile's hints are not verified.
+- Collaboration call budgets count provider requests. They do not estimate or limit dollars, token charges, or provider-specific pricing. The main model's calls are governed separately by its step limit.
+- V0.5 task state and child sessions are local to one AgentDU process. A restart marks active and queued tasks interrupted rather than resuming model execution. Worker and candidate worktrees are retained and not automatically pruned.
+- The main checkout must be clean when implementation/review tasks are dispatched and when results are integrated. The main agent may continue to work while agents run, then commit its work before dispatching further Git tasks or integrating.
+- Acceptance commands run as the current user. A failed check or Git conflict leaves the main checkout unchanged, but the candidate worktree and any external side effects of the command may remain.
+- V0.4's fixed two-role handoff remains available through `--handoff-profile`; V0.5 autonomous tasks use their own task state and integration path.
 - A Git worktree is a version-control workspace boundary, not an OS security boundary. An approved shell command can modify another worktree, the original checkout, Git metadata, or files outside the project. Concurrent or malicious out-of-worktree shell writes cannot be reliably detected by the current baseline checks.
 - Multi-model mode requires an initial Git commit and a clean original worktree. It leaves handoff branches and worktrees for audit and does not automatically prune them.
 - Handoff acceptance text is a model claim. AgentDU independently verifies commit lineage, diff hashes, clean state, and explicit shell acceptance commands, but it cannot prove that the receiver's qualitative code review is correct.
@@ -89,3 +119,9 @@ These are source-level design references, not claims that the upstream projects 
 The handoff protocol, separate model contexts, versioned record, Git snapshot verification, receiver acceptance, explicit command checks, and fast-forward integration are implemented and covered by local endpoint integration tests. V0.4 is ready for architecture review and further provider trials. It does not meet a strict security-isolation requirement for model-issued shell commands, and actual multi-provider model relay remains unverified until credentials and provider endpoints are configured. Those two conditions must be resolved or explicitly accepted before claiming complete real-world multi-model reliability.
 
 The full V0.1 project-by-project reports were not present in the repository when V0.2 work began. This decision record captures source locations checked for the choices above; it does not mark the requested V0.1 research package complete.
+
+## V0.5 Completion Assessment
+
+Automated tests use local OpenAI-compatible fixtures to run two implementation agents concurrently while the main agent edits and commits a separate file. The main agent then integrates both results after acceptance checks. A dependent reviewer starts only after its implementation result is integrated, and its attempted write is denied. Additional tests cover a context-only consultation, task and model-request budgets, failed-check rollback, and merge-conflict rollback. This is real local execution over temporary Git repositories, not a live external-model evaluation.
+
+No provider credentials or configured live profiles were available for an external multi-model development run or a comparable `--solo` baseline. AgentDU has demonstrated the collaboration protocol and filesystem/Git effects against deterministic local model fixtures. It has not established that autonomous collaboration improves task quality, wall-clock time, or cost with real providers. The shell boundary also remains policy approval plus worktree organization, not operating-system isolation.

@@ -47,6 +47,9 @@ class ToolDefinition:
     parameters: dict[str, Any]
     permission: str
     handler: Callable[[dict[str, Any], Path], str | ToolResult]
+    context_handler: Callable[
+        [dict[str, Any], Path, str, asyncio.AbstractEventLoop], str | ToolResult
+    ] | None = None
 
     def to_model_schema(self) -> dict[str, Any]:
         return {
@@ -73,7 +76,12 @@ class ToolRegistry:
     def model_schemas(self) -> list[dict[str, Any]]:
         return [self._tools[name].to_model_schema() for name in sorted(self._tools)]
 
-    async def execute(self, name: str, arguments: dict[str, Any]) -> ToolResult:
+    async def execute(
+        self,
+        name: str,
+        arguments: dict[str, Any],
+        session_id: str | None = None,
+    ) -> ToolResult:
         tool = self._tools.get(name)
         if tool is None:
             return ToolResult(f"Unknown tool: {name}", is_error=True)
@@ -93,7 +101,22 @@ class ToolRegistry:
             return ToolResult(f"Permission denied for tool '{name}'", is_error=True)
 
         try:
-            output = await asyncio.to_thread(tool.handler, arguments, self.workspace)
+            if tool.context_handler is not None:
+                if session_id is None:
+                    return ToolResult(
+                        f"Tool '{name}' requires an AgentDU session context",
+                        is_error=True,
+                    )
+                parent_loop = asyncio.get_running_loop()
+                output = await asyncio.to_thread(
+                    tool.context_handler,
+                    arguments,
+                    self.workspace,
+                    session_id,
+                    parent_loop,
+                )
+            else:
+                output = await asyncio.to_thread(tool.handler, arguments, self.workspace)
         except Exception as error:
             output = f"{type(error).__name__}: {error}"
             return ToolResult(_limit_output(output), is_error=True)
@@ -367,9 +390,17 @@ def _atomic_write(path: Path, content: str) -> None:
 
 def _git_command(workspace: Path, *arguments: str) -> str:
     executable = os.environ.get("AGENTDU_GIT_EXECUTABLE") or shutil.which("git")
-    bundled_git = workspace / ".tools" / "mingit" / "cmd" / "git.exe"
-    if executable is None and bundled_git.is_file():
-        executable = str(bundled_git)
+    if executable is None:
+        bundled_git = next(
+            (
+                parent / ".tools" / "mingit" / "cmd" / "git.exe"
+                for parent in (workspace, *workspace.parents)
+                if (parent / ".tools" / "mingit" / "cmd" / "git.exe").is_file()
+            ),
+            None,
+        )
+        if bundled_git is not None:
+            executable = str(bundled_git)
     if executable is None:
         raise FileNotFoundError("Git was not found on PATH")
     result = subprocess.run(

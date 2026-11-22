@@ -20,6 +20,7 @@ class ModelProfile:
     timeout: float = 120
     temperature: float = 0
     streaming: bool = True
+    capabilities: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -60,12 +61,20 @@ class ModelSettings:
             timeout = values.get("timeout", 120)
             temperature = values.get("temperature", 0)
             streaming = values.get("streaming", True)
+            capabilities = values.get("capabilities", [])
             if not isinstance(timeout, (int, float)) or timeout <= 0:
                 raise ConfigurationError(f"Profile '{name}' timeout must be a positive number")
             if not isinstance(temperature, (int, float)):
                 raise ConfigurationError(f"Profile '{name}' temperature must be numeric")
             if not isinstance(streaming, bool):
                 raise ConfigurationError(f"Profile '{name}' streaming must be true or false")
+            if not isinstance(capabilities, list) or any(
+                not isinstance(capability, str) or not capability.strip()
+                for capability in capabilities
+            ):
+                raise ConfigurationError(
+                    f"Profile '{name}' capabilities must be an array of non-empty strings"
+                )
             profiles[name] = ModelProfile(
                 name=name,
                 model=model,
@@ -74,6 +83,7 @@ class ModelSettings:
                 timeout=float(timeout),
                 temperature=float(temperature),
                 streaming=streaming,
+                capabilities=tuple(capabilities),
             )
         default_profile = data.get("default_profile")
         if default_profile is not None and default_profile not in profiles:
