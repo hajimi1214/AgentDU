@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentdu"
+version = "0.4.0"
+description = "An independently implemented coding agent with verified model handoffs"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+agentdu = "agentdu.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
