@@ -25,6 +25,9 @@
 ### 可确认的产品行为
 
 - **事实** OpenAI 于 2026-02-02 发布 Codex 桌面应用介绍，页面注明 Windows 版本于 2026-03-04 开放。页面将它描述为 Agent 工作指挥界面，支持多个 Agent 并行执行、按项目组织独立线程、在会话中审查变更和评论 Diff、打开本地编辑器，并提供 worktree 隔离。该产品说明也介绍 Skills 管理和后台 Automations 结果审阅。来源为 [OpenAI Codex app 发布说明](https://openai.com/index/introducing-the-codex-app/)。
+- **事实，截至 D0 研究时** OpenAI Help Center 的桌面应用迁移说明已将独立 Codex app 更新到新的 ChatGPT Desktop，导航中包含 Chat、Work 和 Codex。原有 Codex 会话和项目保留，Codex 仍是独立视图，其工作流和历史与 ChatGPT 分开。[迁移说明](https://help.openai.com/en/articles/20001276-moving-to-the-new-chatgpt-desktop-app)；[Work 与 Codex 使用说明](https://help.openai.com/en/articles/20001275-chatgpt-work-and-codex)。因此本文沿用“Codex Desktop”指代被研究的编码 Agent 产品形态，现行安装和导航名称以 OpenAI Help Center 为准。
+- **事实** OpenAI Help Center 将本地 Codex 描述为使用本机文件夹、仓库、终端和开发工具的桌面工作流。Codex Cloud 在 OpenAI 管理的计算机上执行任务，可在本机休眠时继续。两种执行位置不能混为一谈。[Work 与 Codex 使用说明](https://help.openai.com/en/articles/20001275-chatgpt-work-and-codex)；[Codex 使用说明](https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan)。
+- **事实** OpenAI Business 发布说明将 Windows Codex app 描述为支持并行 Agent、隔离 worktree、可审查 Diff，并可与 CLI 和 IDE 协同的桌面工作面。[Windows 桌面发布说明](https://help.openai.com/en/articles/11391654-chatgpt-business-release-notes)。该说明给出产品能力，不公开 Codex Desktop 的内部 IPC 或 Runtime 结构。
 - **推断** 桌面界面的核心价值是让人可以持续监督长任务和切换任务，而不只是把对话窗口放进桌面壳。AgentDU 应把“当前工作、运行状态、文件变更和下一步可执行操作”放在主要视图。
 - **待验证** Codex Desktop 的完整内部 UI、进程边界、持久化格式、具体沙箱实现及私有 API 不作为本研究的事实依据。
 
@@ -123,6 +126,43 @@
 - **推断** 桌面产品安全不是把权限弹窗放进 UI 就能解决。AgentDU 还必须隔离 renderer、约束 Shell 执行、限制凭据和模型数据流，并让用户能查阅已批准的实际命令。
 - **事实** Harness 打包文档将 Linux 列为非正式 Desktop 发布目标。这只描述 Harness 当前打包策略，不能外推为 Electron 不支持 Linux。
 
+### 与 Codex 桌面产品和公开协议对照
+
+| 观察面 | Codex 的公开证据 | Harness 的源码证据 | AgentDU 的架构取舍 |
+| --- | --- | --- | --- |
+| 桌面产品边界 | OpenAI 产品介绍公开了项目、并行 Agent、worktree、Diff、Skills 和 Automations 等用户能力，没有公开 Codex Desktop 的进程图。 | Electron 壳加载本地 Web Client，主进程监督独立 Desktop Host。 | 用 Electron 做桌面入口，Python Runtime 保持 AgentDU 自有执行内核。 |
+| UI 与 Runtime 通信 | Codex App Server 是公开的丰富客户端接口，采用 JSON-RPC 消息和 stdio JSONL。文档说明 App Server 供 Codex VS Code 扩展等客户端使用，没有证明 Codex Desktop 内部直接采用同一实现。 | Renderer 与本地 Host 使用 HTTP/WebSocket，Main 与 Host 通过带类型的私有进程 IPC 传递启动注入、认证和关闭消息。 | D0 选择本机 stdio JSONL，避免新增监听端口、HTTP Host 和本地认证票据。该协议需要由 AgentDU 自己定义并版本化。 |
+| Agent 与任务轨迹 | 产品介绍描述多 Agent 并行和长任务监督。App Server 把 thread、turn、item、审批和事件建模为不同协议对象。 | Agent Loop 将 turn、step、模型消息、工具调用和结果写入 Session 事件。子 Agent 有独立 Session 与生命周期事件，Web Client 从投影读取任务目录和进度。 | 复用 AgentDU JSONL Session、任务状态和 Handoff 证据。UI 时间线只反映持久事件、工具结果和真实退出状态。 |
+| 执行与权限 | App Server 支持客户端审批交互和终端进程控制。Codex Desktop 产品资料公开其沙箱与权限体验，具体内部执行边界仍未公开。 | 文件工具、Shell/PTY、插件、子 Agent 分属多个包。部分能力经过策略或审批服务，运行时仍要单独处理 OS 执行隔离。 | 保留 AgentDU 权限策略，同时新增桌面审批协议和经实测的 OS 级执行隔离。 |
+| 任务恢复与后台 | 产品资料公开了 Automations 与长任务结果审阅，不能据此推断全部本地恢复实现。 | 有 Host 生命周期、会话事件、任务计划和更新协调。桌面默认未启用 scheduled tasks，提醒只对当前加载的 Session 运行。 | 把可恢复事件、未知副作用和后台运行状态明确呈现。不能把“任务已排程”展示成“模型已完成”。 |
+| 扩展与本地化 | 产品资料公开 Skills 管理。其完整桌面扩展实现没有公开。 | Skill Provider、模型侧 `skill` 工具、插件包管理、Web UI 插槽和 `zh` 字典在源码中分别实现。 | 接入 AgentDU 已有 Skills、MCP 和插件入口，扩展进程另做权限与隔离设计。 |
+| 发布复杂度 | Windows 版于 2026-03-04 开放。产品文章不足以核验其私有打包、更新和运行时装配细节。 | Electron/Web Client/Host 同版本协同，另有 Node、Python、pnpm runtime、Windows 签名和更新检查。 | 先以 Windows 为验收基线，D1 测启动、IPC 与安装包，D5 再做签名、更新、迁移和独立验收。 |
+
+Codex 的产品优势可依据官方产品资料讨论，内部实现必须保留为未知。Codex App Server 的源码只能证明公开协议与该仓库实现的行为，不能证明 Codex Desktop 的全部产品能力由它提供。
+
+### Harness Agent Runtime、工具与任务轨迹源码
+
+研究对象仍是固定 SHA `4b399c39a6d1479cd84ca591b4d7c88e24d38a96`。以下源码路径均对应该上游版本。
+
+| 子系统 | 可核验实现 | 技术结论和迁移边界 |
+| --- | --- | --- |
+| Agent Loop | [`ReactLoopAgent.turn` 与 `step`](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/core/agent-loop/src/agent.ts#L323) | Loop 按 turn/step 驱动请求，流式读取模型结果，再把 tool-call 交给 ToolExecutor。开始、结束、Assistant 消息、工具结果、取消和结构化错误写入 Session。工具批次出错时会回收已完成的部分结果，避免它们从会话记录中消失。 |
+| Session 与任务轨迹 | [`Session.append`](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/core/session/src/index.ts#L557)、[Chat turn projection](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/client/ui-chat/src/client/conversation-nodes/assistant.ts#L308) | Session 事件以序号组织，UI 将 `turn/start`、`step/start` 等会话事实投影为可导航的聊天活动。产品遥测 `EventLogReporter` 明确与 Session-log 队列分离，模型正文和凭据不应作为普通分析摘要。 |
+| 子 Agent 与上下文交接 | [`SubagentManager` 创建路径](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/subagent/subagent/src/manager.ts#L332)、[子 Agent 权限快照](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/subagent/subagent/src/child-agent.ts#L244)、[UI 子 Agent 投影](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/client/ui-subagent/src/client/index.ts#L56) | 子任务拥有独立 Session、描述信息、工作目录和生命周期。创建时可带受控的父 Session 事件种子，完成后通过结算消息回到父 Agent。父级路由设置会成为子任务初始值，任务创建时同步记录权限边界。该结构适合研究独立上下文、 lineage 和事件投影，具体 seed 规则不能简化成复制完整聊天记录。 |
+| 文件读取与工作区范围 | [`WorkspaceFiles`](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/api/workspace-files/src/index.ts#L1)、[路径包含检查](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/fs/fs-sandbox/src/containment.ts#L58) | `WorkspaceFiles` 提供有限大小的文本/字节预览、目录列表和搜索。源码注释明确，显式文件读取遵循底层 filesystem 的读取权限，绝对路径可在工作区外；目录列表、搜索和变更观察仍按工作区范围处理。AgentDU 应让 IPC API 的数据外发边界独立于“路径以项目目录开头”这一表面判断。 |
+| Shell 与终端 | [`LocalPtySession`](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/terminal/terminal-bash/src/session.ts#L237)、[`BrowserTerminal`](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/api/terminal-controller/src/terminal.ts#L21) | 终端由持久 PTY Session、启动就绪检查、有界 scrollback、输入控制、尺寸同步和进程清理共同组成。浏览器侧 Terminal 订阅的是进程控制服务，单独显示一个终端组件不足以构成完整集成终端。 |
+| Skills | [`tool-skill` 注册与执行](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/skill/tool-skill/src/index.ts#L84)、[`Skill` Provider registry](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/skill/skill/src/index.ts#L125) | Skill Provider 负责发现与加载。模型侧先看到名称和短描述，再通过 `skill` 工具按任务请求完整指令，加载按 Agent composition scope 解析。分离发现、目录和正文加载有助于控制上下文占用。 |
+| 插件安装与管理 | [`PluginManager`](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/boot/plugin-manager/src/index.ts#L325)、[管理器的失败与限制](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/boot/plugin-manager/README.md#L166) | Plugin Manager 管理 profile 包、版本兼容、安装/移除、操作日志、取消与进程树清理。安装或升级会运行包管理操作，并处理依赖脚本批准和部分回滚。README 仍列出安装中断后下载文件残留、移除不完整等限制。扩展生态显著增加供应链和维护面。 |
+| 后台计划任务 | [`ScheduleRuntime`](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/schedule/schedule/src/runtime.ts#L67)、[Desktop 退出和提醒行为](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/apps/desktop/README.md#L80) | Schedule Runtime 以 Host timer 投递持久化任务，任务送达后仍由目标 Session 和 Agent 执行。桌面文档说明计划功能默认关闭，卸载的 Session 不会在后台自动加载或恢复提醒，因此不应把它理解成任意关窗后仍持续执行的通用后台 Agent。 |
+
+### Harness 的优势、复杂度与适用边界
+
+- **源码事实** Desktop 复用完整 Web Client，并用独立 Host 暴露会话、文件、终端、插件和调度服务。启动凭据由主进程保管，Host 绑定 loopback，关闭与更新流程包含对活动任务的检查。
+- **源码事实** Agent Loop 的持久 Session 事件同时支撑会话读取、子 Agent 目录和 UI 时间线。这个事实链能把“模型说完成”与工具结果、进程退出和任务结算区分开。
+- **工程推断** 这套 Host/Web 结构有利于共享已有 Web Client 和插件服务，代价是 Desktop、Web Host、runtime payload、包管理和更新必须按版本协同。AgentDU 首版使用 Python Host 的 stdio IPC 可以减少本地 HTTP Host 与启动认证的组件数量，但要自行实现事件重放、Host 状态和 UI 查询服务。
+- **已知边界** Desktop README 将 Linux 列为非正式目标。计划任务默认关闭且只对当前已加载 Session 生效。文件预览 API 的显式绝对路径读取可能超出工作区根目录，取决于 filesystem read 权限。插件安装失败可能保留下载文件，部分移除错误需要重试。
+- **适用结论** 值得吸收的是明确的 Host 生命周期、窄化 Preload、Session 事件投影、子 Agent 独立会话、PTY 控制和 Skill 延迟加载。AgentDU 不应照搬 Harness 的完整 Web Host、插件包管理和 bundled Node/Python/PNPM 发布体系，因为现有 AgentDU Runtime 与目标首版边界不同。
+
 ## 与 AgentDU 现状的对应
 
 ### 可以直接复用的 Runtime 能力
@@ -141,7 +181,8 @@
 
 - **事实** `docs/v0.6-status.zh-CN.md` 声明 AgentDU 当前没有 Codex 级桌面界面、实时协作时间线、模型配置 GUI 或会话查看器。
 - **事实** 本地 `pyproject.toml` 只定义 Python 包和命令行入口，没有 Electron、Tauri 或 Qt 依赖。
-- **事实** AgentDU 当前 `provider.py` 实现 OpenAI 兼容 Chat Completions 形状，`settings.py` 为对应模型 Profile 提供 TOML 配置。真实多 Provider 能力、模型特有协议和跨提供商任务接力还没有真实凭据评测证据。
+- **事实** AgentDU 当前 [`provider.py` 的 `OpenAICompatibleModel`](https://github.com/hajimi1214/AgentDU/blob/2aa31341feea69ac1f3c3c062ddfba08082129e4/src/agentdu/provider.py#L20) 实现 OpenAI 兼容 Chat Completions 形状。[`settings.py` 的 `ModelSettings.load`](https://github.com/hajimi1214/AgentDU/blob/2aa31341feea69ac1f3c3c062ddfba08082129e4/src/agentdu/settings.py#L48) 读取并校验 TOML Profile，[`resolve_model_options`](https://github.com/hajimi1214/AgentDU/blob/2aa31341feea69ac1f3c3c062ddfba08082129e4/src/agentdu/settings.py#L166) 处理命令行、环境变量和 Profile 的模型选项优先级。真实多 Provider 能力、模型特有协议和跨提供商任务接力还没有真实凭据评测证据。
+- **事实** [`docs/architecture.md`](https://github.com/hajimi1214/AgentDU/blob/2aa31341feea69ac1f3c3c062ddfba08082129e4/docs/architecture.md) 记录了当前 Runtime 的模块契约、会话与工具调用持久化顺序、协作边界和已知限制。该文档是 AgentDU V0.6 的架构基线，不代表桌面 Host、UI 或 OS 级执行隔离已经实现。
 - **事实** `tools.py` 执行的 Shell 命令以当前用户权限运行，Git worktree 不是操作系统安全边界。审批能限制 AgentDU 工具入口，但不能阻止已批准命令访问工作区外文件。
 - **事实** 协作任务状态目前绑定单进程。进程重启时活动任务会标记为 interrupted，不会自动重放不确定的模型操作。
 - **推断** 桌面 UI 可以较高比例复用 AgentDU Runtime，但桌面安全、稳定 IPC、任务恢复策略和审批界面都需要新增工程工作。

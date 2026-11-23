@@ -27,9 +27,30 @@ Electron 方案为 D0 的明确技术建议，可在 D1 命令隔离与 Windows 
 
 | 方案 | 已确认能力 | AgentDU 适配度 | 主要代价和风险 |
 | --- | --- | --- | --- |
-| Electron | Chromium/Node 桌面壳、成熟 Web UI 生态、IPC 和原生桌面打包生态。Harness Desktop 是一个公开的 Electron + Web + 本地 Host 参考实现。官方安全指南明确要求隔离 renderer 并限制高权限 API。 | 高。适合实现工作台型多面板 UI，可独立拉起并监督 Python Runtime。 | 包体和内存占用较大，需持续跟进 Electron/Chromium 安全更新；Renderer 失陷可能影响本机，必须限制桥接能力。 |
-| Tauri 2 | 官方支持将 Python CLI 或服务器打包为 sidecar，并可通过权限 capability 限定可执行文件和参数。来源为 [Tauri sidecar 文档](https://v2.tauri.app/develop/sidecar/)。 | 中。可作为轻量桌面壳和 Python sidecar 容器。 | Rust host、WebView 平台差异和 Tauri capability 配置增加新技术面；需要验证 Windows WebView2、终端和窗口多视图需求。 |
-| Qt / PySide6 | 官方 Python 绑定，Qt Widgets/Qt Quick，可直接使用 Python API。PySide 通过多种工具部署 Windows、macOS 和 Linux。来源为 [Qt for Python](https://doc.qt.io/qtforpython-6/) 与 [部署文档](https://doc.qt.io/qtforpython-6/deployment/index.html)。 | 中。Python 运行时集成自然，可减少应用进程间 API 设计。 | 复杂 Web 风格界面和 JS/React 复用度较低；桌面 Web 技能生态较小；部署文档注明 PySide6 许可覆盖 LGPLv3/GPLv3 或商业许可，需审核发版义务。 |
+| Electron | Electron 使用 Chromium 多进程模型，主进程运行于 Node.js 环境。Renderer 可通过隔离的 Preload API 请求主进程能力。官方文档提供 Windows 和 macOS 自动更新机制。 | 高。React/TypeScript 多面板 UI、桌面生命周期和 Python 子进程可分别落在 Renderer、主进程与 Runtime Host。 | 应用分发需要包含 Electron、Chromium 和 Node.js 组件。需维护安全更新，并限制 Renderer 到主进程的桥接能力。 |
+| Tauri 2 | 支持把外部可执行文件作为 sidecar，并用 capability 约束应用可调用的程序和参数。Windows 使用系统 WebView2，也可以由安装器配置 WebView2 的部署方式。 | 中。可采用 React/TypeScript 和独立 Python Host，但 Python 必须先制作为可分发的 sidecar，Rust 主进程负责监督。 | Rust、WebView2 和 capability 配置增加技术面。Tauri 的 sidecar 调用权限本身不限制子进程对文件、网络和其他进程的操作。 |
+| Qt / PySide6 | PySide6 提供 Python API。`QProcess` 可启动外部程序、读写标准输入输出并读取退出状态。`pyside6-deploy` 支持 Windows、macOS 和 Linux 打包。 | 中。Python 集成路径直接，适合以 Qt Widgets 或 Qt Quick 建立独立桌面 UI。 | UI 需采用 Qt 技术栈。`QProcess` 和 Qt UI 本身不隔离 Agent Shell。发行时需审查 LGPLv3/GPLv3 或商业许可条件。 |
+
+### 按研发约束逐项比较
+
+| 维度 | Electron | Tauri 2 | Qt / PySide6 | D0 判断 |
+| --- | --- | --- | --- | --- |
+| Windows 兼容与分发 | 有独立 Chromium/Node 运行环境，支持 Windows 应用分发与更新。 | 使用 Windows WebView2。安装器可下载或内置 WebView2，离线包会显著增大。 | 官方部署工具覆盖 Windows。需验证 Qt/Python 依赖、签名和升级路径。 | 三种方案都能面向 Windows 发布，离线安装、清洁机器和更新必须在 D1 验证。 |
+| 界面与研发效率 | React/TypeScript 与代码工作台、多面板和 Web 组件的匹配度高。此项属于工程判断。 | 可用 Web 前端，但还需维护 Rust 主进程和 WebView 平台差异。 | Python API 与现有 Runtime 同语言，界面组件体系需要采用 Qt。 | Electron 与拟定的 React/TypeScript 界面分工最一致。 |
+| Python Runtime 集成 | 由主进程监督独立 Python Host，通过 stdio 协议通信。 | 将 Python Host 制作为 sidecar，由 Rust 进程启动和监督。 | 可在 Python 应用中组合 Runtime，也可通过 `QProcess` 分进程运行。 | 三者都能接现有 Runtime。独立 Host 和协议边界仍需 AgentDU 自己实现。 |
+| 终端与进程管理 | 主进程能管理独立进程，完整终端仍需实现 PTY、输入输出、尺寸变化和取消。 | Shell 插件可按能力授权启动配置过的 sidecar，交互式 PTY 体验仍需实测。 | `QProcess` 提供进程与管道 I/O，完整终端仍需单独实现。 | 框架的子进程 API 不等于可用的集成终端。D1 应用真实交互任务验收。 |
+| 权限与安全边界 | Renderer sandbox、context isolation、CSP 和窄化 Preload 可降低 UI 权限，不能替代 Shell 的 OS 级隔离。 | capability 能收窄前端可调用的 API，不能替代 sidecar 的 OS 级隔离。 | UI 与 `QProcess` 默认处于应用用户权限下，隔离需要单独的 OS 方案。 | 三种框架都不自动解决 Agent 命令的系统级限制。 |
+| 安装体积与资源占用 | Electron 分发包含 Electron、Chromium 和 Node.js。 | 基础应用可复用系统 WebView，安装器策略和 Python sidecar 会改变实际体积。 | 需要分发 Python、Qt 与应用依赖。 | D0 没有 AgentDU 三套构建的实测体积、启动时延或内存数据。D1 必须记录这些指标。 |
+| 自动更新 | Electron `autoUpdater` 支持 Windows 和 macOS，不同打包格式采用不同更新通路。 | 官方 updater 插件支持签名更新包和 Windows 安装器。 | `pyside6-deploy` 负责打包。D0 参考的部署文档未确定适合 AgentDU 的更新通路。 | 更新、签名、数据迁移和失败回滚都要通过 D1/D5 的实际发布流程验证。 |
+| 许可证 | Electron、Chromium、Node.js 与 npm 依赖需要一并盘点。 | Tauri、Rust crates、前端依赖和 Python sidecar 需要一并盘点。 | Community Edition 按 LGPLv3/GPLv3 规则提供，也有商业版本。 | D1 建立锁定依赖清单与许可证审查结果，D0 不复制参考实现。 |
+
+上述对比使用官方框架文档描述可用能力。性能、包体、开发效率和终端交互结论中没有 AgentDU 实测数据的部分均属于待验证工程判断，不作为性能结论。
+
+### 官方实现依据
+
+- Electron 主进程、Renderer、Preload 与 Utility Process 见 [Process Model](https://www.electronjs.org/docs/latest/tutorial/process-model)。Renderer 隔离建议见 [Security](https://www.electronjs.org/docs/latest/tutorial/security)。Windows/macOS 更新边界见 [autoUpdater](https://www.electronjs.org/docs/latest/api/auto-updater/) 和 [Updating Applications](https://www.electronjs.org/docs/latest/tutorial/updates)。
+- Tauri 外部可执行文件与参数权限见 [Embedding External Binaries](https://v2.tauri.app/develop/sidecar/)。Windows WebView2 部署选项见 [WebView Versions](https://v2.tauri.app/reference/webview-versions/) 和 [Windows Installer](https://v2.tauri.app/distribute/windows-installer/)。应用体积说明见 [App Size](https://v2.tauri.app/concept/size/)，更新包签名见 [Updater](https://v2.tauri.app/plugin/updater/)。
+- PySide 子进程、管道和退出状态见 [QProcess](https://doc.qt.io/qtforpython-6/PySide6/QtCore/QProcess.html)。跨平台打包见 [Deployment](https://doc.qt.io/qtforpython-6/deployment/index.html) 和 [pyside6-deploy](https://doc.qt.io/qtforpython-6/deployment/deployment-pyside6-deploy.html)。许可方式见 [Commercial Use](https://doc.qt.io/qtforpython-6/commercial/index.html)。
 
 ### 为什么当前选 Electron
 
