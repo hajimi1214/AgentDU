@@ -12,6 +12,7 @@ dependencies = []
 [project.scripts]
 agentdu = "agentdu.cli:main"
 agentdu-evaluate = "agentdu.evaluation:main"
+agentdu-desktop-host = "agentdu.desktop_host:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
