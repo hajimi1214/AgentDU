@@ -168,6 +168,6 @@ desktop/
 3. 异常关闭后重启安装版并目视确认恢复提示。
 4. 将 Python AppContainer launcher 接入需要执行的 Runtime 进程后，重新验证工作区 capability 授权，并覆盖文件、网络及子进程逃逸。集成前继续拒绝 Shell、MCP 与插件执行。
 
-最终 Git 基线为 `701d3476d75671a6ea734f5fdd5c7dcf073e47c6`。最终本地 SHA 由提交记录写入此处。当前工作不推送 GitHub。
+最终 Git 基线为 `701d3476d75671a6ea734f5fdd5c7dcf073e47c6`。D1 实现提交为 `109320dbfeda4fbb5ffbe1c84e22ef05a8e4dc24`，交付时的最终本地 HEAD 以验收记录提交为准。当前工作不推送 GitHub。
 
 完成以上验证后才可将 D1 状态从 BLOCKED 更新为通过或逐项记录新的失败证据。
