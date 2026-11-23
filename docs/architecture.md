@@ -1,4 +1,4 @@
-# AgentDU V0.5 Architecture
+# AgentDU V0.6 Development Architecture
 
 ## Runtime Shape
 
@@ -21,8 +21,13 @@ flowchart TD
     Scheduler --> Git[Isolated Git worktrees]
     WorkerA --> Events
     WorkerB --> Events
-    Extensions[Extensions] --> Tools
+    MCP[MCP stdio] --> Tools
+    Skills[Agent Skills] --> Tools
+    Plugins[Approved Python plugins] --> Extensions
+    Extensions --> Tools
     Extensions --> Events
+    Runtime --> Usage[Token and cost telemetry]
+    Eval[Paired evaluator] --> Runtime
 ```
 
 `AgentRuntime.run(prompt, session_id)` is the execution entry point for the main brain and every child agent. It takes both an in-process lock and a per-session cross-process file lock, restores the transcript, closes tool calls left pending by a previous process without replaying them, appends the user message, selects a bounded request context, and calls one `ChatModel`. Assistant tool calls are persisted before execution. Each result is persisted before the next model request. The loop ends when the model returns without tool calls, returns a truncated response, fails, or reaches a configured step or provider-call limit.
@@ -33,13 +38,17 @@ flowchart TD
 | --- | --- |
 | `models.py` | `ChatModel.complete(messages, tools)` returns a normalized `AssistantMessage`. Streaming providers emit `ModelStreamEvent` values. Provider-specific request and response types stay outside the loop. |
 | `provider.py` | `OpenAICompatibleModel` maps the normalized contract to Chat Completions JSON or SSE, reassembles streamed tool calls, and classifies transient HTTP and transport errors for bounded retry. It uses Python's standard-library HTTP client. |
-| `settings.py` | TOML profiles select an OpenAI-compatible base URL, model, environment variable for an API key, timeout, temperature, streaming mode, and optional capability hints. CLI flags and environment variables provide overrides. |
+| `settings.py` | TOML profiles select an OpenAI-compatible base URL, model, environment variable for an API key, timeout, temperature, streaming mode, optional capability hints, usage capture, and optional input/output prices. MCP stdio servers are also configured here. CLI flags and environment variables provide overrides. |
 | `tools.py` | `ToolRegistry` publishes JSON Schema function definitions, validates the supported schema subset, requests permission, and executes registered handlers. Built-ins list, search, read, and edit workspace files, write one file atomically, run shell commands, and inspect Git status/diff/log. |
 | `permissions.py` | `PermissionPolicy.authorize(request)` is the policy boundary. The CLI allows reads and asks before collaboration, writes, or execution. `--yes` approves these actions for the run. |
 | `sessions.py` | Each session is an append-only JSONL event file with contiguous sequence numbers. A per-session OS file lock serializes writers across processes. Incomplete final records are repaired before the next append. |
 | `events.py` | Lifecycle events are persisted once and then delivered to extension observers. Streaming text deltas are delivered to observers but are not stored as separate events. Observer exceptions are logged and do not stop the agent run. |
 | `context.py` | A conservative character estimate selects complete recent turns and accounts for tool schemas while retaining system instructions and matched tool-call/result groups. The canonical transcript remains intact. |
-| `extensions.py` | An extension registers tools and subscribes to lifecycle events. Dynamic module loading and third-party code installation are outside this phase. |
+| `extensions.py` | An extension registers tools and subscribes to lifecycle events. `plugins.py` loads explicitly named installed entry points after execution approval and checks extension API version 1. |
+| `mcp.py` | `MCPStdioClient` negotiates a supported protocol version, lists tools with cursor pagination, enforces message and pending-queue bounds, filters subprocess environment values, and shuts down approved local server processes. |
+| `skills.py` | `SkillsExtension` discovers `SKILL.md`, initially exposes metadata, then loads instructions or UTF-8 text resources from within the skill directory. Frontmatter parsing supports a constrained subset for the required metadata fields. |
+| `security.py` | Known credential values are removed from child environments and redacted from structured session and tool data. This is not operating-system process isolation. |
+| `evaluation.py` | Paired solo/collaborative runs use separate clean Git workspaces with matching tree hashes and record elapsed time, request/token counts, optional estimated cost, and acceptance-check results. |
 | `collaboration.py` | `HandoffCoordinator` retains the V0.4 fixed source-to-receiver workflow with separate profiles, sessions, and Git worktrees. |
 | `orchestration.py` | `AutonomousCoordinator` exposes asynchronous implementation, consultation, review, status, result, wait, and integration tools only to the main brain. It maintains per-session task state, dependency gates, bounded concurrency and model-request budgets, child progress, result snapshots, and non-recursive private AgentRuntime instances. |
 | `handoff.py` | `HandoffLedger` persists versioned state transitions and execution evidence as JSONL events. Expected versions and owners are checked before transitions. |
@@ -111,7 +120,7 @@ These are source-level design references, not claims that the upstream projects 
 - Multi-model mode requires an initial Git commit and a clean original worktree. It leaves handoff branches and worktrees for audit and does not automatically prune them.
 - Handoff acceptance text is a model claim. AgentDU independently verifies commit lineage, diff hashes, clean state, and explicit shell acceptance commands, but it cannot prove that the receiver's qualitative code review is correct.
 - Provider tests use local deterministic endpoints. No two live external providers or models have been validated with credentials in this environment.
-- MCP, Skills discovery, dynamic extension loading, remote execution, and autonomous model routing are not implemented.
+- The V0.6 MCP client is stdio-only and exposes tools only. Skills parsing handles a constrained frontmatter subset. Python plugins execute in-process after approval and are not isolated.
 - Package installation uses `setuptools` as a build dependency. The source-tree CLI and tests run with Python's standard library.
 
 ## V0.4 Completion Assessment
@@ -125,3 +134,7 @@ The full V0.1 project-by-project reports were not present in the repository when
 Automated tests use local OpenAI-compatible fixtures to run two implementation agents concurrently while the main agent edits and commits a separate file. The main agent then integrates both results after acceptance checks. A dependent reviewer starts only after its implementation result is integrated, and its attempted write is denied. Additional tests cover a context-only consultation, task and model-request budgets, failed-check rollback, and merge-conflict rollback. This is real local execution over temporary Git repositories, not a live external-model evaluation.
 
 No provider credentials or configured live profiles were available for an external multi-model development run or a comparable `--solo` baseline. AgentDU has demonstrated the collaboration protocol and filesystem/Git effects against deterministic local model fixtures. It has not established that autonomous collaboration improves task quality, wall-clock time, or cost with real providers. The shell boundary also remains policy approval plus worktree organization, not operating-system isolation.
+
+## V0.6 Development Assessment
+
+V0.6 adds local recovery and handoff entry points, token and optional price telemetry, subprocess credential filtering, MCP stdio tools, progressive skills loading, explicitly approved Python entry-point extensions, and a paired evaluator. These capabilities are covered by local tests and described in [v0.6-status.md](v0.6-status.md). The evaluator has not been run against live providers. Shell commands remain unsandboxed, the interface remains CLI-only, resource limits are process-local, and cross-model data classification is absent. V0.6 therefore remains under development and has not passed independent product acceptance.

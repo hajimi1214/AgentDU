@@ -11,11 +11,13 @@ import subprocess
 import stat
 import tempfile
 import threading
+from collections.abc import Collection
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterator
 
 from .permissions import PermissionPolicy, PermissionRequest
+from .security import redact_value, safe_child_environment
 
 
 MAX_TOOL_OUTPUT_CHARS = 16_000
@@ -125,7 +127,10 @@ class ToolRegistry:
         return ToolResult(_limit_output(output))
 
 
-def create_builtin_tools() -> list[ToolDefinition]:
+def create_builtin_tools(secret_values: Collection[str] = ()) -> list[ToolDefinition]:
+    def run_command(arguments: dict[str, Any], workspace: Path) -> ToolResult:
+        return _run_command(arguments, workspace, secret_values)
+
     return [
         ToolDefinition(
             name="read_file",
@@ -186,7 +191,7 @@ def create_builtin_tools() -> list[ToolDefinition]:
             description="Run a shell command in the workspace. This tool requires explicit approval.",
             parameters=_object_schema({"command": {"type": "string"}}, ["command"]),
             permission="execute",
-            handler=_run_command,
+            handler=run_command,
         ),
         ToolDefinition(
             name="git_status",
@@ -436,7 +441,11 @@ def _git_log(arguments: dict[str, Any], workspace: Path) -> str:
     return _git_command(workspace, "log", "-5", "--oneline", "--decorate")
 
 
-def _run_command(arguments: dict[str, Any], workspace: Path) -> ToolResult:
+def _run_command(
+    arguments: dict[str, Any],
+    workspace: Path,
+    secret_values: tuple[str, ...] = (),
+) -> ToolResult:
     command = arguments["command"]
     timed_out = False
     output_capped = False
@@ -446,6 +455,7 @@ def _run_command(arguments: dict[str, Any], workspace: Path) -> ToolResult:
     process_options: dict[str, Any] = {
         "shell": True,
         "cwd": workspace,
+        "env": safe_child_environment(secret_values),
         "stdout": subprocess.PIPE,
         "stderr": subprocess.STDOUT,
     }
@@ -494,8 +504,9 @@ def _run_command(arguments: dict[str, Any], workspace: Path) -> ToolResult:
         status += " A background process retained stdout after the command ended; cleanup was attempted."
     with captured_lock:
         output = captured.decode("utf-8", errors="replace")
+    safe_output = redact_value(output, secret_values)
     return ToolResult(
-        f"{status}\n{output}",
+        f"{status}\n{safe_output}",
         is_error=timed_out or background_process or process.returncode != 0,
     )
 

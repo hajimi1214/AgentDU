@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import Message
+from .security import redact_value
 
 
 _SESSION_ID = re.compile(r"^[a-f0-9-]{16,64}$")
@@ -97,6 +98,15 @@ class SessionStore:
         self.sessions_dir = self.data_dir / "sessions"
         self._lock = threading.RLock()
         self._next_sequence: dict[str, int] = {}
+        self._redactions: set[str] = set()
+
+    def add_redactions(self, secrets: list[str] | tuple[str, ...]) -> None:
+        with self._lock:
+            self._redactions.update(secret for secret in secrets if len(secret) >= 4)
+
+    def redact(self, value: Any) -> Any:
+        with self._lock:
+            return redact_value(value, tuple(self._redactions))
 
     def create(self, session_id: str | None = None) -> str:
         session_id = session_id or uuid.uuid4().hex
@@ -157,6 +167,7 @@ class SessionStore:
 
     def append(self, session_id: str, kind: str, payload: dict[str, Any]) -> dict[str, Any]:
         with self._lock:
+            payload = redact_value(payload, tuple(self._redactions))
             path = self._path(session_id)
             if not path.exists():
                 raise FileNotFoundError(f"No session found: {session_id}")

@@ -18,6 +18,8 @@ from .git_workspaces import GitWorkspaceError, GitWorkspaces
 from .models import ChatModel
 from .permissions import PermissionPolicy, PermissionRequest, ReadOnlyPolicy
 from .provider import OpenAICompatibleModel
+from .sessions import SessionStore
+from .security import redact_value
 from .settings import ModelSettings, resolve_profile_options
 from .tools import ToolDefinition, ToolRegistry, ToolResult, _run_command
 
@@ -43,11 +45,17 @@ _MAX_TASK_OUTPUT_CHARS = 12_000
 class TaskStateStore:
     """Atomic per-session task state with a bounded progress history."""
 
-    def __init__(self, workspace: Path, session_id: str) -> None:
+    def __init__(
+        self,
+        workspace: Path,
+        session_id: str,
+        secret_values: tuple[str, ...] = (),
+    ) -> None:
         if not re.fullmatch(r"[a-f0-9-]{16,64}", session_id):
             raise ValueError("Invalid AgentDU session id")
         self.path = workspace.resolve() / ".agentdu" / "agents" / session_id / "tasks.json"
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.secret_values = tuple(value for value in secret_values if len(value) >= 4)
         self.lock = threading.RLock()
         self.tasks: dict[str, dict[str, Any]] = {}
         if self.path.exists():
@@ -56,7 +64,7 @@ class TaskStateStore:
                 records = content["tasks"]
                 if not isinstance(records, dict):
                     raise ValueError("tasks must be an object")
-                self.tasks = records
+                self.tasks = redact_value(records, self.secret_values)
             except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
                 raise RuntimeError(f"Could not read task state {self.path}: {error}") from error
 
@@ -72,6 +80,7 @@ class TaskStateStore:
 
     def add(self, record: dict[str, Any]) -> None:
         with self.lock:
+            record = redact_value(record, self.secret_values)
             task_id = record["task_id"]
             if task_id in self.tasks:
                 raise ValueError(f"Task already exists: {task_id}")
@@ -91,7 +100,7 @@ class TaskStateStore:
             if record is None:
                 raise ValueError(f"Unknown task id: {task_id}")
             previous_status = record.get("status")
-            record.update(values)
+            record.update(redact_value(values, self.secret_values))
             if "status" in values and previous_status != values["status"]:
                 record["version"] = int(record.get("version", 0)) + 1
             record["updated_at"] = _now()
@@ -117,6 +126,7 @@ class TaskStateStore:
             ]
 
     def _save(self) -> None:
+        self.tasks = redact_value(self.tasks, self.secret_values)
         temporary = self.path.with_suffix(".json.tmp")
         temporary.write_text(
             json.dumps({"version": 1, "tasks": self.tasks}, ensure_ascii=False, indent=2)
@@ -163,6 +173,12 @@ class AutonomousCoordinator:
             thread_name_prefix="agentdu-agent",
         )
         self._parent_events: EventBus | None = None
+        self._parent_sessions: SessionStore | None = None
+        self._secret_values = {
+            value
+            for value in (main_options.get("api_key"),)
+            if isinstance(value, str) and len(value) >= 4
+        }
         self._git: GitWorkspaces | None = None
         try:
             self._git = GitWorkspaces(self.workspace)
@@ -174,11 +190,15 @@ class AutonomousCoordinator:
             main_options.get("model"),
         )
         self.profiles: dict[str, dict[str, Any]] = {}
+        self._all_profile_options: dict[str, dict[str, Any]] = {}
         for name, profile in settings.profiles.items():
             if not profile.model:
                 continue
             options = resolve_profile_options(settings, name)
+            self._all_profile_options[name] = options
             identity = (str(options["base_url"]).rstrip("/"), options["model"])
+            if isinstance(options.get("api_key"), str) and len(options["api_key"]) >= 4:
+                self._secret_values.add(options["api_key"])
             if identity != main_identity:
                 self.profiles[name] = options
 
@@ -190,6 +210,9 @@ class AutonomousCoordinator:
         if not self.available:
             raise ValueError("At least one distinct collaborator profile is required")
         self._parent_events = runtime.event_bus
+        self._parent_sessions = runtime.sessions
+        runtime.add_secret_values(self._secret_values)
+        runtime.sessions.add_redactions(list(self._secret_values))
         runtime.system_prompt = f"{runtime.system_prompt}\n\n{AUTONOMOUS_INSTRUCTIONS}"
         runtime.tools.register(
             self._tool(
@@ -254,6 +277,30 @@ class AutonomousCoordinator:
                 self._wait_for_tasks,
             )
         )
+        runtime.tools.register(
+            self._tool(
+                "resume_agent_task",
+                "Resume a failed or interrupted task in its existing private session and worktree. Inspect its status and workspace before resuming.",
+                _object_schema({"task_id": {"type": "string"}}, ["task_id"]),
+                "execute",
+                self._resume,
+            )
+        )
+        runtime.tools.register(
+            self._tool(
+                "takeover_agent_task",
+                "Continue a failed or interrupted task with a different configured model while preserving its verified session and workspace state.",
+                _object_schema(
+                    {
+                        "task_id": {"type": "string"},
+                        "profile": {"type": "string", "enum": sorted(self.profiles)},
+                    },
+                    ["task_id", "profile"],
+                ),
+                "execute",
+                self._takeover,
+            )
+        )
         if self._git is not None:
             runtime.tools.register(
                 self._tool(
@@ -279,6 +326,8 @@ class AutonomousCoordinator:
         with self._changed:
             while True:
                 self._launch_queued(session_id)
+                records = store.list()
+                self._reconcile_finished_workers(store, records)
                 records = store.list()
                 if not any(record.get("status") == "running" for record in records):
                     for record in records:
@@ -384,6 +433,162 @@ class AutonomousCoordinator:
             supplied_context=context,
         )
 
+    def _resume(
+        self,
+        arguments: dict[str, Any],
+        workspace: Path,
+        session_id: str,
+        parent_loop: asyncio.AbstractEventLoop,
+    ) -> str:
+        return self._resume_task(
+            session_id,
+            arguments["task_id"],
+            None,
+            False,
+            parent_loop,
+        )
+
+    def _takeover(
+        self,
+        arguments: dict[str, Any],
+        workspace: Path,
+        session_id: str,
+        parent_loop: asyncio.AbstractEventLoop,
+    ) -> str:
+        return self._resume_task(
+            session_id,
+            arguments["task_id"],
+            arguments["profile"],
+            True,
+            parent_loop,
+        )
+
+    def _resume_task(
+        self,
+        session_id: str,
+        task_id: str,
+        profile: str | None,
+        require_model_change: bool,
+        parent_loop: asyncio.AbstractEventLoop,
+    ) -> str:
+        if not _TASK_ID.fullmatch(task_id):
+            return ToolResult("Invalid task id", True)
+        with self._changed:
+            self._parent_loops[session_id] = parent_loop
+            store = self._store(session_id)
+            try:
+                task = store.get(task_id)
+            except ValueError as error:
+                return ToolResult(str(error), True)
+            if task["status"] not in {"failed", "interrupted"}:
+                return ToolResult(
+                    f"Task {task_id} cannot be resumed from status {task['status']}",
+                    True,
+                )
+            records = {record["task_id"]: record for record in store.list()}
+            if self._dependency_state(task["dependencies"], records) != "ready":
+                return ToolResult("Task dependencies are not ready for resumption", True)
+            try:
+                task = self._ensure_worker_session_id(store, task)
+            except (OSError, RuntimeError, ValueError) as error:
+                return ToolResult(f"Task session cannot be recovered: {error}", True)
+
+            selected_profile = profile or task["profile"]
+            if selected_profile not in self.profiles:
+                return ToolResult(
+                    f"Profile is not available for resumption: {selected_profile}",
+                    True,
+                )
+            next_options = self._all_profile_options[selected_profile]
+            previous_identity = task.get("model_identity")
+            if not isinstance(previous_identity, dict):
+                if require_model_change:
+                    return ToolResult(
+                        "The task does not record its original model identity, so takeover cannot be verified",
+                        True,
+                    )
+                previous_options = self._all_profile_options.get(task["profile"])
+                if previous_options is None:
+                    return ToolResult(
+                        "The original model profile is unavailable, so this task cannot be resumed",
+                        True,
+                    )
+                previous_identity = {
+                    "base_url": str(previous_options["base_url"]).rstrip("/"),
+                    "model": previous_options["model"],
+                }
+            next_identity = {
+                "base_url": str(next_options["base_url"]).rstrip("/"),
+                "model": next_options["model"],
+            }
+            if not isinstance(previous_identity.get("base_url"), str) or not isinstance(
+                previous_identity.get("model"), str
+            ):
+                return ToolResult("The task's original model identity is invalid", True)
+            if require_model_change and previous_identity == next_identity:
+                return ToolResult(
+                    "Takeover requires a different model endpoint and model id",
+                    True,
+                )
+            if not require_model_change and previous_identity != next_identity:
+                return ToolResult(
+                    "The configured model changed since this task started; use takeover_agent_task",
+                    True,
+                )
+            if self._available_model_calls(session_id) < 1:
+                return ToolResult("The session model-request budget is exhausted", True)
+            if task.get("workspace") and task["kind"] != "consultation":
+                try:
+                    self._validate_existing_workspace(task)
+                except (GitWorkspaceError, OSError) as error:
+                    return ToolResult(f"Saved task workspace is not safe to resume: {error}", True)
+
+            self._update(
+                store,
+                task_id,
+                status="queued",
+                owner="AgentDU",
+                profile=selected_profile,
+                model_identity=next_identity,
+                model_call_limit=int(task.get("model_calls", 0)),
+                resume_count=int(task.get("resume_count", 0)) + 1,
+                resumed_from_profile=task["profile"],
+                error=None,
+            )
+            self._event(
+                store,
+                task_id,
+                "task_resumed",
+                {"profile": selected_profile, "takeover": require_model_change},
+            )
+            self._launch_queued(session_id)
+            return _render_task_summary(store.get(task_id))
+
+    def _ensure_worker_session_id(
+        self,
+        store: TaskStateStore,
+        task: dict[str, Any],
+    ) -> dict[str, Any]:
+        current = task.get("worker_session_id")
+        if isinstance(current, str) and re.fullmatch(r"[a-f0-9]{32}", current):
+            return task
+        data_dir = (
+            self.workspace
+            / ".agentdu"
+            / "agents"
+            / task["session_id"]
+            / "tasks"
+            / task["task_id"]
+        )
+        sessions = SessionStore(data_dir).list_sessions()
+        valid_sessions = [item for item in sessions if "error" not in item]
+        if len(valid_sessions) > 1:
+            raise RuntimeError("Multiple private sessions exist for this task")
+        worker_session_id = (
+            valid_sessions[0]["session_id"] if valid_sessions else uuid.uuid4().hex
+        )
+        return store.update(task["task_id"], worker_session_id=worker_session_id)
+
     def _review(
         self,
         arguments: dict[str, Any],
@@ -441,6 +646,10 @@ class AutonomousCoordinator:
                 "session_id": session_id,
                 "kind": kind,
                 "profile": profile,
+                "model_identity": {
+                    "base_url": str(self.profiles[profile]["base_url"]).rstrip("/"),
+                    "model": self.profiles[profile]["model"],
+                },
                 "prompt": prompt,
                 "supplied_context": supplied_context,
                 "acceptance_criteria": acceptance_criteria,
@@ -460,6 +669,10 @@ class AutonomousCoordinator:
                 "error": None,
                 "model_calls": 0,
                 "model_call_limit": 0,
+                "usage": {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0},
+                "estimated_cost_usd": 0.0,
+                "worker_session_id": uuid.uuid4().hex,
+                "resume_count": 0,
                 "acceptance_checks": [],
                 "integration_commit": None,
                 "events": [],
@@ -525,7 +738,7 @@ class AutonomousCoordinator:
                     workspace=str(workspace),
                     base_commit=base_commit,
                     branch=branch,
-                    model_call_limit=call_limit,
+                    model_call_limit=int(record.get("model_calls", 0)) + call_limit,
                     error=None,
                 )
                 self._event(
@@ -540,6 +753,7 @@ class AutonomousCoordinator:
                     record["task_id"],
                 )
                 self._futures[record["task_id"]] = future
+                future.add_done_callback(self._notify_worker_finished)
                 self._changed.notify_all()
 
     def _prepare_workspace(self, record: dict[str, Any]) -> tuple[Path, str | None, str | None]:
@@ -547,6 +761,8 @@ class AutonomousCoordinator:
             return self.workspace, None, None
         if self._git is None:
             raise GitWorkspaceError("Implementation and review tasks require a Git repository")
+        if record.get("workspace"):
+            return self._validate_existing_workspace(record)
         with self._git.handoff_lock():
             base_commit = self._git.require_clean()
             task_id = record["task_id"]
@@ -558,26 +774,91 @@ class AutonomousCoordinator:
                 workspace = self._git.add_readonly_worktree(task_id, "review", base_commit)
         return workspace, base_commit, branch
 
+    def _validate_existing_workspace(
+        self,
+        record: dict[str, Any],
+    ) -> tuple[Path, str | None, str | None]:
+        assert self._git is not None
+        role = "worker" if record["kind"] == "implementation" else "review"
+        worktree_root = self._git.worktree_path(record["task_id"], role).resolve()
+        expected_workspace = (worktree_root / self._git.workspace_relative).resolve()
+        workspace = Path(record["workspace"]).resolve()
+        if workspace != expected_workspace or not workspace.is_dir():
+            raise GitWorkspaceError("The saved task worktree is missing or outside its recorded location")
+        if not record.get("base_commit"):
+            raise GitWorkspaceError("The saved task has no Git baseline")
+        current_commit = self._git.head(workspace)
+        if not self._git.is_ancestor(record["base_commit"], current_commit):
+            raise GitWorkspaceError("The saved task worktree no longer descends from its baseline")
+        if record["kind"] == "implementation":
+            current_branch = self._git.git(
+                workspace,
+                "rev-parse",
+                "--abbrev-ref",
+                "HEAD",
+            ).stdout.decode().strip()
+            if current_branch != record.get("branch"):
+                raise GitWorkspaceError("The saved task worktree is on an unexpected branch")
+        elif self._git.status(workspace):
+            raise GitWorkspaceError("The saved read-only review worktree has uncommitted changes")
+        return workspace, record["base_commit"], record.get("branch")
+
     def _run_task(self, session_id: str, task_id: str) -> None:
         try:
             asyncio.run(self._execute_task(session_id, task_id))
-        except Exception as error:
+        except BaseException as error:
             store = self._store(session_id)
+            status = "interrupted" if isinstance(error, asyncio.CancelledError) else "failed"
+            detail = f"{type(error).__name__}: {error}"[:2_000]
             self._update(
                 store,
                 task_id,
-                status="failed",
+                status=status,
                 owner="AgentDU",
-                error=f"{type(error).__name__}: {error}"[:2_000],
+                error=detail,
             )
             self._publish_progress(
                 session_id,
                 task_id,
-                "task_failed",
-                {"error": f"{type(error).__name__}: {error}"[:500]},
+                "task_interrupted" if status == "interrupted" else "task_failed",
+                {"error": detail[:500]},
             )
         finally:
             self._launch_queued(session_id)
+
+    def _reconcile_finished_workers(
+        self,
+        store: TaskStateStore,
+        records: list[dict[str, Any]],
+    ) -> None:
+        for record in records:
+            if record.get("status") != "running":
+                continue
+            future = self._futures.get(record["task_id"])
+            if future is None or not future.done():
+                continue
+            if future.cancelled():
+                status = "interrupted"
+                detail = "The worker was cancelled before it recorded a terminal task state"
+            else:
+                error = future.exception()
+                status = "failed"
+                detail = (
+                    f"Worker exited without a terminal task state: {type(error).__name__}: {error}"
+                    if error is not None
+                    else "Worker exited without recording a terminal task state"
+                )
+            self._update(
+                store,
+                record["task_id"],
+                status=status,
+                owner="AgentDU",
+                error=detail[:2_000],
+            )
+
+    def _notify_worker_finished(self, future: Any) -> None:
+        with self._changed:
+            self._changed.notify_all()
 
     async def _execute_task(self, session_id: str, task_id: str) -> None:
         store = self._store(session_id)
@@ -623,9 +904,10 @@ class AutonomousCoordinator:
             ),
             context_tokens=self.context_tokens,
             max_steps=self.max_steps,
-            max_model_calls=task["model_call_limit"],
+            max_model_calls=max(1, task["model_call_limit"] - task["model_calls"]),
             system_prompt=f"{DEFAULT_SYSTEM_PROMPT}\n\n{instructions}",
             include_builtin_tools=kind != "consultation",
+            secret_values=self._secret_values,
         )
 
         async def forward_event(event: AgentEvent) -> None:
@@ -633,15 +915,48 @@ class AutonomousCoordinator:
                 "event": event.kind,
                 "profile": profile,
             }
-            for key in ("step", "tool_name", "is_error", "reason", "limit"):
+            for key in (
+                "step",
+                "tool_name",
+                "is_error",
+                "reason",
+                "limit",
+                "usage",
+                "totals",
+                "call_cost_usd",
+                "estimated_cost_usd",
+            ):
                 if key in event.payload:
                     payload[key] = event.payload[key]
             if event.kind == "model_request":
                 current = store.get(task_id)
                 self._update(store, task_id, model_calls=current["model_calls"] + 1)
+            elif event.kind == "model_usage":
+                current = store.get(task_id)
+                total_usage = dict(current.get("usage", {}))
+                usage = event.payload.get("usage")
+                if isinstance(usage, dict):
+                    for name, count in usage.items():
+                        if isinstance(count, int) and count >= 0:
+                            total_usage[name] = total_usage.get(name, 0) + count
+                call_cost = event.payload.get("call_cost_usd")
+                current_cost = current.get("estimated_cost_usd")
+                total_cost = (
+                    current_cost + call_cost
+                    if isinstance(current_cost, (int, float))
+                    and isinstance(call_cost, (int, float))
+                    else None
+                )
+                self._update(
+                    store,
+                    task_id,
+                    usage=total_usage,
+                    estimated_cost_usd=total_cost,
+                )
             if event.kind in {
                 "run_started",
                 "model_request",
+                "model_usage",
                 "tool_started",
                 "tool_finished",
                 "provider_retry",
@@ -653,12 +968,16 @@ class AutonomousCoordinator:
                 await self._publish_progress_async(session_id, task_id, "task_progress", payload)
 
         runtime.event_bus.subscribe(forward_event)
-        prompt = self._task_prompt(task, store.list())
-        result = await runtime.run(prompt)
+        worker_session_id = task["worker_session_id"]
+        if runtime.sessions.exists(worker_session_id):
+            prompt = self._resume_prompt(task, store.list())
+        else:
+            prompt = self._task_prompt(task, store.list())
+        result = await runtime.run(prompt, worker_session_id)
         report = result.content[:8_000]
         changes: dict[str, Any] = {
             "report": report,
-            "model_calls": result.model_calls,
+            "model_calls": store.get(task_id)["model_calls"],
             "error": None,
         }
         if kind == "implementation":
@@ -727,11 +1046,23 @@ class AutonomousCoordinator:
             f"{json.dumps(dependency_reports, ensure_ascii=False, indent=2)}"
         )
 
+    def _resume_prompt(self, task: dict[str, Any], records: list[dict[str, Any]]) -> str:
+        return (
+            "Continue the existing assignment from the saved conversation and current workspace. "
+            "Inspect the repository and the result of any interrupted tool call before repeating "
+            "an operation. Preserve verified work and report any uncertainty.\n\n"
+            + self._task_prompt(task, records)
+        )
+
     def _store(self, session_id: str) -> TaskStateStore:
         with self._lock:
             store = self._stores.get(session_id)
             if store is None:
-                store = TaskStateStore(self.workspace, session_id)
+                store = TaskStateStore(
+                    self.workspace,
+                    session_id,
+                    tuple(self._secret_values),
+                )
                 self._stores[session_id] = store
                 self._recover_integrations(store)
             return store
@@ -819,21 +1150,10 @@ class AutonomousCoordinator:
         kind: str,
         payload: dict[str, Any],
     ) -> None:
-        if self._parent_events is None:
-            return
-        parent_loop = self._parent_loops.get(session_id)
-        if parent_loop is None or not parent_loop.is_running():
-            return
-        event = AgentEvent.create(
-            session_id,
-            "collaboration_progress",
-            {"task_id": task_id, "kind": kind, **payload},
-        )
-        try:
-            future = asyncio.run_coroutine_threadsafe(self._parent_events.publish(event), parent_loop)
-            future.result(timeout=2)
-        except (RuntimeError, TimeoutError):
-            pass
+        event = self._progress_event(session_id, task_id, kind, payload)
+        if self._parent_sessions is not None:
+            self._parent_sessions.append(session_id, event.kind, event.payload)
+        self._queue_parent_event(event)
 
     async def _publish_progress_async(
         self,
@@ -842,20 +1162,34 @@ class AutonomousCoordinator:
         kind: str,
         payload: dict[str, Any],
     ) -> None:
+        event = self._progress_event(session_id, task_id, kind, payload)
+        if self._parent_sessions is not None:
+            self._parent_sessions.append(session_id, event.kind, event.payload)
+        self._queue_parent_event(event)
+
+    def _queue_parent_event(self, event: AgentEvent) -> None:
         if self._parent_events is None:
             return
-        parent_loop = self._parent_loops.get(session_id)
+        parent_loop = self._parent_loops.get(event.session_id)
         if parent_loop is None or not parent_loop.is_running():
             return
-        future = asyncio.run_coroutine_threadsafe(
-            self._parent_events.publish(AgentEvent.create(
-                session_id,
-                "collaboration_progress",
-                {"task_id": task_id, "kind": kind, **payload},
-            )),
-            parent_loop,
-        )
-        await asyncio.wrap_future(future)
+        publication = self._parent_events.publish(event)
+        try:
+            asyncio.run_coroutine_threadsafe(publication, parent_loop)
+        except RuntimeError:
+            publication.close()
+
+    def _progress_event(
+        self,
+        session_id: str,
+        task_id: str,
+        kind: str,
+        payload: dict[str, Any],
+    ) -> AgentEvent:
+        progress = {"task_id": task_id, "kind": kind, **payload}
+        if self._parent_sessions is not None:
+            progress = self._parent_sessions.redact(progress)
+        return AgentEvent.create(session_id, "collaboration_progress", progress)
 
     def _list_tasks(
         self,
@@ -888,6 +1222,8 @@ class AutonomousCoordinator:
             "profile": task["profile"],
             "status": task["status"],
             "model_calls": task["model_calls"],
+            "usage": task.get("usage", {}),
+            "estimated_cost_usd": task.get("estimated_cost_usd"),
             "report": task["report"],
             "changed_files": task["changed_files"],
             "base_commit": task["base_commit"],
@@ -1081,7 +1417,11 @@ class AutonomousCoordinator:
                     {"command": command, "passed": False, "output": "Execution was not authorized"}
                 )
                 break
-            result = _run_command({"command": command}, workspace)
+            result = _run_command(
+                {"command": command},
+                workspace,
+                tuple(self._secret_values),
+            )
             evidence.append(
                 {
                     "command": command,
@@ -1122,6 +1462,8 @@ def _render_task_summary(record: dict[str, Any]) -> str:
         "dependencies": record["dependencies"],
         "model_calls": record["model_calls"],
         "model_call_limit": record["model_call_limit"],
+        "usage": record.get("usage", {}),
+        "estimated_cost_usd": record.get("estimated_cost_usd"),
         "changed_files": record["changed_files"],
     }
     if record.get("error"):

@@ -477,6 +477,12 @@ class HandoffCoordinator:
         role_instructions: str,
     ) -> AgentRuntime:
         options = resolve_profile_options(self.settings, profile_name)
+        secret_values = set()
+        for name, profile in self.settings.profiles.items():
+            if profile.model:
+                key = resolve_profile_options(self.settings, name).get("api_key")
+                if isinstance(key, str) and len(key) >= 4:
+                    secret_values.add(key)
         runtime = build_default_runtime(
             workspace=workspace,
             model=OpenAICompatibleModel(**options),
@@ -485,6 +491,7 @@ class HandoffCoordinator:
             context_tokens=self.context_tokens,
             max_steps=self.max_steps,
             system_prompt=f"{DEFAULT_SYSTEM_PROMPT}\n\n{role_instructions}",
+            secret_values=secret_values,
         )
         if self.event_handler is not None:
             runtime.event_bus.subscribe(self.event_handler)

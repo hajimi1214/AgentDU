@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentdu"
-version = "0.5.0"
-description = "An independently implemented coding agent with autonomous model collaboration"
+version = "0.6.0"
+description = "An independently implemented coding agent with recoverable model collaboration"
 requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
 agentdu = "agentdu.cli:main"
+agentdu-evaluate = "agentdu.evaluation:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

@@ -1028,6 +1028,14 @@ class RuntimeTests(unittest.TestCase):
                             }
                         ]
                     },
+                    {
+                        "choices": [],
+                        "usage": {
+                            "prompt_tokens": 7,
+                            "completion_tokens": 3,
+                            "total_tokens": 10,
+                        },
+                    },
                 ]
                 body = "".join(f"data: {json.dumps(chunk)}\n\n" for chunk in chunks)
                 body += "data: [DONE]\n\n"
@@ -1063,6 +1071,7 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual(final.tool_calls[0].id, "call-1")
             self.assertEqual(final.tool_calls[0].name, "read_file")
             self.assertEqual(final.tool_calls[0].arguments, {"path": "README.md"})
+            self.assertEqual(final.usage, {"input_tokens": 7, "output_tokens": 3, "total_tokens": 10})
         finally:
             server.shutdown()
             server.server_close()
@@ -1088,6 +1097,85 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual(options["base_url"], "https://example.invalid/v1")
             self.assertEqual(options["api_key"], "secret-value")
             self.assertFalse(options["streaming"])
+
+    def test_model_profile_rejects_non_finite_numeric_settings(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "config.toml"
+            path.write_text(
+                "[profiles.example]\n"
+                "model = 'test-model'\n"
+                "temperature = nan\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ConfigurationError, "finite number"):
+                ModelSettings.load(path)
+
+    def test_model_usage_and_configured_cost_are_accumulated(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "README.md").write_text("usage test\n", encoding="utf-8")
+            model = QueueModel(
+                [
+                    AssistantMessage(
+                        content="Reading the file",
+                        tool_calls=(ToolCall("usage-read", "read_file", {"path": "README.md"}),),
+                        usage={"input_tokens": 1_000, "output_tokens": 500, "total_tokens": 1_500},
+                    ),
+                    AssistantMessage(
+                        content="Second response",
+                        usage={"input_tokens": 2_000, "output_tokens": 1_000, "total_tokens": 3_000},
+                    ),
+                ]
+            )
+            model.input_cost_per_million = 0.5
+            model.output_cost_per_million = 1.0
+            runtime = AgentRuntime(
+                model,
+                ToolRegistry(root, ReadOnlyPolicy()),
+                SessionStore(root / ".agentdu"),
+            )
+
+            result = asyncio.run(runtime.run("Count provider usage"))
+
+            self.assertEqual(
+                result.model_usage,
+                {"input_tokens": 3_000, "output_tokens": 1_500, "total_tokens": 4_500},
+            )
+            self.assertAlmostEqual(result.estimated_cost_usd, 0.003)
+
+    def test_missing_usage_makes_cost_estimate_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "README.md").write_text("usage test\n", encoding="utf-8")
+            model = QueueModel(
+                [
+                    AssistantMessage(
+                        content="Reading the file",
+                        tool_calls=(ToolCall("usage-read", "read_file", {"path": "README.md"}),),
+                        usage=None,
+                    ),
+                    AssistantMessage(
+                        content="Second response",
+                        usage={"input_tokens": 2_000, "output_tokens": 1_000},
+                    ),
+                ]
+            )
+            model.input_cost_per_million = 0.5
+            model.output_cost_per_million = 1.0
+            runtime = AgentRuntime(
+                model,
+                ToolRegistry(root, ReadOnlyPolicy()),
+                SessionStore(root / ".agentdu"),
+            )
+
+            result = asyncio.run(runtime.run("Count provider usage"))
+
+            self.assertIsNone(result.estimated_cost_usd)
+            events = runtime.sessions.read_events(result.session_id)
+            usage_events = [event for event in events if event["kind"] == "model_usage"]
+            self.assertIsNone(usage_events[0]["payload"]["usage"])
+            self.assertIsNotNone(usage_events[-1]["payload"]["usage"])
+            self.assertIsNone(usage_events[-1]["payload"]["estimated_cost_usd"])
 
     def test_handoff_ledger_enforces_owner_and_version_transitions(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

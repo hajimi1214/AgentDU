@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import math
 import os
+import re
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -21,12 +23,26 @@ class ModelProfile:
     temperature: float = 0
     streaming: bool = True
     capabilities: tuple[str, ...] = ()
+    stream_usage: bool = True
+    input_cost_per_million: float | None = None
+    output_cost_per_million: float | None = None
+
+
+@dataclass(frozen=True)
+class MCPServerSettings:
+    name: str
+    command: str
+    args: tuple[str, ...] = ()
+    cwd: str | None = None
+    env: dict[str, str] | None = None
+    timeout: float = 60
 
 
 @dataclass(frozen=True)
 class ModelSettings:
     profiles: dict[str, ModelProfile]
     default_profile: str | None
+    mcp_servers: tuple[MCPServerSettings, ...] = ()
 
     @classmethod
     def load(cls, path: Path) -> "ModelSettings":
@@ -62,12 +78,26 @@ class ModelSettings:
             temperature = values.get("temperature", 0)
             streaming = values.get("streaming", True)
             capabilities = values.get("capabilities", [])
-            if not isinstance(timeout, (int, float)) or timeout <= 0:
+            stream_usage = values.get("stream_usage", True)
+            input_cost = values.get("input_cost_per_million")
+            output_cost = values.get("output_cost_per_million")
+            if (
+                not isinstance(timeout, (int, float))
+                or isinstance(timeout, bool)
+                or not math.isfinite(timeout)
+                or timeout <= 0
+            ):
                 raise ConfigurationError(f"Profile '{name}' timeout must be a positive number")
-            if not isinstance(temperature, (int, float)):
-                raise ConfigurationError(f"Profile '{name}' temperature must be numeric")
+            if (
+                not isinstance(temperature, (int, float))
+                or isinstance(temperature, bool)
+                or not math.isfinite(temperature)
+            ):
+                raise ConfigurationError(f"Profile '{name}' temperature must be a finite number")
             if not isinstance(streaming, bool):
                 raise ConfigurationError(f"Profile '{name}' streaming must be true or false")
+            if not isinstance(stream_usage, bool):
+                raise ConfigurationError(f"Profile '{name}' stream_usage must be true or false")
             if not isinstance(capabilities, list) or any(
                 not isinstance(capability, str) or not capability.strip()
                 for capability in capabilities
@@ -75,6 +105,19 @@ class ModelSettings:
                 raise ConfigurationError(
                     f"Profile '{name}' capabilities must be an array of non-empty strings"
                 )
+            for label, price in (
+                ("input_cost_per_million", input_cost),
+                ("output_cost_per_million", output_cost),
+            ):
+                if price is not None and (
+                    not isinstance(price, (int, float))
+                    or isinstance(price, bool)
+                    or not math.isfinite(price)
+                    or price < 0
+                ):
+                    raise ConfigurationError(
+                        f"Profile '{name}' {label} must be a non-negative finite number"
+                    )
             profiles[name] = ModelProfile(
                 name=name,
                 model=model,
@@ -84,11 +127,19 @@ class ModelSettings:
                 temperature=float(temperature),
                 streaming=streaming,
                 capabilities=tuple(capabilities),
+                stream_usage=stream_usage,
+                input_cost_per_million=(float(input_cost) if input_cost is not None else None),
+                output_cost_per_million=(float(output_cost) if output_cost is not None else None),
             )
         default_profile = data.get("default_profile")
         if default_profile is not None and default_profile not in profiles:
             raise ConfigurationError(f"Default profile '{default_profile}' is not defined")
-        return cls(profiles=profiles, default_profile=default_profile)
+        mcp_servers = _parse_mcp_servers(data.get("mcp", {}))
+        return cls(
+            profiles=profiles,
+            default_profile=default_profile,
+            mcp_servers=mcp_servers,
+        )
 
     def resolve(self, name: str | None) -> ModelProfile | None:
         if name is None:
@@ -150,6 +201,9 @@ def resolve_model_options(
         "timeout": profile.timeout if profile else 120,
         "temperature": profile.temperature if profile else 0,
         "streaming": streaming,
+        "stream_usage": profile.stream_usage if profile else True,
+        "input_cost_per_million": profile.input_cost_per_million if profile else None,
+        "output_cost_per_million": profile.output_cost_per_million if profile else None,
     }
 
 
@@ -170,4 +224,64 @@ def resolve_profile_options(settings: ModelSettings, profile_name: str) -> dict[
         "timeout": profile.timeout,
         "temperature": profile.temperature,
         "streaming": profile.streaming,
+        "stream_usage": profile.stream_usage,
+        "input_cost_per_million": profile.input_cost_per_million,
+        "output_cost_per_million": profile.output_cost_per_million,
     }
+
+
+def _parse_mcp_servers(value: Any) -> tuple[MCPServerSettings, ...]:
+    if not isinstance(value, dict):
+        raise ConfigurationError("[mcp] must be a table")
+    servers = value.get("servers", {})
+    if not isinstance(servers, dict):
+        raise ConfigurationError("[mcp.servers] must contain named tables")
+    parsed: list[MCPServerSettings] = []
+    for name, config in servers.items():
+        if not isinstance(name, str) or not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}", name):
+            raise ConfigurationError(f"Invalid MCP server name: {name!r}")
+        if not isinstance(config, dict):
+            raise ConfigurationError(f"MCP server '{name}' must be a TOML table")
+        command = config.get("command")
+        args = config.get("args", [])
+        cwd = config.get("cwd")
+        env = config.get("env", {})
+        timeout = config.get("timeout", 60)
+        if not isinstance(command, str) or not command.strip():
+            raise ConfigurationError(f"MCP server '{name}' needs a command")
+        if not isinstance(args, list) or any(not isinstance(argument, str) for argument in args):
+            raise ConfigurationError(f"MCP server '{name}' args must be an array of strings")
+        if cwd is not None and (not isinstance(cwd, str) or not cwd.strip()):
+            raise ConfigurationError(f"MCP server '{name}' cwd must be a relative directory")
+        if cwd is not None and Path(cwd).is_absolute():
+            raise ConfigurationError(f"MCP server '{name}' cwd must be relative to the workspace")
+        if cwd is not None and ".." in Path(cwd).parts:
+            raise ConfigurationError(f"MCP server '{name}' cwd must not contain parent-directory segments")
+        if not isinstance(env, dict) or any(
+            not isinstance(target, str)
+            or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", target)
+            or not isinstance(source, str)
+            or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", source)
+            for target, source in env.items()
+        ):
+            raise ConfigurationError(
+                f"MCP server '{name}' env maps child variable names to environment variable names"
+            )
+        if (
+            not isinstance(timeout, (int, float))
+            or isinstance(timeout, bool)
+            or not math.isfinite(timeout)
+            or timeout <= 0
+        ):
+            raise ConfigurationError(f"MCP server '{name}' timeout must be a positive number")
+        parsed.append(
+            MCPServerSettings(
+                name=name,
+                command=command,
+                args=tuple(args),
+                cwd=cwd,
+                env=dict(env),
+                timeout=float(timeout),
+            )
+        )
+    return tuple(parsed)

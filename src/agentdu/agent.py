@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import threading
+from collections.abc import Collection
 from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
@@ -44,6 +45,8 @@ class RunResult:
     content: str
     model_steps: int
     model_calls: int = 0
+    model_usage: dict[str, int] | None = None
+    estimated_cost_usd: float | None = None
 
 
 class AgentRuntime:
@@ -61,6 +64,7 @@ class AgentRuntime:
         max_steps: int = 40,
         max_model_calls: int | None = None,
         include_builtin_tools: bool = True,
+        secret_values: Collection[str] = (),
     ) -> None:
         if max_steps < 1:
             raise ValueError("max_steps must be positive")
@@ -69,6 +73,13 @@ class AgentRuntime:
         self.model = model
         self.tools = tools
         self.sessions = sessions
+        api_key = getattr(model, "api_key", None)
+        self.secret_values = {
+            value
+            for value in (*secret_values, api_key)
+            if isinstance(value, str) and len(value) >= 4
+        }
+        self.sessions.add_redactions(list(self.secret_values))
         self.context = context or ContextManager()
         self.event_bus = event_bus or EventBus()
         self.system_prompt = system_prompt
@@ -77,13 +88,39 @@ class AgentRuntime:
         self._model_call_count: ContextVar[int] = ContextVar(
             f"agentdu_model_calls_{id(self)}", default=0
         )
+        self._model_usage: ContextVar[dict[str, int]] = ContextVar(
+            f"agentdu_model_usage_{id(self)}", default={}
+        )
+        self._estimated_cost: ContextVar[float | None] = ContextVar(
+            f"agentdu_estimated_cost_{id(self)}", default=None
+        )
+        self._model_cost_complete: ContextVar[bool] = ContextVar(
+            f"agentdu_model_cost_complete_{id(self)}", default=True
+        )
         if include_builtin_tools:
-            for tool in create_builtin_tools():
+            for tool in create_builtin_tools(self.secret_values):
                 if tool.name not in {schema["function"]["name"] for schema in tools.model_schemas()}:
                     tools.register(tool)
-        for extension in extensions:
-            extension.register_tools(tools)
-            self.event_bus.subscribe(extension.on_event)
+        self.extensions = tuple(extensions)
+        try:
+            for extension in self.extensions:
+                extension.register_tools(tools)
+                self.event_bus.subscribe(extension.on_event)
+        except BaseException:
+            self.close()
+            raise
+
+    def close(self) -> None:
+        for extension in reversed(self.extensions):
+            close = getattr(extension, "close", None)
+            if callable(close):
+                close()
+
+    def add_secret_values(self, secret_values: Collection[str]) -> None:
+        added = {value for value in secret_values if isinstance(value, str) and len(value) >= 4}
+        if added:
+            self.secret_values.update(added)
+            self.sessions.add_redactions(list(added))
 
     async def run(self, prompt: str, session_id: str | None = None) -> RunResult:
         if not prompt.strip():
@@ -106,6 +143,9 @@ class AgentRuntime:
             raise
         process_lock = None
         call_count_token = self._model_call_count.set(0)
+        usage_token = self._model_usage.set({})
+        cost_token = self._estimated_cost.set(None)
+        cost_complete_token = self._model_cost_complete.set(True)
         try:
             process_lock_task = asyncio.create_task(
                 asyncio.to_thread(self.sessions.acquire_process_lock, session_id)
@@ -147,6 +187,7 @@ class AgentRuntime:
                 messages = self.sessions.read_messages(session_id)
                 request_messages = self.context.prepare(messages, self.tools.model_schemas())
                 answer = await self._request_model(session_id, step, request_messages)
+                await self._record_model_usage(session_id, answer.usage)
 
                 assistant_message = answer.to_message()
                 if answer.finish_reason == "length":
@@ -176,6 +217,8 @@ class AgentRuntime:
                         content,
                         step,
                         self._model_call_count.get(),
+                        dict(self._model_usage.get()),
+                        self._estimated_cost.get(),
                     )
 
                 for call in answer.tool_calls:
@@ -195,9 +238,63 @@ class AgentRuntime:
             raise MaxStepsExceeded(f"Agent stopped after {self.max_steps} model steps")
         finally:
             self._model_call_count.reset(call_count_token)
+            self._model_usage.reset(usage_token)
+            self._estimated_cost.reset(cost_token)
+            self._model_cost_complete.reset(cost_complete_token)
             if process_lock is not None:
                 process_lock.release()
             lock.release()
+
+    async def _record_model_usage(
+        self,
+        session_id: str,
+        usage: dict[str, int] | None,
+    ) -> None:
+        totals = dict(self._model_usage.get())
+        if usage:
+            for name in ("input_tokens", "output_tokens", "total_tokens"):
+                count = usage.get(name)
+                if isinstance(count, int) and count >= 0:
+                    totals[name] = totals.get(name, 0) + count
+        input_rate = getattr(self.model, "input_cost_per_million", None)
+        output_rate = getattr(self.model, "output_cost_per_million", None)
+        cost = self._estimated_cost.get()
+        cost_complete = self._model_cost_complete.get()
+        call_cost: float | None = None
+        input_tokens = usage.get("input_tokens") if usage else None
+        output_tokens = usage.get("output_tokens") if usage else None
+        if (
+            input_rate is not None
+            and output_rate is not None
+            and isinstance(input_tokens, int)
+            and not isinstance(input_tokens, bool)
+            and input_tokens >= 0
+            and isinstance(output_tokens, int)
+            and not isinstance(output_tokens, bool)
+            and output_tokens >= 0
+        ):
+            call_cost = (
+                input_tokens * input_rate
+                + output_tokens * output_rate
+            ) / 1_000_000
+            if cost_complete:
+                cost = (cost or 0.0) + call_cost
+        else:
+            cost = None
+            cost_complete = False
+        self._model_usage.set(totals)
+        self._estimated_cost.set(cost)
+        self._model_cost_complete.set(cost_complete)
+        await self._emit(
+            session_id,
+            "model_usage",
+            {
+                "usage": usage,
+                "totals": totals,
+                "call_cost_usd": call_cost,
+                "estimated_cost_usd": cost,
+            },
+        )
 
     def _session_lock(self, session_id: str) -> threading.Lock:
         key = self.sessions.lock_key(session_id)
@@ -209,12 +306,13 @@ class AgentRuntime:
             return lock
 
     async def _emit(self, session_id: str, kind: str, payload: dict[str, object]) -> None:
-        event = AgentEvent.create(session_id, kind, payload)
+        safe_payload = self.sessions.redact(payload)
+        event = AgentEvent.create(session_id, kind, safe_payload)
         if kind != "assistant_delta":
             self.sessions.append(
                 session_id,
                 kind,
-                {"occurred_at": event.occurred_at, **payload},
+                {"occurred_at": event.occurred_at, **safe_payload},
             )
         await self.event_bus.publish(event)
 
@@ -290,6 +388,7 @@ class AgentRuntime:
                     content="".join(content),
                     tool_calls=answer.tool_calls,
                     finish_reason=answer.finish_reason,
+                    usage=answer.usage,
                 )
             return answer
 
@@ -340,6 +439,7 @@ def build_default_runtime(
     system_prompt: str = DEFAULT_SYSTEM_PROMPT,
     max_model_calls: int | None = None,
     include_builtin_tools: bool = True,
+    secret_values: Collection[str] = (),
 ) -> AgentRuntime:
     if not callable(getattr(permission_policy, "authorize", None)):
         raise TypeError("permission_policy must implement authorize(request)")
@@ -355,6 +455,7 @@ def build_default_runtime(
         max_steps=max_steps,
         max_model_calls=max_model_calls,
         include_builtin_tools=include_builtin_tools,
+        secret_values=secret_values,
     )
 
 

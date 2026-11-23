@@ -28,6 +28,9 @@ class OpenAICompatibleModel:
         timeout: float = 120,
         temperature: float = 0,
         streaming: bool = True,
+        stream_usage: bool = True,
+        input_cost_per_million: float | None = None,
+        output_cost_per_million: float | None = None,
     ) -> None:
         self.endpoint = self._endpoint(base_url)
         self.model = model
@@ -35,6 +38,9 @@ class OpenAICompatibleModel:
         self.timeout = timeout
         self.temperature = temperature
         self.streaming_enabled = streaming
+        self.stream_usage = stream_usage
+        self.input_cost_per_million = input_cost_per_million
+        self.output_cost_per_million = output_cost_per_million
 
     async def complete(
         self, messages: Sequence[Message], tools: Sequence[ToolSchema]
@@ -61,6 +67,8 @@ class OpenAICompatibleModel:
         if tools:
             payload["tools"] = list(tools)
             payload["tool_choice"] = "auto"
+        if self.stream_usage:
+            payload["stream_options"] = {"include_usage": True}
 
         events: asyncio.Queue[ModelStreamEvent | BaseException | None] = asyncio.Queue()
         loop = asyncio.get_running_loop()
@@ -111,6 +119,7 @@ class OpenAICompatibleModel:
         content: list[str] = []
         tool_fragments: dict[int, dict[str, str]] = {}
         finish_reason: str | None = None
+        usage: dict[str, int] | None = None
         saw_done = False
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
@@ -133,6 +142,7 @@ class OpenAICompatibleModel:
                             chunk = json.loads(event_data)
                         except json.JSONDecodeError as error:
                             raise ProviderError(f"Model API sent invalid SSE JSON: {error}") from error
+                        usage = _normalize_usage(chunk.get("usage")) or usage
                         for choice in chunk.get("choices", []):
                             delta = choice.get("delta", {})
                             text_delta = delta.get("content")
@@ -190,6 +200,7 @@ class OpenAICompatibleModel:
             content="".join(content) or None,
             tool_calls=tuple(calls),
             finish_reason=finish_reason,
+            usage=usage,
         )
         try:
             message.to_message()
@@ -237,6 +248,7 @@ class OpenAICompatibleModel:
                 content=content,
                 tool_calls=calls,
                 finish_reason=choice.get("finish_reason"),
+                usage=_normalize_usage(result.get("usage")),
             )
         except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError) as error:
             raise ProviderError(f"Model API returned an invalid chat completion: {error}") from error
@@ -255,3 +267,23 @@ class OpenAICompatibleModel:
         if normalized.endswith("/v1"):
             return f"{normalized}/chat/completions"
         return f"{normalized}/v1/chat/completions"
+
+
+def _normalize_usage(value: Any) -> dict[str, int] | None:
+    if not isinstance(value, dict):
+        return None
+    normalized: dict[str, int] = {}
+    for source, target in (
+        ("prompt_tokens", "input_tokens"),
+        ("completion_tokens", "output_tokens"),
+        ("total_tokens", "total_tokens"),
+    ):
+        count = value.get(source)
+        if isinstance(count, int) and not isinstance(count, bool) and count >= 0:
+            normalized[target] = count
+    if "total_tokens" not in normalized and {
+        "input_tokens",
+        "output_tokens",
+    } <= normalized.keys():
+        normalized["total_tokens"] = normalized["input_tokens"] + normalized["output_tokens"]
+    return normalized or None

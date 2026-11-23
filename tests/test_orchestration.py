@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import threading
 import unittest
+from concurrent.futures import Future
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -14,10 +15,12 @@ from unittest.mock import patch
 
 from agentdu.agent import ModelCallBudgetExceeded, build_default_runtime
 from agentdu.git_workspaces import GitWorkspaceError, GitWorkspaces
+from agentdu.events import EventBus
 from agentdu.models import AssistantMessage, ToolCall
 from agentdu.orchestration import AutonomousCoordinator, TaskStateStore
 from agentdu.permissions import AllowAllPolicy
 from agentdu.provider import OpenAICompatibleModel
+from agentdu.sessions import SessionStore
 from agentdu.settings import ModelProfile, ModelSettings
 
 
@@ -280,6 +283,408 @@ class OrchestrationTests(unittest.TestCase):
             record = reopened.get("b" * 12)
             self.assertEqual(record["status"], "interrupted")
             self.assertIn("process stopped", record["error"])
+
+    def test_finished_unexpected_worker_wakes_session_shutdown(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            session_id = "a" * 32
+            task_id = "b" * 12
+            coordinator = AutonomousCoordinator(
+                workspace,
+                ModelSettings({}, None),
+                {},
+                AllowAllPolicy(),
+            )
+            store = TaskStateStore(workspace, session_id)
+            store.add(
+                {
+                    "task_id": task_id,
+                    "session_id": session_id,
+                    "kind": "consultation",
+                    "status": "running",
+                    "dependencies": [],
+                    "model_calls": 0,
+                    "model_call_limit": 1,
+                }
+            )
+            coordinator._stores[session_id] = store
+            release_worker = threading.Event()
+            future = coordinator._executor.submit(release_worker.wait)
+            coordinator._futures[task_id] = future
+            future.add_done_callback(coordinator._notify_worker_finished)
+            waiting = threading.Event()
+            original_wait = coordinator._changed.wait
+
+            def observe_wait(timeout: float | None = None) -> bool:
+                waiting.set()
+                return original_wait(timeout)
+
+            coordinator._changed.wait = observe_wait
+            result: list[dict[str, Any]] = []
+            finish_thread = threading.Thread(
+                target=lambda: result.extend(coordinator.finish_session(session_id)),
+                daemon=True,
+            )
+            finish_thread.start()
+            try:
+                self.assertTrue(waiting.wait(1))
+                release_worker.set()
+                finish_thread.join(timeout=2)
+                self.assertFalse(finish_thread.is_alive())
+                self.assertEqual(result[0]["status"], "failed")
+                self.assertIn("without recording", result[0]["error"])
+            finally:
+                release_worker.set()
+                if finish_thread.is_alive():
+                    coordinator.close(wait=False)
+                    finish_thread.join(timeout=2)
+                else:
+                    coordinator.close()
+
+    def test_cancelled_parent_progress_publication_does_not_interrupt_worker(self) -> None:
+        class RunningLoop:
+            def is_running(self) -> bool:
+                return True
+
+        def cancel_submission(coroutine: Any, loop: Any) -> Any:
+            coroutine.close()
+            future = Future()
+            future.cancel()
+            return future
+
+        with tempfile.TemporaryDirectory() as directory:
+            coordinator = AutonomousCoordinator(
+                Path(directory),
+                ModelSettings({}, None),
+                {},
+                AllowAllPolicy(),
+            )
+            coordinator._parent_events = EventBus()
+            coordinator._parent_loops["a" * 32] = RunningLoop()  # type: ignore[assignment]
+            try:
+                with patch("agentdu.orchestration.asyncio.run_coroutine_threadsafe", cancel_submission):
+                    asyncio.run(
+                        coordinator._publish_progress_async(
+                            "a" * 32,
+                            "b" * 12,
+                            "task_progress",
+                            {"event": "model_request"},
+                        )
+                    )
+            finally:
+                coordinator.close()
+
+    def test_interrupted_task_can_be_taken_over_in_its_saved_session(self) -> None:
+        state: dict[str, Any] = {"request_models": [], "request_messages": []}
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self) -> None:
+                length = int(self.headers.get("Content-Length", "0"))
+                request = json.loads(self.rfile.read(length))
+                state["request_models"].append(request["model"])
+                state["request_messages"].append(request["messages"])
+                body = json.dumps(
+                    {
+                        "choices": [
+                            {
+                                "message": {
+                                    "role": "assistant",
+                                    "content": "The saved assignment was continued by the takeover model.",
+                                },
+                                "finish_reason": "stop",
+                            }
+                        ]
+                    }
+                ).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+        server_thread.start()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                session_id = "a" * 32
+                task_id = "b" * 12
+                worker_session_id = "c" * 32
+                parent_sessions = SessionStore(root / ".agentdu")
+                parent_sessions.create(session_id)
+                task_store = TaskStateStore(root, session_id)
+                task_store.add(
+                    {
+                        "task_id": task_id,
+                        "session_id": session_id,
+                        "kind": "consultation",
+                        "profile": "advisor_old",
+                        "model_identity": {
+                            "base_url": "http://127.0.0.1",
+                            "model": "advisor-old",
+                        },
+                        "prompt": "Explain the existing architecture.",
+                        "supplied_context": "The task has already begun.",
+                        "acceptance_criteria": "",
+                        "dependencies": [],
+                        "status": "interrupted",
+                        "owner": "AgentDU",
+                        "version": 1,
+                        "created_at": "2026-11-23T00:00:00+00:00",
+                        "updated_at": "2026-11-23T00:00:00+00:00",
+                        "base_commit": None,
+                        "result_commit": None,
+                        "changed_files": [],
+                        "diff_digest": None,
+                        "workspace": None,
+                        "branch": None,
+                        "report": "",
+                        "error": "The process stopped before completion",
+                        "model_calls": 1,
+                        "model_call_limit": 4,
+                        "worker_session_id": worker_session_id,
+                        "resume_count": 0,
+                        "acceptance_checks": [],
+                        "integration_commit": None,
+                        "events": [],
+                    }
+                )
+                worker_sessions = SessionStore(
+                    root
+                    / ".agentdu"
+                    / "agents"
+                    / session_id
+                    / "tasks"
+                    / task_id
+                )
+                worker_sessions.create(worker_session_id)
+                worker_sessions.append_message(
+                    worker_session_id,
+                    {"role": "user", "content": "Original consultation prompt"},
+                )
+                worker_sessions.append_message(
+                    worker_session_id,
+                    {
+                        "role": "assistant",
+                        "content": None,
+                        "tool_calls": [
+                            {
+                                "id": "interrupted-call",
+                                "type": "function",
+                                "function": {"name": "read_file", "arguments": "{}"},
+                            }
+                        ],
+                    },
+                )
+                base_url = f"http://127.0.0.1:{server.server_port}/v1"
+                settings = ModelSettings(
+                    profiles={
+                        "main": ModelProfile("main", "main-model", base_url, streaming=False),
+                        "advisor_old": ModelProfile(
+                            "advisor_old", "advisor-old", base_url, streaming=False
+                        ),
+                        "advisor_new": ModelProfile(
+                            "advisor_new", "advisor-new", base_url, streaming=False
+                        ),
+                    },
+                    default_profile="main",
+                )
+                main_options = {
+                    "model": "main-model",
+                    "base_url": base_url,
+                    "api_key": None,
+                    "timeout": 5,
+                    "temperature": 0,
+                    "streaming": False,
+                }
+                runtime = build_default_runtime(
+                    root,
+                    OpenAICompatibleModel(**main_options),
+                    AllowAllPolicy(),
+                )
+                coordinator = AutonomousCoordinator(
+                    root,
+                    settings,
+                    main_options,
+                    AllowAllPolicy(),
+                    max_concurrency=1,
+                    total_model_calls=20,
+                    task_model_calls=4,
+                )
+                coordinator.install(runtime)
+
+                async def take_over() -> None:
+                    result = await runtime.tools.execute(
+                        "takeover_agent_task",
+                        {"task_id": task_id, "profile": "advisor_new"},
+                        session_id,
+                    )
+                    self.assertFalse(result.is_error, result.text)
+                    await asyncio.to_thread(coordinator.finish_session, session_id)
+
+                with self.assertNoLogs("agentdu.extensions", level="ERROR"):
+                    asyncio.run(take_over())
+                completed = TaskStateStore(root, session_id).get(task_id)
+                self.assertEqual(completed["status"], "completed")
+                self.assertEqual(completed["profile"], "advisor_new")
+                self.assertEqual(completed["resume_count"], 1)
+                self.assertEqual(completed["model_calls"], 2)
+                self.assertEqual(state["request_models"], ["advisor-new"])
+                self.assertTrue(
+                    any(
+                        message.get("role") == "tool"
+                        and "stopped before recording" in message.get("content", "")
+                        for message in state["request_messages"][0]
+                    )
+                )
+                self.assertTrue(
+                    any(
+                        event["kind"] == "collaboration_progress"
+                        for event in parent_sessions.read_events(session_id)
+                    )
+                )
+                coordinator.close()
+        finally:
+            server.shutdown()
+            server.server_close()
+            server_thread.join(timeout=2)
+
+    def test_resume_and_takeover_verify_the_recorded_model_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            session_id = "a" * 32
+            task_id = "b" * 12
+            base_url = "http://model.example/v1"
+            settings = ModelSettings(
+                profiles={
+                    "main": ModelProfile("main", "main-model", base_url),
+                    "advisor": ModelProfile("advisor", "current-model", base_url),
+                },
+                default_profile="main",
+            )
+            coordinator = AutonomousCoordinator(
+                workspace,
+                settings,
+                {"model": "main-model", "base_url": base_url},
+                AllowAllPolicy(),
+            )
+            store = TaskStateStore(workspace, session_id)
+            store.add(
+                {
+                    "task_id": task_id,
+                    "session_id": session_id,
+                    "kind": "consultation",
+                    "profile": "advisor",
+                    "model_identity": {
+                        "base_url": base_url,
+                        "model": "original-model",
+                    },
+                    "status": "interrupted",
+                    "dependencies": [],
+                    "model_calls": 0,
+                    "model_call_limit": 1,
+                    "changed_files": [],
+                    "worker_session_id": "c" * 32,
+                }
+            )
+            coordinator._stores[session_id] = store
+            parent_loop = asyncio.new_event_loop()
+            try:
+                resumed = coordinator._resume_task(
+                    session_id,
+                    task_id,
+                    None,
+                    False,
+                    parent_loop,
+                )
+                self.assertTrue(resumed.is_error)
+                self.assertIn("use takeover_agent_task", resumed.text)
+
+                store.update(
+                    task_id,
+                    model_identity={"base_url": base_url, "model": "current-model"},
+                )
+                takeover = coordinator._resume_task(
+                    session_id,
+                    task_id,
+                    "advisor",
+                    True,
+                    parent_loop,
+                )
+                self.assertTrue(takeover.is_error)
+                self.assertIn("Takeover requires a different model", takeover.text)
+            finally:
+                parent_loop.close()
+                coordinator.close()
+
+    def test_successful_takeover_becomes_the_new_model_identity_for_recovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            session_id = "a" * 32
+            task_id = "b" * 12
+            base_url = "http://model.example/v1"
+            settings = ModelSettings(
+                profiles={
+                    "main": ModelProfile("main", "main-model", base_url),
+                    "advisor": ModelProfile("advisor", "current-model", base_url),
+                },
+                default_profile="main",
+            )
+            coordinator = AutonomousCoordinator(
+                workspace,
+                settings,
+                {"model": "main-model", "base_url": base_url},
+                AllowAllPolicy(),
+            )
+            store = TaskStateStore(workspace, session_id)
+            store.add(
+                {
+                    "task_id": task_id,
+                    "session_id": session_id,
+                    "kind": "consultation",
+                    "profile": "old-advisor",
+                    "model_identity": {"base_url": base_url, "model": "old-model"},
+                    "status": "interrupted",
+                    "dependencies": [],
+                    "model_calls": 0,
+                    "model_call_limit": 1,
+                    "changed_files": [],
+                    "worker_session_id": "c" * 32,
+                }
+            )
+            coordinator._stores[session_id] = store
+            parent_loop = asyncio.new_event_loop()
+            try:
+                with patch.object(coordinator, "_launch_queued"):
+                    takeover = coordinator._resume_task(
+                        session_id,
+                        task_id,
+                        "advisor",
+                        True,
+                        parent_loop,
+                    )
+                    self.assertIsInstance(takeover, str)
+                    current_identity = store.get(task_id)["model_identity"]
+                    self.assertEqual(
+                        current_identity,
+                        {"base_url": base_url, "model": "current-model"},
+                    )
+                    store.update(task_id, status="interrupted")
+                    resumed = coordinator._resume_task(
+                        session_id,
+                        task_id,
+                        None,
+                        False,
+                        parent_loop,
+                    )
+                    self.assertIsInstance(resumed, str)
+            finally:
+                parent_loop.close()
+                coordinator.close()
 
     def test_failed_acceptance_check_does_not_change_main_worktree(self) -> None:
         git_executable = Path(__file__).resolve().parents[1] / ".tools" / "mingit" / "cmd" / "git.exe"

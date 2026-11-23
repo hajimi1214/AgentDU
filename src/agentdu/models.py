@@ -21,6 +21,7 @@ class AssistantMessage:
     content: str | None = None
     tool_calls: tuple[ToolCall, ...] = ()
     finish_reason: str | None = None
+    usage: dict[str, int] | None = None
 
     def to_message(self) -> Message:
         call_ids = [call.id for call in self.tool_calls]

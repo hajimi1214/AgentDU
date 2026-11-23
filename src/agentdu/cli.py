@@ -12,11 +12,19 @@ from .collaboration import HandoffCoordinator
 from .events import AgentEvent
 from .git_workspaces import GitWorkspaceError, GitWorkspaces
 from .handoff import HandoffLedger
+from .mcp import MCPToolsExtension
 from .permissions import ApproveWorkspaceActionsPolicy, PermissionRequest
 from .orchestration import AutonomousCoordinator
+from .plugins import load_plugins
 from .provider import OpenAICompatibleModel
 from .sessions import SessionStore
-from .settings import ModelSettings, default_config_path, resolve_model_options
+from .skills import SkillsExtension
+from .settings import (
+    ModelSettings,
+    default_config_path,
+    resolve_model_options,
+    resolve_profile_options,
+)
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -32,6 +40,19 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--abandon-handoff", help="Mark an incomplete handoff as abandoned")
     parser.add_argument("--interactive", action="store_true", help="Open a multi-turn coding session")
     parser.add_argument("--config", type=Path, default=default_config_path())
+    parser.add_argument(
+        "--skills-dir",
+        type=Path,
+        action="append",
+        default=[],
+        help="Add a directory containing Agent Skills",
+    )
+    parser.add_argument(
+        "--plugin",
+        action="append",
+        default=[],
+        help="Load one explicitly named installed AgentDU plugin",
+    )
     parser.add_argument("--profile", default=os.environ.get("AGENTDU_PROFILE"))
     parser.add_argument(
         "--model",
@@ -42,7 +63,6 @@ def _parser() -> argparse.ArgumentParser:
         "--base-url",
         help="Override the selected profile's OpenAI-compatible API URL",
     )
-    parser.add_argument("--api-key", help="Override the selected profile's API key")
     parser.add_argument("--handoff-profile", help="Run a second model as the handoff receiver")
     parser.add_argument(
         "--solo",
@@ -128,6 +148,7 @@ def main() -> int:
             lock.release()
     policy = ApproveWorkspaceActionsPolicy() if args.yes else _InteractivePolicy()
     coordinator: AutonomousCoordinator | None = None
+    runtime: AgentRuntime | None = None
     try:
         settings = ModelSettings.load(args.config)
         if args.handoff_profile:
@@ -159,16 +180,39 @@ def main() -> int:
                 args.profile,
                 args.model,
                 args.base_url,
-                args.api_key,
+                None,
                 args.streaming,
             )
+            profile_secrets = set()
+            for name, profile in settings.profiles.items():
+                if profile.model:
+                    key = resolve_profile_options(settings, name).get("api_key")
+                    if isinstance(key, str) and len(key) >= 4:
+                        profile_secrets.add(key)
+            if isinstance(options.get("api_key"), str) and len(options["api_key"]) >= 4:
+                profile_secrets.add(options["api_key"])
             model = OpenAICompatibleModel(**options)
+            skill_roots = [workspace / ".agents" / "skills"]
+            skill_roots.extend(args.skills_dir)
+            extensions = [SkillsExtension(tuple(skill_roots))]
+            extensions.extend(load_plugins(tuple(args.plugin), policy, workspace))
+            if settings.mcp_servers:
+                extensions.append(
+                    MCPToolsExtension(
+                        settings.mcp_servers,
+                        workspace,
+                        policy,
+                        tuple(profile_secrets),
+                    )
+                )
             runtime = build_default_runtime(
                 workspace=workspace,
                 model=model,
                 permission_policy=policy,
                 context_tokens=args.context_tokens,
                 max_steps=args.max_steps,
+                extensions=extensions,
+                secret_values=profile_secrets,
             )
             if not args.solo:
                 candidate_coordinator = AutonomousCoordinator(
@@ -204,6 +248,11 @@ def main() -> int:
     except Exception as error:
         print(f"AgentDU error: {error}", file=sys.stderr)
         return 1
+    finally:
+        if runtime is not None:
+            runtime.close()
+        if isinstance(coordinator, AutonomousCoordinator):
+            coordinator.close(wait=False)
     if session_id:
         print(f"Session: {session_id}", file=sys.stderr)
     return 0
