@@ -125,3 +125,24 @@ flowchart LR
 ## D0 结束条件
 
 D0 交付中文产品需求、桌面架构、页面结构、技术选型、研究证据和五阶段路线。D0 不实现桌面 UI，不修改 Agent Runtime，不直接进入 D1。进入 D1 需要下一阶段明确授权，并优先完成 Electron/Python IPC 与 Windows Shell 隔离技术 spike。
+
+## D0 最终验收问答
+
+| 验收问题 | D0 决策 | 详细依据 |
+| --- | --- | --- |
+| AgentDU 应该做成什么样的桌面产品？ | 本地优先、以项目和持久任务会话为核心的 AI 编程工作台，涵盖模型、Agent 活动、代码审查、审批和恢复 | [产品需求](product-requirements.md)、[页面结构](screen-map.md) |
+| 如何最大程度复用当前 AgentDU 核心？ | 保留 `AgentRuntime`、Provider 契约、SessionStore、协作协调器、Handoff 账本、Git worktree 和现有 MCP/Skills/插件入口，在其上增加 Desktop Host 与 UI 应用服务 | [源码研究](reference-study.md)、[总体架构](architecture.md) |
+| 应该采用什么桌面技术架构？ | Electron 主进程和隔离 Renderer + 独立 Python Runtime Host，通过 stdio 版本化 JSONL 双向通信 | [总体架构](architecture.md)、[技术选型](technology-decisions.md) |
+| 桌面 UI 应当包含哪些页面？ | 项目主页、工作区、会话与任务时间线、Agent 协作、Diff 审查、终端、权限、Provider、MCP/Skills/插件、通知和设置 | [页面结构](screen-map.md) |
+| 多模型协作如何在界面中呈现？ | 主/子 Agent 任务卡、私有会话、模型档案、依赖、基线与结果 SHA、验证证据、Diff 和显式集成状态 | [产品需求](product-requirements.md)、[页面结构](screen-map.md) |
+| 桌面进程与 Python Runtime 如何可靠通信？ | 单实例桌面主进程监督 Python Host，使用握手、schema、请求 ID、持久事件序号、健康状态、去重请求和明确关闭协议 | [总体架构](architecture.md) |
+| 如何保障文件、Shell、凭据和模型数据安全？ | Renderer 窄化能力、OS 级 Shell 隔离、系统密钥存储、最小环境注入、数据传输策略和本地日志脱敏；平台隔离能力必须在 D1 实测 | [总体架构](architecture.md)、[产品需求](product-requirements.md) |
+| 与 Codex、DeepSeek Harness 相比，AgentDU 的独特优势是什么？ | 已拥有本地可读源码的多模型 handoff、任务 owner/version 校验、Git snapshot 验证和验收后集成路径，可围绕可证明的工程状态设计协作监督界面 | [源码研究](reference-study.md) |
+| 后续五个阶段分别应达到什么产品状态？ | D1 桌面 IPC 骨架，D2 单模型工作台，D3 多 Agent 和交接，D4 安全/恢复/扩展，D5 产品发布与独立验收 | [D1–D5 路线](roadmap.md#d1-桌面运行骨架与-runtime-通信) |
+
+### D0 结论
+
+- **研究和架构设计已达到进入 D1 技术验证的条件**。D1 应先验证 Windows 上 Electron 与 Python Runtime 的打包、stdio IPC 和 Shell 隔离，期间保留现有 Runtime 核心。
+- **桌面产品尚未实现或运行**。本地项目当前提供中文 CLI，不包含 AgentDU Desktop 窗口、Renderer、安装包或桌面 Host。开发并运行桌面窗口属于 D1 工作。
+- **安全与平台结论仍有明确待验证项**，尤其 Windows OS 隔离、进程树资源限制、密钥存储、真实 Provider 接入和跨 Provider 任务接力。
+- 本阶段只交付 D0 中文研究资料并停止。尚不能宣称 AgentDU 已经具备日常使用的桌面产品或完成 D1。

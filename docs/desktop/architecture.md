@@ -2,11 +2,11 @@
 
 ## 架构决定
 
-**方案**：Electron 主进程 + React/TypeScript Renderer + 独立 Python Runtime 子进程。桌面 UI 通过版本化 JSON-RPC/JSONL 消息连接 Runtime。所有会话、工具、Agent Loop、协作和 Git 状态继续由 AgentDU Runtime 拥有。
+**架构采用** Electron 主进程、React/TypeScript Renderer 和独立 Python Runtime 子进程。桌面 UI 通过版本化 JSON-RPC/JSONL 消息连接 Runtime。所有会话、工具、Agent Loop、协作和 Git 状态继续由 AgentDU Runtime 拥有。
 
-**决定依据**：AgentDU 已经是 Python Runtime；Electron 可提供成熟的 Windows 桌面、窗口、系统通知、应用更新和跨平台界面能力；公开 Codex App Server 与 Harness Desktop 都证明“桌面客户端和 Agent Host 使用明确进程/协议边界”值得研究。选择 Electron 是 D0 的产品工程判断，不是已运行验证的性能结论。
+**决定依据来自** AgentDU 已经采用 Python Runtime，Electron 可提供成熟的 Windows 桌面、窗口、系统通知、应用更新和跨平台界面能力。公开 Codex App Server 与 Harness Desktop 都提供了“桌面客户端和 Agent Host 使用明确进程/协议边界”的研究案例。选择 Electron 是 D0 的产品工程判断，尚无运行验证的性能结论。
 
-**尚未定案的安全细节**：Windows Shell 与子进程必须有可测试的 OS 级限制。D1 首先做命令执行隔离技术验证，比较 Windows Job Objects、受限令牌、AppContainer 或维护中的第三方 sandbox 能力，再确定跨平台的能力模型。不能把普通子进程启动或 Git worktree 写成安全沙箱。
+**安全方案尚未定案。** Windows Shell 与子进程必须具备可测试的 OS 级限制。D1 首先做命令执行隔离技术验证，比较 Windows Job Objects、受限令牌、AppContainer 或仍在维护的第三方 sandbox 能力，再确定跨平台能力模型。普通子进程启动或 Git worktree 不构成安全沙箱。
 
 ## 组件图
 

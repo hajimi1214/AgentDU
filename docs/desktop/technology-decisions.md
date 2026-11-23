@@ -33,11 +33,11 @@ Electron 方案为 D0 的明确技术建议，可在 D1 命令隔离与 Windows 
 
 ### 为什么当前选 Electron
 
-- **事实**：产品目标要求高密度的代码工作台、可调整面板、聊天活动时间线、Diff、集成终端和设置页面。
-- **事实**：已有 Runtime 是 Python 包，AgentDU 源码没有 GUI 依赖和桌面工程。
-- **事实**：Electron 官方文档说明隔离 renderer 和 preload bridge 的安全机制，Harness Desktop 有实际主进程/Host/Preload 分层源码。
-- **推断**：Electron + React/TypeScript 能用单一 UI 技术栈构建多面板开发界面，并让 Python Runtime 保持独立。它需要更严格的本机权限约束与更大的安装包。
-- **待验证**：在目标 Windows 设备上，Runtime 打包、Shell 沙箱、Windows 文件通知、长时间运行和升级后的数据迁移都必须通过实际测试。
+- **事实** 产品目标要求高密度的代码工作台、可调整面板、聊天活动时间线、Diff、集成终端和设置页面。
+- **事实** 已有 Runtime 是 Python 包，AgentDU 源码没有 GUI 依赖和桌面工程。
+- **事实** Electron 官方文档说明隔离 renderer 和 preload bridge 的安全机制，Harness Desktop 有实际主进程/Host/Preload 分层源码。
+- **推断** Electron + React/TypeScript 能用单一 UI 技术栈构建多面板开发界面，并让 Python Runtime 保持独立。它需要更严格的本机权限约束与更大的安装包。
+- **待验证** 在目标 Windows 设备上，Runtime 打包、Shell 沙箱、Windows 文件通知、长时间运行和升级后的数据迁移都必须通过实际测试。
 
 ## 进程通信选择
 
@@ -75,7 +75,7 @@ CLI 面向终端输入和输出，桌面需要稳定的 session read、turn cont
 
 ## D1 技术验证门槛
 
-只有以下 spike 全部通过，Electron 选型才转为已验证决定：
+Electron 选型只有在以下 spike 全部通过后，才视为已验证决定。
 
 1. Windows 开发环境启动 UI 与 Python Host，并通过 stdio JSONL 完成握手和一次模型流式任务。
 2. 无凭据启动、Provider 配置失败、Host 崩溃和协议不兼容时应用仍可恢复。
