@@ -27,65 +27,85 @@ from .settings import (
 )
 
 
+class _ChineseHelpFormatter(argparse.HelpFormatter):
+    def _format_usage(
+        self,
+        usage: str | None,
+        actions: list[argparse.Action],
+        groups: list[argparse._MutuallyExclusiveGroup],
+        prefix: str | None,
+    ) -> str:
+        rendered = super()._format_usage(usage, actions, groups, prefix)
+        if prefix is None:
+            rendered = rendered.replace("usage:", "用法：", 1)
+            rendered = rendered.replace("用法： ", "用法：", 1)
+        return rendered
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agentdu",
-        description="Run the AgentDU coding agent in smart autonomous collaboration mode",
+        description="以智能自主协作模式运行 AgentDU 编程 Agent",
+        add_help=False,
+        formatter_class=_ChineseHelpFormatter,
     )
-    parser.add_argument("prompt", nargs="?", help="Task for the agent")
-    parser.add_argument("--workspace", type=Path, default=Path.cwd())
-    parser.add_argument("--session", help="Resume a session by id")
-    parser.add_argument("--list-sessions", action="store_true", help="List saved sessions in the workspace")
-    parser.add_argument("--list-handoffs", action="store_true", help="List persisted multi-model handoffs")
-    parser.add_argument("--abandon-handoff", help="Mark an incomplete handoff as abandoned")
-    parser.add_argument("--interactive", action="store_true", help="Open a multi-turn coding session")
-    parser.add_argument("--config", type=Path, default=default_config_path())
+    parser._positionals.title = "位置参数"
+    parser._optionals.title = "选项"
+    parser.add_argument("-h", "--help", action="help", help="显示此帮助信息并退出")
+    parser.add_argument("prompt", nargs="?", help="交给 Agent 的任务")
+    parser.add_argument("--workspace", type=Path, default=Path.cwd(), help="项目工作目录")
+    parser.add_argument("--session", help="按会话 ID 恢复会话")
+    parser.add_argument("--list-sessions", action="store_true", help="列出工作区中的已保存会话")
+    parser.add_argument("--list-handoffs", action="store_true", help="列出已保存的多模型交接")
+    parser.add_argument("--abandon-handoff", help="将未完成的交接标记为已放弃")
+    parser.add_argument("--interactive", action="store_true", help="启动多轮编程会话")
+    parser.add_argument("--config", type=Path, default=default_config_path(), help="模型配置文件")
     parser.add_argument(
         "--skills-dir",
         type=Path,
         action="append",
         default=[],
-        help="Add a directory containing Agent Skills",
+        help="添加包含 Agent Skills 的目录",
     )
     parser.add_argument(
         "--plugin",
         action="append",
         default=[],
-        help="Load one explicitly named installed AgentDU plugin",
+        help="加载一个已安装且明确指定的 AgentDU 插件",
     )
-    parser.add_argument("--profile", default=os.environ.get("AGENTDU_PROFILE"))
+    parser.add_argument("--profile", default=os.environ.get("AGENTDU_PROFILE"), help="模型档案名称")
     parser.add_argument(
         "--model",
         default=os.environ.get("AGENTDU_MODEL", os.environ.get("OPENAI_MODEL")),
-        help="Override the model from the selected profile",
+        help="覆盖所选档案中的模型名称",
     )
     parser.add_argument(
         "--base-url",
-        help="Override the selected profile's OpenAI-compatible API URL",
+        help="覆盖所选档案中的 OpenAI 兼容 API 地址",
     )
-    parser.add_argument("--handoff-profile", help="Run a second model as the handoff receiver")
+    parser.add_argument("--handoff-profile", help="指定接收交接任务的第二个模型档案")
     parser.add_argument(
         "--solo",
         action="store_true",
-        help="Disable autonomous model collaboration for a single-model baseline",
+        help="关闭自主模型协作，运行单模型基线",
     )
-    parser.add_argument("--collaboration-concurrency", type=int, default=2)
-    parser.add_argument("--collaboration-max-tasks", type=int, default=8)
-    parser.add_argument("--collaboration-max-model-calls", type=int, default=80)
-    parser.add_argument("--collaboration-task-model-calls", type=int, default=20)
+    parser.add_argument("--collaboration-concurrency", type=int, default=2, help="协作任务最大并发数")
+    parser.add_argument("--collaboration-max-tasks", type=int, default=8, help="每个会话的协作任务上限")
+    parser.add_argument("--collaboration-max-model-calls", type=int, default=80, help="每个会话的协作模型请求上限")
+    parser.add_argument("--collaboration-task-model-calls", type=int, default=20, help="每个协作任务的模型请求上限")
     parser.add_argument(
         "--check",
         action="append",
         default=[],
-        help="Acceptance command to run in the receiver worktree. Repeat for multiple checks.",
+        help="在接收方 worktree 中运行的验收命令，可重复指定",
     )
-    parser.add_argument("--context-tokens", type=int, default=24_000)
-    parser.add_argument("--max-steps", type=int, default=40)
+    parser.add_argument("--context-tokens", type=int, default=24_000, help="上下文 Token 预算")
+    parser.add_argument("--max-steps", type=int, default=40, help="主 Agent 最大模型轮次")
     streaming = parser.add_mutually_exclusive_group()
-    streaming.add_argument("--stream", dest="streaming", action="store_true")
-    streaming.add_argument("--no-stream", dest="streaming", action="store_false")
+    streaming.add_argument("--stream", dest="streaming", action="store_true", help="启用流式响应")
+    streaming.add_argument("--no-stream", dest="streaming", action="store_false", help="关闭流式响应")
     parser.set_defaults(streaming=None)
-    parser.add_argument("--yes", action="store_true", help="Approve workspace writes and shell commands")
+    parser.add_argument("--yes", action="store_true", help="自动批准工作区写入和 Shell 命令")
     return parser
 
 
@@ -154,7 +174,7 @@ def main() -> int:
         if args.handoff_profile:
             source_profile = args.profile or settings.default_profile
             if not source_profile:
-                raise ValueError("Set --profile or default_profile when using --handoff-profile")
+                raise ValueError("使用 --handoff-profile 时，请设置 --profile 或 default_profile")
             coordinator = HandoffCoordinator(
                 workspace,
                 settings,
@@ -243,10 +263,10 @@ def main() -> int:
                 )
             )
     except KeyboardInterrupt:
-        print("AgentDU interrupted", file=sys.stderr)
+        print("AgentDU 已中断", file=sys.stderr)
         return 130
     except Exception as error:
-        print(f"AgentDU error: {error}", file=sys.stderr)
+        print(f"AgentDU 错误：{error}", file=sys.stderr)
         return 1
     finally:
         if runtime is not None:
@@ -254,7 +274,7 @@ def main() -> int:
         if isinstance(coordinator, AutonomousCoordinator):
             coordinator.close(wait=False)
     if session_id:
-        print(f"Session: {session_id}", file=sys.stderr)
+        print(f"会话 ID：{session_id}", file=sys.stderr)
     return 0
 
 
@@ -270,7 +290,7 @@ async def _run_prompts(
     current_session = session_id
     while True:
         try:
-            current_prompt = await asyncio.to_thread(input, "agentdu> ")
+            current_prompt = await asyncio.to_thread(input, "AgentDU> ")
         except EOFError:
             break
         if current_prompt.strip().lower() in {"/exit", "/quit"}:
@@ -301,7 +321,7 @@ async def _run_with_coordinator(
     ]
     if pending:
         details = ", ".join(f"{task['task_id']}={task['status']}" for task in pending)
-        print(f"\n[AgentDU] Collaboration follow-up required: {details}", file=sys.stderr)
+        print(f"\n[AgentDU] 协作任务需要后续处理：{details}", file=sys.stderr)
     return session_id
 
 
@@ -314,7 +334,19 @@ def _terminal_output(event: AgentEvent) -> None:
     elif event.kind == "collaboration_progress":
         payload = event.payload
         detail = payload.get("tool_name") or payload.get("event") or payload.get("kind")
-        print(f"\n[AgentDU task {payload['task_id']}] {detail}")
+        localized = {
+            "task_started": "任务已启动",
+            "task_progress": "任务进行中",
+            "task_completed": "任务已完成",
+            "task_failed": "任务失败",
+            "task_interrupted": "任务已中断",
+            "model_request": "正在请求模型",
+            "model_usage": "已记录模型用量",
+            "provider_retry": "正在重试模型请求",
+            "provider_error": "模型请求出错",
+        }
+        detail = localized.get(detail, detail)
+        print(f"\n[AgentDU 任务 {payload['task_id']}] {detail}")
 
 
 class _InteractivePolicy:
@@ -327,7 +359,7 @@ class _InteractivePolicy:
         with self._approval_lock:
             if not sys.stdin.isatty():
                 print(
-                    f"Denied {request.tool_name}: approval requires an interactive terminal (or --yes).",
+                    f"已拒绝 {request.tool_name}：授权需要交互式终端（或使用 --yes）。",
                     file=sys.stderr,
                 )
                 return False
@@ -337,7 +369,7 @@ class _InteractivePolicy:
                 or request.arguments.get("question")
                 or request.arguments.get("task_id", "")
             )
-            answer = input(f"Allow {request.tool_name} {detail!r}? [y/N] ")
+            answer = input(f"允许 {request.tool_name} 执行 {detail!r} 吗？[y/N] ")
             return answer.strip().lower() in {"y", "yes"}
 
 

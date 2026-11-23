@@ -1,5 +1,7 @@
 # AgentDU
 
+[简体中文](README.zh-CN.md) | English
+
 AgentDU V0.6 development builds on the single-model programming runtime and smart autonomous multi-model collaboration with task recovery, token and cost telemetry, MCP stdio tools, progressive Agent Skills, and explicitly enabled Python extensions. The V0.6 milestone has not passed product acceptance. See [docs/v0.6-status.md](docs/v0.6-status.md) for verified capabilities and remaining requirements.
 
 ## Requirements

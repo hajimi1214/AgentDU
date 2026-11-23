@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 import os
 import subprocess
@@ -21,6 +21,17 @@ from agentdu.tools import ToolRegistry, create_builtin_tools
 
 
 class SecurityTests(unittest.TestCase):
+    def test_cli_help_is_localized_in_simplified_chinese(self) -> None:
+        output = StringIO()
+        with redirect_stdout(output):
+            _parser().print_help()
+
+        self.assertIn("以智能自主协作模式运行", output.getvalue())
+        self.assertIn("项目工作目录", output.getvalue())
+        self.assertIn("用法：agentdu", output.getvalue())
+        self.assertIn("位置参数", output.getvalue())
+        self.assertIn("显示此帮助信息并退出", output.getvalue())
+
     def test_cli_rejects_raw_api_key_arguments(self) -> None:
         with redirect_stderr(StringIO()), self.assertRaises(SystemExit):
             _parser().parse_args(["--api-key", "provider-secret-value", "task"])
