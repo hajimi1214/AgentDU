@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type {
   PermissionRequestEvent,
   ProviderProfileInput,
@@ -10,6 +10,7 @@ import type {
   WorkspaceFile,
 } from "../shared/protocol";
 import { observeRuntimeStartup } from "./startup";
+import { initialTaskLifecycleState, reduceTaskLifecycle } from "./task-lifecycle";
 
 type Activity = {
   id: string;
@@ -22,6 +23,17 @@ type Activity = {
 type Project = { path: string; name: string; files: WorkspaceFile[]; gitStatus: string; gitError: string | null };
 type InspectorTab = "files" | "diff" | "terminal";
 type TerminalRecord = { operationId: string; command: string; workingDirectory: string; status: string; exitCode: number | null; output: string };
+type RuntimeCheckStatus = "idle" | "starting" | "running" | "cancelling" | "completed" | "cancelled" | "failed";
+
+const RUNTIME_CHECK_STATUS_LABELS: Record<RuntimeCheckStatus, string> = {
+  idle: "未运行",
+  starting: "正在启动",
+  running: "正在流式运行",
+  cancelling: "正在请求取消",
+  completed: "运行完成",
+  cancelled: "已取消",
+  failed: "运行失败",
+};
 
 const EVENT_LABELS: Record<string, string> = {
   "host.ready": "Runtime 已连接",
@@ -32,6 +44,7 @@ const EVENT_LABELS: Record<string, string> = {
   assistant_delta: "模型回复",
   assistant_message: "消息已保存",
   run_completed: "任务完成",
+  "task.completed": "任务完成",
   run_stopped: "任务已停止",
   tool_started: "工具开始",
   tool_finished: "工具结束",
@@ -86,8 +99,13 @@ export function App() {
   const [messages, setMessages] = useState<SessionMessage[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [streamingText, setStreamingText] = useState("");
-  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [taskLifecycle, dispatchTaskLifecycle] = useReducer(reduceTaskLifecycle, initialTaskLifecycleState);
+  const [taskStarting, setTaskStarting] = useState(false);
+  const [runtimeCheckStatus, setRuntimeCheckStatus] = useState<RuntimeCheckStatus>("idle");
+  const [runtimeCheckTaskId, setRuntimeCheckTaskId] = useState<string | null>(null);
+  const [runtimeCheckOutput, setRuntimeCheckOutput] = useState("");
+  const activeTaskId = taskLifecycle.activeTaskId;
+  const busy = taskStarting || activeTaskId !== null;
   const [prompt, setPrompt] = useState("");
   const [permission, setPermission] = useState<PermissionRequestEvent | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -103,6 +121,8 @@ export function App() {
   const [terminalBusy, setTerminalBusy] = useState(false);
   const [terminalHistory, setTerminalHistory] = useState<TerminalRecord[]>([]);
   const pendingFileWriteRef = useRef<string | null>(null);
+  const runtimeCheckTaskIdRef = useRef<string | null>(null);
+  const runtimeCheckSessionIdRef = useRef<string | null>(null);
   const fileDraftRef = useRef(fileDraft);
   const initialWorkspaceLoaded = useRef(false);
   pendingFileWriteRef.current = pendingFileWriteId;
@@ -154,6 +174,11 @@ export function App() {
         setStatus(runtimeStatus);
         if (runtimeStatus.state === "error") {
           setNotice(runtimeStatus.error ?? "Python Runtime 启动失败。");
+          setTaskStarting(false);
+          dispatchTaskLifecycle({ type: "runtime-lost" });
+          setRuntimeCheckStatus((current) =>
+            ["starting", "running", "cancelling"].includes(current) ? "failed" : current,
+          );
         }
       },
       () => void loadRecentWorkspaces(),
@@ -179,8 +204,28 @@ export function App() {
         payload,
       };
       setActivities((items) => [...items, activity].slice(-500));
-      if (event.event === "assistant_delta" && payload.sessionId === sessionId) {
-        setStreamingText((text) => text + String(payload.text ?? ""));
+      if (event.event === "task.accepted" && typeof payload.taskId === "string") {
+        dispatchTaskLifecycle({ type: "accepted", taskId: payload.taskId });
+        if (payload.source === "controlled-test") {
+          runtimeCheckTaskIdRef.current = payload.taskId;
+          runtimeCheckSessionIdRef.current =
+            typeof payload.sessionId === "string" ? payload.sessionId : null;
+          setRuntimeCheckTaskId(payload.taskId);
+          setRuntimeCheckStatus("running");
+        }
+      }
+      if (event.event === "assistant_delta") {
+        if (
+          payload.source === "controlled-test" &&
+          payload.sessionId === runtimeCheckSessionIdRef.current
+        ) {
+          setRuntimeCheckOutput((text) => text + String(payload.text ?? ""));
+        } else if (payload.sessionId === sessionId) {
+          setStreamingText((text) => text + String(payload.text ?? ""));
+        }
+      }
+      if (event.event === "task.cancel_requested" && payload.taskId === runtimeCheckTaskIdRef.current) {
+        setRuntimeCheckStatus("cancelling");
       }
       if (event.event === "permission.requested") {
         setPermission({
@@ -199,12 +244,26 @@ export function App() {
         });
       }
       if (event.event === "permission.resolved" && payload.approvalId === permission?.approvalId) setPermission(null);
-      if (["run_completed", "task.cancelled", "task.failed"].includes(event.event)) {
-        setActiveTaskId((current) => (payload.taskId === current ? null : current));
-        setBusy(false);
-        setStreamingText("");
-        if (sessionId) void restoreSession(sessionId);
-        if (project) void refreshProject();
+      if (["run_completed", "task.completed", "task.cancelled", "task.failed"].includes(event.event)) {
+        const taskId = typeof payload.taskId === "string" ? payload.taskId : null;
+        if (taskId) {
+          dispatchTaskLifecycle({ type: "finished", taskId });
+          setTaskStarting(false);
+        }
+        if (payload.source === "controlled-test" && taskId === runtimeCheckTaskIdRef.current) {
+          setRuntimeCheckStatus(
+            event.event === "task.cancelled"
+              ? "cancelled"
+              : event.event === "task.failed"
+                ? "failed"
+                : "completed",
+          );
+        }
+        if (payload.source === "provider") {
+          setStreamingText("");
+          if (sessionId && payload.sessionId === sessionId) void restoreSession(sessionId);
+          if (project && payload.sessionId === sessionId) void refreshProject();
+        }
       }
       if (event.event === "workspace.write.finished" && payload.operationId === pendingFileWriteRef.current) {
         setPendingFileWriteId(null);
@@ -366,29 +425,67 @@ export function App() {
     }
   }
 
+  async function startRuntimeCheck() {
+    if (status.state !== "ready" || busy) return;
+    setNotice(null);
+    setRuntimeCheckStatus("starting");
+    setRuntimeCheckTaskId(null);
+    setRuntimeCheckOutput("");
+    runtimeCheckTaskIdRef.current = null;
+    runtimeCheckSessionIdRef.current = null;
+    setTaskStarting(true);
+    try {
+      const task = await window.agentdu.startTestTask();
+      dispatchTaskLifecycle({ type: "request-resolved", taskId: task.taskId });
+      setTaskStarting(false);
+    } catch (error) {
+      setTaskStarting(false);
+      if (runtimeCheckTaskIdRef.current) {
+        setRuntimeCheckStatus("running");
+        setNotice("Runtime 已接收自检任务，但启动响应未能确认。请查看任务事件。");
+      } else {
+        setRuntimeCheckStatus("failed");
+        setNotice(error instanceof Error ? error.message : "无法启动 Runtime 自检。");
+      }
+    }
+  }
+
   async function sendPrompt() {
     if (!project || !sessionId || !prompt.trim() || busy) return;
     setNotice(null);
-    setBusy(true);
+    setTaskStarting(true);
     setStreamingText("");
     const submitted = prompt.trim();
     setPrompt("");
     try {
       const task = await window.agentdu.startTask(submitted, sessionId, selectedProfile || currentProfile?.name);
-      setActiveTaskId(task.taskId);
+      dispatchTaskLifecycle({ type: "request-resolved", taskId: task.taskId });
+      setTaskStarting(false);
       setMessages((items) => [...items, { role: "user", content: submitted }]);
     } catch (error) {
-      setBusy(false);
+      setTaskStarting(false);
       setNotice(error instanceof Error ? error.message : "无法启动模型任务。");
     }
   }
 
   async function cancelTask() {
     if (!activeTaskId) return;
+    if (runtimeCheckTaskIdRef.current === activeTaskId) setRuntimeCheckStatus("cancelling");
     try {
-      await window.agentdu.cancelTask(activeTaskId);
+      const result = await window.agentdu.cancelTask(activeTaskId);
+      dispatchTaskLifecycle({ type: "finished", taskId: activeTaskId });
+      if (runtimeCheckTaskIdRef.current === activeTaskId) {
+        setRuntimeCheckStatus(
+          result.status === "cancelled"
+            ? "cancelled"
+            : result.status === "not_found"
+              ? "failed"
+              : "completed",
+        );
+      }
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "取消请求失败。");
+      if (runtimeCheckTaskIdRef.current === activeTaskId) setRuntimeCheckStatus("running");
+      setNotice(error instanceof Error ? error.message : "取消请求失败。任务仍在运行，可以重试停止。");
     }
   }
 
@@ -474,6 +571,17 @@ export function App() {
     }
   }
 
+  const controlledTestActive =
+    runtimeCheckStatus === "starting" ||
+    runtimeCheckStatus === "running" ||
+    runtimeCheckStatus === "cancelling";
+  const runtimeCheckActivities = activities
+    .filter(
+      (activity) =>
+        activity.payload.source === "controlled-test" &&
+        activity.payload.taskId === runtimeCheckTaskId,
+    )
+    .slice(-12);
   const visibleFiles = useMemo(() => {
     const query = fileQuery.trim().toLocaleLowerCase();
     return project?.files.filter((file) => !query || file.path.toLocaleLowerCase().includes(query)) ?? [];
@@ -514,7 +622,57 @@ export function App() {
         </header>
         {status.recoveredAfterCrash && <div className="recovery-banner"><strong>检测到上次异常关闭</strong><span>未完成操作没有自动重放。请检查会话与项目状态后再继续。</span></div>}
         {notice && <div className="notice-banner" role="alert">{notice}<button type="button" onClick={() => setNotice(null)}>关闭</button></div>}
-        {!project ? <div className="welcome-state"><div className="welcome-mark">A</div><h1>开始一个编程任务</h1><p>打开本地项目，查看代码、Git 变更并恢复项目会话。</p><button className="primary-button" type="button" onClick={() => void chooseProject()}>打开本地项目</button></div> : <>
+        {!project ? <div className="welcome-state">
+          <div className="welcome-mark">A</div>
+          <h1>开始一个编程任务</h1>
+          <p>打开本地项目，查看代码、Git 变更并恢复项目会话。</p>
+          <div className="welcome-actions">
+            <button className="primary-button" type="button" disabled={busy} onClick={() => void chooseProject()}>打开本地项目</button>
+            {controlledTestActive ? (
+              <button
+                className="secondary-button"
+                type="button"
+                disabled={!activeTaskId || runtimeCheckStatus === "cancelling"}
+                onClick={() => void cancelTask()}
+              >
+                {activeTaskId ? "停止 Runtime 自检" : "自检启动中…"}
+              </button>
+            ) : (
+              <button
+                className="secondary-button"
+                type="button"
+                disabled={busy || status.state !== "ready"}
+                onClick={() => void startRuntimeCheck()}
+              >
+                {runtimeCheckStatus === "idle" ? "运行 Runtime 自检" : "重新运行 Runtime 自检"}
+              </button>
+            )}
+          </div>
+          {runtimeCheckStatus !== "idle" && (
+            <section className="runtime-check-panel" aria-live="polite">
+              <div className="runtime-check-heading">
+                <strong>Runtime 自检</strong>
+                <span>{RUNTIME_CHECK_STATUS_LABELS[runtimeCheckStatus]}</span>
+              </div>
+              <p>使用本地受控模型和隔离临时目录，不请求外部 Provider，也不修改项目文件。</p>
+              {runtimeCheckOutput ? (
+                <pre className="runtime-check-output">{runtimeCheckOutput}</pre>
+              ) : (
+                <div className="runtime-check-output empty">等待 Runtime 流式事件…</div>
+              )}
+              {runtimeCheckActivities.length > 0 && (
+                <div className="runtime-check-events" aria-label="Runtime 自检事件">
+                  {runtimeCheckActivities.map((activity) => (
+                    <div className="runtime-check-event" key={activity.id}>
+                      <span>{EVENT_LABELS[activity.event] ?? activity.event}</span>
+                      <span>{describeActivity(activity)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+        </div> : <>
           <div className="chat-project-strip"><div><strong>{project.name}</strong><span title={project.path}>{project.path}</span></div><span className={`git-branch ${project.gitError ? "error" : ""}`}>{project.gitError ? "Git 不可用" : project.gitStatus.split("\n")[0] || "Git 工作区"}</span></div>
           <section className="conversation" aria-label="会话消息">
             {messages.filter((message) => message.role !== "system").length === 0 && !streamingText ? <div className="conversation-empty"><div className="empty-timeline">✳</div><strong>你想在这个项目里完成什么？</strong><span>AgentDU 会读取真实项目文件，并通过审批执行写入操作。</span></div> : messages.filter((message) => message.role !== "system").map((message, index) => {
@@ -539,7 +697,7 @@ export function App() {
               {profiles.length === 0 && <option value="">尚未配置 Provider</option>}{profiles.map((profile) => <option key={profile.name} value={profile.name}>{profile.name} · {profile.model}</option>)}
             </select></label><span>{currentProfile ? `${currentProfile.model} · ${currentProfile.protocol ?? "协议未确认"} · ${currentProfile.streaming ? "流式已配置" : "未配置流式"}` : "添加 Provider 后开始对话"}</span><button type="button" className="text-button" onClick={() => setShowProviderSettings(true)}>配置</button></div>
             <div className="composer"><textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void sendPrompt(); } }} placeholder="描述你希望完成的代码任务…" rows={3} maxLength={16000} disabled={!sessionId} />
-              <div className="composer-actions"><span>Enter 发送 · Shift+Enter 换行</span>{busy ? <button className="secondary-button" type="button" onClick={() => void cancelTask()}>停止</button> : <button className="primary-button" type="button" disabled={!sessionId || !currentProfile?.credentialAvailable && !isLocalProvider(currentProfile?.baseUrl) || !prompt.trim()} onClick={() => void sendPrompt()}>发送任务 ↑</button>}</div>
+              <div className="composer-actions"><span>Enter 发送 · Shift+Enter 换行</span>{busy ? <button className="secondary-button" type="button" disabled={!activeTaskId} onClick={() => void cancelTask()}>{activeTaskId ? "停止" : "启动中…"}</button> : <button className="primary-button" type="button" disabled={!sessionId || !currentProfile?.credentialAvailable && !isLocalProvider(currentProfile?.baseUrl) || !prompt.trim()} onClick={() => void sendPrompt()}>发送任务 ↑</button>}</div>
             </div>
             {!currentProfile && <div className="composer-warning">请配置 Provider 档案和凭据。模型能力会在实际请求中验证。</div>}
           </div>

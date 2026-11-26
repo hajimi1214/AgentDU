@@ -8,6 +8,7 @@ import logging
 import os
 import queue
 import re
+import subprocess
 import sys
 import threading
 import uuid
@@ -350,7 +351,7 @@ class RuntimeHost:
             return {"workspaces": self._recent_workspaces()}
         if method == "workspace.inspect":
             workspace = self._require_workspace()
-            return self._inspect_workspace(workspace)
+            return await asyncio.to_thread(self._inspect_workspace, workspace)
         if method == "workspace.files":
             workspace = self._require_workspace()
             return self._workspace_files(workspace, params)
@@ -466,7 +467,7 @@ class RuntimeHost:
             active = self._start_task(
                 source="controlled-test",
                 workspace=task_workspace,
-                model=ControlledStreamingModel(),
+                model=ControlledStreamingModel(delay_seconds=1.5),
                 permission_policy=ReadOnlyPolicy(),
                 prompt="Run the deterministic AgentDU desktop IPC streaming smoke test.",
             )
@@ -623,9 +624,11 @@ class RuntimeHost:
     def _inspect_workspace(self, workspace: Path) -> dict[str, Any]:
         files = self._workspace_files(workspace, {"limit": 300})["files"]
         try:
-            git_status = _git_command(workspace, "status", "--short", "--branch")
+            git_status = _git_command(
+                workspace, "status", "--short", "--branch", timeout_seconds=5
+            )
             git_error = None
-        except (OSError, RuntimeError, ValueError) as error:
+        except (OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as error:
             git_status = ""
             git_error = str(error)
         return {"path": str(workspace), "name": workspace.name, "files": files, "gitStatus": git_status, "gitError": git_error}

@@ -228,6 +228,18 @@ body { min-width: 820px; min-height: 620px; }
 .welcome-state { padding: 35px; }
 .welcome-state h1 { color: #e8e7ef; font-size: 22px; }
 .welcome-mark { display: grid; width: 48px; height: 48px; place-items: center; border: 1px solid #4a4268; border-radius: 14px; color: #e4deff; background: #302b43; font-size: 23px; font-weight: 700; }
+.welcome-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 3px; }
+.runtime-check-panel { display: grid; width: min(620px, 100%); gap: 9px; margin-top: 12px; border: 1px solid #30303c; border-radius: 9px; padding: 13px; background: #15161d; text-align: left; }
+.runtime-check-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.runtime-check-heading strong { color: #d8d6e3; font-size: 10px; }
+.runtime-check-heading span { color: #a99af7; font-size: 9px; }
+.runtime-check-panel > p { color: #858794; font-size: 9px; line-height: 1.6; }
+.runtime-check-output { max-height: 180px; overflow: auto; border: 1px solid #292a34; border-radius: 6px; margin: 0; padding: 9px; color: #d5d5de; background: #111218; font: 9px/1.6 "IBM Plex Mono", monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.runtime-check-output.empty { color: #757783; }
+.runtime-check-events { display: grid; gap: 4px; max-height: 130px; overflow: auto; }
+.runtime-check-event { display: grid; grid-template-columns: 95px minmax(0, 1fr); gap: 8px; border-bottom: 1px solid #252630; padding: 4px 1px; font-size: 8px; }
+.runtime-check-event span:first-child { color: #aaa0f5; }
+.runtime-check-event span:last-child { color: #8a8c98; overflow-wrap: anywhere; }
 .chat-message { display: flex; gap: 10px; margin: 0 auto 17px; width: 100%; max-width: 790px; }
 .message-avatar { display: grid; width: 25px; height: 25px; flex: 0 0 25px; place-items: center; border: 1px solid #3b394c; border-radius: 8px; color: #c6bdff; background: #272435; font-size: 9px; }
 .chat-message.user .message-avatar { border-color: #365043; color: #b1d9c2; background: #202d26; }

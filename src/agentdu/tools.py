@@ -398,7 +398,11 @@ def _atomic_write(path: Path, content: str) -> None:
         raise
 
 
-def _git_command(workspace: Path, *arguments: str) -> str:
+def _git_command(
+    workspace: Path,
+    *arguments: str,
+    timeout_seconds: float = 20,
+) -> str:
     executable = os.environ.get("AGENTDU_GIT_EXECUTABLE") or shutil.which("git")
     if executable is None:
         bundled_git = next(
@@ -419,7 +423,7 @@ def _git_command(workspace: Path, *arguments: str) -> str:
         text=True,
         encoding="utf-8",
         errors="replace",
-        timeout=20,
+        timeout=timeout_seconds,
         check=False,
     )
     output = (result.stdout + result.stderr).strip()

@@ -6,7 +6,7 @@
 
 **D2 尚未通过独立验收。** 本地工作区已实现单模型工作台主要路径，自动化与 Windows AppContainer 集成测试通过。修复了真实冷启动时的 Runtime 就绪竞态，并生成、安装和启动了 D2 Windows 包。针对当前配置增加了 OpenAI-compatible Responses API 支持，覆盖文本输入、流式事件、函数调用和函数结果续传，同时保留 Chat Completions 默认行为。真实 Provider 任务仍未完成。新版界面已目视确认异常恢复提示和 Runtime 在线状态，但没有保存为可交付的截图文件，也未复核 Provider 设置表单。未将受控测试任务或模拟模型调用作为真实 Provider 证据。
 
-Git 基线为 `837efebb80f14a1f10590f9f577fddf6418fd28a`。本次提交保存截至 2026-11-26 的 D2 实现进度。D2 仍未通过独立验收。
+本轮进度基于 `8363f82146f95c67ed8f4edb0c9d60b46b2594c6`，并记录了 2026-11-26 的工作树改动。D2 仍未通过独立验收。
 
 ## 功能实现
 
@@ -30,6 +30,14 @@ Git 基线为 `837efebb80f14a1f10590f9f577fddf6418fd28a`。本次提交保存截
 - 已将 NSIS 包安装到 `desktop/release/d2-final/installed app with spaces`。从该路径的 embedded Python 启动 Host 时将 `PATH` 限制为 `%WINDIR%\System32`，Host 仍成功初始化和关闭，退出码为 0；Runtime 报告 Python 3.14.10、协议版本 1，并正确解析 `wire_api = "responses"`。Provider 凭据状态为缺失，验证过程未执行外部模型请求。
 - 已从含空格的安装路径启动新版 `AgentDU.exe`，进程树确认 Electron Main 与 bundled Python Runtime 正在运行。通过同一安装目录下的 Python Host 子进程启动受控任务并发送取消请求，收到 `task.cancelled`，未收到 `task.completed`，`host.shutdown` 返回 `stopped`，退出码为 0。此验证覆盖打包 Runtime 的取消语义，不代表 UI 按钮操作或真实 Provider 任务验收。
 - 第一次包运行发现 Renderer 在 Runtime 仍为 `starting` 时调用 `listWorkspaces`，产生“Python Runtime 当前不可用”提示。现已调整为先订阅状态，仅在 Runtime `ready` 后加载最近项目，并使用幂等标记避免重复加载。2026-11-25 从安装版完成异常退出恢复验证，窗口显示恢复提示和 Runtime 在线状态，工作区为空。
+
+## 2026-11-26 本轮进度
+
+- Vite 开发态 CSP 允许内联样式及本机动态 HMR 端口，解决开发版样式未加载。生产构建继续采用严格 CSP。
+- 在 Electron 开发版中观察到本地受控 Runtime 自检的流式文本及事件。此路径不调用外部 Provider，不能作为真实模型任务证据。
+- Renderer 任务状态 reducer 覆盖任务接受、启动响应迟到、无关终态事件和 Runtime 丢失。取消请求失败时界面保留运行状态，允许重试。
+- Host 的 `workspace.inspect` 已改为在线程池执行，并将 Git 状态检查超时设为 5 秒，增加超时回归测试。重启开发版后恢复最近项目仍出现 `desktop.inspectWorkspace` 超时，根因尚未解决。
+- 本轮验证结果为 Python 90 项测试通过、Desktop 17 项测试通过、TypeScript 检查和生产构建通过。并行验证时一次出现本地 HTTP 流测试连接重置，单项及 Python 全量串行复跑通过。
 
 ## 仍未验证的 D2 验收项
 

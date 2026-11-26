@@ -254,6 +254,26 @@ class DesktopHostTests(unittest.TestCase):
         self.assertEqual(permission_events[0][1]["command"], f"echo blocked > {marker}")
         self.assertFalse(permission_events[0][1]["networkRequired"])
 
+    def test_workspace_inspection_keeps_files_when_git_status_times_out(self) -> None:
+        from unittest.mock import patch
+
+        from agentdu.desktop_host import RuntimeHost
+
+        workspace = self.root / "slow git workspace"
+        workspace.mkdir()
+        (workspace / "main.py").write_text("print('ready')", encoding="utf-8")
+        inspector = RuntimeHost(self.root / "inspector-runtime")
+
+        with patch(
+            "agentdu.desktop_host._git_command",
+            side_effect=subprocess.TimeoutExpired(["git", "status"], timeout=5),
+        ):
+            result = inspector._inspect_workspace(workspace)
+
+        self.assertEqual([item["path"] for item in result["files"]], ["main.py"])
+        self.assertEqual(result["gitStatus"], "")
+        self.assertIn("timed out", result["gitError"] or "")
+
     def test_runtime_executes_controlled_stream_and_cancels_the_real_agent_task(self) -> None:
         started = self.host.request("test.start")
         task_id = started["result"]["taskId"]
