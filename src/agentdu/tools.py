@@ -419,6 +419,7 @@ def _git_command(
         raise FileNotFoundError("Git was not found on PATH")
     result = subprocess.run(
         [executable, "-C", str(workspace), *arguments],
+        stdin=subprocess.DEVNULL,
         capture_output=True,
         text=True,
         encoding="utf-8",

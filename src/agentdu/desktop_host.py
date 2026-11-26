@@ -623,9 +623,28 @@ class RuntimeHost:
 
     def _inspect_workspace(self, workspace: Path) -> dict[str, Any]:
         files = self._workspace_files(workspace, {"limit": 300})["files"]
+        has_git_metadata = any(
+            (parent / ".git").exists() for parent in (workspace, *workspace.parents)
+        )
+        if not has_git_metadata:
+            return {
+                "path": str(workspace),
+                "name": workspace.name,
+                "files": files,
+                "gitStatus": "",
+                "gitError": "当前工作区不在 Git 仓库中。",
+            }
+
         try:
             git_status = _git_command(
-                workspace, "status", "--short", "--branch", timeout_seconds=5
+                workspace,
+                "status",
+                "--short",
+                "--branch",
+                "--untracked-files=normal",
+                "--",
+                ".",
+                timeout_seconds=5,
             )
             git_error = None
         except (OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as error:

@@ -254,6 +254,99 @@ class DesktopHostTests(unittest.TestCase):
         self.assertEqual(permission_events[0][1]["command"], f"echo blocked > {marker}")
         self.assertFalse(permission_events[0][1]["networkRequired"])
 
+    def test_workspace_inspection_skips_git_for_non_repository_directory(self) -> None:
+        app_data = Path(os.environ.get("APPDATA") or tempfile.gettempdir())
+        with tempfile.TemporaryDirectory(prefix="agentdu-plain-workspace-", dir=app_data) as directory:
+            workspace = Path(directory)
+            (workspace / "main.py").write_text("print('ready')", encoding="utf-8")
+            self.host.request("workspace.open", {"path": str(workspace)})
+
+            request_id = self.host.send("workspace.inspect", {})
+            response = self.host.wait_for(
+                lambda item: item.get("type") == "response" and item.get("requestId") == request_id,
+                timeout=4,
+            )
+
+        self.assertNotIn("error", response)
+        result = response["result"]
+        self.assertEqual([item["path"] for item in result["files"]], ["main.py"])
+        self.assertEqual(result["gitStatus"], "")
+        self.assertEqual(result["gitError"], "当前工作区不在 Git 仓库中。")
+
+    def test_workspace_inspection_scopes_git_status_to_selected_directory(self) -> None:
+        import shutil
+
+        git_executable = shutil.which("git")
+        if git_executable is None:
+            self.skipTest("Git is unavailable")
+
+        app_data = Path(os.environ.get("APPDATA") or tempfile.gettempdir())
+        with tempfile.TemporaryDirectory(prefix="agentdu-git-workspace-", dir=app_data) as directory:
+            repository = Path(directory)
+            subprocess.run(
+                [git_executable, "init", "--quiet", str(repository)],
+                capture_output=True,
+                timeout=10,
+                check=True,
+            )
+            (repository / "outside-workspace.txt").write_text("outside", encoding="utf-8")
+            workspace = repository / "selected"
+            workspace.mkdir()
+            main_file = workspace / "main.py"
+            main_file.write_text("print('ready')", encoding="utf-8")
+            git_identity = (("user.name", "AgentDU Test"), ("user.email", "agentdu-test@example.invalid"))
+            for key, value in git_identity:
+                subprocess.run(
+                    [git_executable, "-C", str(repository), "config", key, value],
+                    capture_output=True,
+                    timeout=10,
+                    check=True,
+                )
+            subprocess.run(
+                [
+                    git_executable,
+                    "-C",
+                    str(repository),
+                    "add",
+                    "outside-workspace.txt",
+                    "selected/main.py",
+                ],
+                capture_output=True,
+                timeout=10,
+                check=True,
+            )
+            subprocess.run(
+                [
+                    git_executable,
+                    "-C",
+                    str(repository),
+                    "commit",
+                    "--quiet",
+                    "-m",
+                    "workspace scope baseline",
+                ],
+                capture_output=True,
+                timeout=10,
+                check=True,
+            )
+            (repository / "outside-workspace.txt").write_text("updated outside", encoding="utf-8")
+            main_file.write_text("print('updated')", encoding="utf-8")
+            (workspace / "new.py").write_text("print('new')", encoding="utf-8")
+            self.host.request("workspace.open", {"path": str(workspace)})
+
+            request_id = self.host.send("workspace.inspect", {})
+            response = self.host.wait_for(
+                lambda item: item.get("type") == "response" and item.get("requestId") == request_id,
+                timeout=8,
+            )
+
+        self.assertNotIn("error", response)
+        result = response["result"]
+        self.assertRegex(result["gitStatus"], r"(?m)^ M main\.py$")
+        self.assertRegex(result["gitStatus"], r"(?m)^\?\? new\.py$")
+        self.assertNotIn("outside-workspace.txt", result["gitStatus"])
+        self.assertIsNone(result["gitError"])
+
     def test_workspace_inspection_keeps_files_when_git_status_times_out(self) -> None:
         from unittest.mock import patch
 
@@ -261,6 +354,7 @@ class DesktopHostTests(unittest.TestCase):
 
         workspace = self.root / "slow git workspace"
         workspace.mkdir()
+        (workspace / ".git").mkdir()
         (workspace / "main.py").write_text("print('ready')", encoding="utf-8")
         inspector = RuntimeHost(self.root / "inspector-runtime")
 

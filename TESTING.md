@@ -1,13 +1,13 @@
 # AgentDU 测试与验证记录
 
-最后复测：2026-11-26，工作目录 `C:\AgentDU`，分支 `main`。测试代码基于 `8363f82146f95c67ed8f4edb0c9d60b46b2594c6` 并包含本次进度改动。
+最后复测：2026-11-26，工作目录 `C:\AgentDU`，分支 `main`。本轮测试覆盖基于 `c61933a667b6e044cc9cf2e50a732288824eea72` 的实现及本次进度改动。
 
 ## 本次复测
 
 | 验证 | 命令 | 结果 |
 | --- | --- | --- |
 | Python 编译 | `python -m compileall -q src tests` | PASS |
-| Python 自动化测试 | `python -m unittest discover -s tests` | PASS，90 项测试。并行运行时一次出现本地 HTTP 流测试连接重置，单项复跑及 Python 全量串行复跑均通过 |
+| Python 自动化测试 | `python -m unittest discover -s tests` | PASS，92 项测试。并行运行时一次出现本地 HTTP 流测试连接重置，单项复跑及 Python 全量串行复跑均通过 |
 | Desktop 自动化测试 | `cd desktop; pnpm test` | PASS，4 个测试文件、17 项测试 |
 | Desktop TypeScript 检查与生产构建 | `cd desktop; pnpm run build` | PASS，主进程/Renderer 类型检查、Vite Renderer 构建及 Electron 构建通过 |
 | Git 差异空白检查 | `git diff --check` | PASS |
@@ -25,7 +25,7 @@ Python 测试包含本地 HTTP Provider 夹具、Runtime、会话、工具、CLI
 - 在 AgentDU 应用中安全配置真实 Provider，并完成连通性验证。
 - 用真实 Provider 在真实项目中完成跨文件读取、修改、测试和修复。
 - 从 Renderer 发起受控任务并取消，核对 Host 事件、任务终态和退出状态。
-- 修复并复验最近项目恢复时仍出现的 `desktop.inspectWorkspace` 超时。
+- 在 Electron 中复验最近项目恢复是否已随 Host Git 子进程修复而恢复正常。
 - 从 Windows 安装版恢复已有会话，并验证任务状态与工作区内容。
 - 完成桌面 Runtime 接入多 Agent 后的并发、恢复、故障注入和真实多模型验证。
 

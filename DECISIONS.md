@@ -57,3 +57,11 @@ AppContainer 用于限制桌面终端命令的操作系统访问范围。Git Wor
 Runtime 会话以追加式 JSONL 事件保存并验证事件序号，测试覆盖不完整尾记录修复和跨进程锁。桌面可在此基础上继续完善会话列表和恢复交互。
 
 证据见 `src/agentdu/sessions.py` 和 `tests/test_runtime.py`。
+
+## ADR-008 Host 启动的 Git 状态命令使用非交互标准输入
+
+**状态：已采用**
+
+Desktop Host 与 Electron 通过 stdin/stdout JSONL 通信。Host 启动的本地 Git 状态命令将标准输入连接到 `DEVNULL`，避免子进程继承仍保持打开的协议输入管道。工作区检查先确认 Git 元数据，再将状态查询限定于当前选定目录。
+
+证据见 `src/agentdu/tools.py` 的 `_git_command`、`src/agentdu/desktop_host.py` 的 `_inspect_workspace` 和 `tests/test_desktop_host.py` 中的工作区检查集成测试。

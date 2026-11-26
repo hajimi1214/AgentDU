@@ -1,7 +1,7 @@
 # AgentDU 长期研发路线
 
 最后更新：2026-11-26
-仓库基线：`main`，`8363f82146f95c67ed8f4edb0c9d60b46b2594c6`
+本轮实施起点：`main`，`c61933a667b6e044cc9cf2e50a732288824eea72`
 总目标：建设可日常使用、可靠、可验证的多模型协同 AI Agent 桌面工作站。项目保持进行中，阶段演示、构建成功或单次测试通过均不代表最终验收完成。
 
 ## 状态定义
@@ -13,7 +13,7 @@
 | 阶段 | 目标 | 当前状态 | 进入下一步前的主要条件 |
 | --- | --- | --- | --- |
 | G0 | 现有仓库审计与基线 | CONDITIONAL PASS | 已核对 Git 基线、主要 Runtime 与桌面边界，并复跑本地测试。后续审计发现仍需持续记入状态和决策文档。 |
-| G1 | 桌面基础能力稳定化 | NOT VERIFIED | 完成 D1/D2 未验收项，包括真实 Provider 编程任务、UI 取消端到端、会话恢复及 Windows 安装版完整工作流。 |
+| G1 | 桌面基础能力稳定化 | NOT VERIFIED | 完成 D1/D2 未验收项，包括真实 Provider 编程任务、UI 取消端到端、Electron 最近项目恢复复验、会话恢复及 Windows 安装版完整工作流。 |
 | G2 | 多 Agent Runtime 集成 | NOT VERIFIED | 将现有 `AutonomousCoordinator` 接入桌面 Host，定义统一任务生命周期、事件和并发约束。 |
 | G3 | 多 Agent 并行执行 | NOT VERIFIED | 验证独立工作区、依赖调度、结果验证、冲突处理和集成恢复。 |
 | G4 | 桌面多 Agent 工作台 | NOT VERIFIED | 将 Agent、任务、依赖、事件、审批和结果审查接入桌面交互。 |

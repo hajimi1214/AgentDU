@@ -1,12 +1,12 @@
 # AgentDU Desktop D2 实现与验收记录
 
-日期：2026-11-25（Asia/Shanghai）
+日期：2026-11-26（Asia/Shanghai）
 
 ## 状态
 
 **D2 尚未通过独立验收。** 本地工作区已实现单模型工作台主要路径，自动化与 Windows AppContainer 集成测试通过。修复了真实冷启动时的 Runtime 就绪竞态，并生成、安装和启动了 D2 Windows 包。针对当前配置增加了 OpenAI-compatible Responses API 支持，覆盖文本输入、流式事件、函数调用和函数结果续传，同时保留 Chat Completions 默认行为。真实 Provider 任务仍未完成。新版界面已目视确认异常恢复提示和 Runtime 在线状态，但没有保存为可交付的截图文件，也未复核 Provider 设置表单。未将受控测试任务或模拟模型调用作为真实 Provider 证据。
 
-本轮进度基于 `8363f82146f95c67ed8f4edb0c9d60b46b2594c6`，并记录了 2026-11-26 的工作树改动。D2 仍未通过独立验收。
+本轮修复从 `c61933a667b6e044cc9cf2e50a732288824eea72` 开始。D2 仍未通过独立验收。
 
 ## 功能实现
 
@@ -20,8 +20,8 @@
 
 ## 自动化和隔离测试
 
-- `cd desktop; pnpm run build` 和 `pnpm test`：通过，包含 Renderer/Electron TypeScript 检查、Vite 生产构建及 13 项桌面测试。新增启动竞态回归测试覆盖 `starting → ready`、初始已就绪、Runtime 错误和卸载后忽略迟到响应。
-- `python -m unittest discover -s tests -v`：通过，89 项测试。新增 Responses API 非流式工具往返、流式文本增量/函数调用，以及 content filter 不完整响应不得报告成功的回归测试。
+- `cd desktop; pnpm run build` 和 `pnpm test`：通过，包含 Renderer/Electron TypeScript 检查、Vite 生产构建及最新 17 项桌面测试。新增启动竞态回归测试覆盖 `starting → ready`、初始已就绪、Runtime 错误和卸载后忽略迟到响应。
+- `python -m unittest discover -s tests -v`：通过，最新完整复测为 92 项测试。新增 Responses API 非流式工具往返、流式文本增量/函数调用，以及 content filter 不完整响应不得报告成功的回归测试。
 - `cd desktop; pnpm run verify:appcontainer`：通过。探针报告 AppContainer token、项目目录拒绝读写、loopback 网络阻断、子进程仍处于 AppContainer 且项目外写入被拒绝。
 - Windows 终端 Host 集成测试真实启动经审批的 AppContainer 命令，并检查退出码、输出及会话记录。它验证隔离和协议路径，不作为真实模型任务证据。
 - `cd desktop; pnpm run package:win`：通过。脚本使用本机已安装的 Electron 分发目录，避免依赖损坏的 Electron zip 下载，并将产物输出到 `desktop/release/d2-final`。
@@ -36,14 +36,14 @@
 - Vite 开发态 CSP 允许内联样式及本机动态 HMR 端口，解决开发版样式未加载。生产构建继续采用严格 CSP。
 - 在 Electron 开发版中观察到本地受控 Runtime 自检的流式文本及事件。此路径不调用外部 Provider，不能作为真实模型任务证据。
 - Renderer 任务状态 reducer 覆盖任务接受、启动响应迟到、无关终态事件和 Runtime 丢失。取消请求失败时界面保留运行状态，允许重试。
-- Host 的 `workspace.inspect` 已改为在线程池执行，并将 Git 状态检查超时设为 5 秒，增加超时回归测试。重启开发版后恢复最近项目仍出现 `desktop.inspectWorkspace` 超时，根因尚未解决。
-- 本轮验证结果为 Python 90 项测试通过、Desktop 17 项测试通过、TypeScript 检查和生产构建通过。并行验证时一次出现本地 HTTP 流测试连接重置，单项及 Python 全量串行复跑通过。
+- Host 的 `workspace.inspect` 在线程池执行。对照复测确认嵌套仓库集成测试在 Git 子进程继承 Host 输入管道时超时，使用 `stdin=DEVNULL` 后通过。非 Git 目录跳过 Git 调用，Git 仓库状态限定到当前选中目录。集成测试确认选中目录中的已跟踪与未跟踪变更可返回，工作区外文件不进入状态结果，Git 超时时文件列表仍可返回。Electron 中的最近项目恢复尚未在本轮复验。
+- 本轮验证结果为 Python 92 项测试通过、Desktop 17 项测试通过、TypeScript 检查和生产构建通过。Host 工作区检查专项集成测试通过。并行验证时一次出现本地 HTTP 流测试连接重置，单项及 Python 全量串行复跑通过。
 
 ## 仍未验证的 D2 验收项
 
 - AgentDU 当前 Windows 安全 Provider 档案为空。用户提供的 Codex 配置使用 `wire_api = "responses"`，现已实现对应适配；Codex 与 AgentDU 的凭据存储互不共享。真实 Provider 连通性、跨文件模型修改、真实测试修复、真实 Git Diff 审查和界面恢复模型会话均未执行，状态为 **BLOCKED**。
 - 新构建 Electron 主进程和 Runtime Host 已联合启动。已目视确认异常恢复横幅、Runtime 在线和空工作区。未保存截图文件，Provider 设置表单的 Responses 选项仍未目视复核。
-- 已验证新版 NSIS 安装、带空格安装路径、embedded Python、Host 初始化/关闭及受控 Runtime 取消。此前根目录 `release/AgentDU-Setup-0.1.0-x64.exe` 是 2026-11-23 的 D1 构建，本轮未覆盖。
+- 已验证新版 NSIS 安装、带空格安装路径、embedded Python、Host 初始化/关闭及受控 Runtime 取消。此前根目录 `release/AgentDU-Setup-0.1.0-x64.exe` 是 2026-11-23 的 D1 构建，本轮未覆盖。最近源码的 Electron 工作区恢复流程未用新构建重新验收。
 - 已验证安装版正常关闭、Runtime 有序退出、异常退出恢复提示，以及 Host 层任务取消。尚未验证 Renderer UI 取消按钮端到端、Runtime 重启按钮、已有模型会话恢复和真实 Provider 任务。
 
 ## 当前结论
