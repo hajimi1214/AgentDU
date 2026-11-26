@@ -36,8 +36,17 @@
 - Vite 开发态 CSP 允许内联样式及本机动态 HMR 端口，解决开发版样式未加载。生产构建继续采用严格 CSP。
 - 在 Electron 开发版中观察到本地受控 Runtime 自检的流式文本及事件。此路径不调用外部 Provider，不能作为真实模型任务证据。
 - Renderer 任务状态 reducer 覆盖任务接受、启动响应迟到、无关终态事件和 Runtime 丢失。取消请求失败时界面保留运行状态，允许重试。
-- Host 的 `workspace.inspect` 在线程池执行。对照复测确认嵌套仓库集成测试在 Git 子进程继承 Host 输入管道时超时，使用 `stdin=DEVNULL` 后通过。非 Git 目录跳过 Git 调用，Git 仓库状态限定到当前选中目录。集成测试确认选中目录中的已跟踪与未跟踪变更可返回，工作区外文件不进入状态结果，Git 超时时文件列表仍可返回。Electron 中的最近项目恢复尚未在本轮复验。
+- Host 的 `workspace.inspect` 在线程池执行。对照复测确认嵌套仓库集成测试在 Git 子进程继承 Host 输入管道时超时，使用 `stdin=DEVNULL` 后通过。非 Git 目录跳过 Git 调用，Git 仓库状态限定到当前选中目录。集成测试确认选中目录中的已跟踪与未跟踪变更可返回，工作区外文件不进入状态结果，Git 超时时文件列表仍可返回。随后在最新安装版中已恢复 `C:\AgentDU` 并看到 Git 状态，安装版完整会话恢复仍待验证。
 - 本轮验证结果为 Python 92 项测试通过、Desktop 17 项测试通过、TypeScript 检查和生产构建通过。Host 工作区检查专项集成测试通过。并行验证时一次出现本地 HTTP 流测试连接重置，单项及 Python 全量串行复跑通过。
+
+## 2026-11-26 进度提交前复测
+
+- 为增加从 Renderer 点击取消的操作窗口，将受控桌面自检任务的事件间隔从 1.5 秒调整为 3 秒。此设置仅用于 `controlled-test` 自检路径。
+- `python -m unittest discover -s tests -p test_desktop_host.py -v`：PASS，19 项测试，包含 Host 层真实任务取消测试。
+- 最新源码已构建并安装到 `desktop/release/d2-cancel-verify-2026-11-26/installed app with spaces`。从该安装版启动后，已恢复 `C:\AgentDU` 项目并显示 Git 分支状态 `main...origin/main [ahead 1]`。
+- 新安装版的 Renderer 取消按钮尚未重新完成端到端验证。此前一次按钮操作发生在受控任务结束后，不能作为取消成功证据。D2 继续保持 **NOT VERIFIED**。
+- 测试结束后已正常关闭安装版应用，并恢复原有最近项目记录。恢复文件与测试前备份的 SHA-256 一致。
+
 
 ## 仍未验证的 D2 验收项
 

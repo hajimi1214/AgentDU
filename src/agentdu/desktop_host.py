@@ -467,7 +467,7 @@ class RuntimeHost:
             active = self._start_task(
                 source="controlled-test",
                 workspace=task_workspace,
-                model=ControlledStreamingModel(delay_seconds=1.5),
+                model=ControlledStreamingModel(delay_seconds=3.0),
                 permission_policy=ReadOnlyPolicy(),
                 prompt="Run the deterministic AgentDU desktop IPC streaming smoke test.",
             )
