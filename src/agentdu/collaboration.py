@@ -16,6 +16,7 @@ from .permissions import PermissionPolicy, ReadOnlyPolicy
 from .provider import OpenAICompatibleModel
 from .sessions import SessionProcessLock, SessionStore
 from .settings import ModelSettings, resolve_profile_options
+from .tools import ToolResult
 
 
 class CollaborationError(RuntimeError):
@@ -49,6 +50,8 @@ class HandoffCoordinator:
         context_tokens: int = 24_000,
         max_steps: int = 40,
         event_handler: Callable[[AgentEvent], None] | None = None,
+        command_runner: Callable[..., ToolResult] | None = None,
+        state_handler: Callable[[HandoffState], None] | None = None,
     ) -> None:
         self.workspaces = GitWorkspaces(workspace)
         self.root = self.workspaces.root
@@ -57,6 +60,8 @@ class HandoffCoordinator:
         self.context_tokens = context_tokens
         self.max_steps = max_steps
         self.event_handler = event_handler
+        self.command_runner = command_runner
+        self.state_handler = state_handler
         self.coordinator_sessions = SessionStore(self.root / ".agentdu")
         self.ledger = HandoffLedger(self.root / ".agentdu" / "handoffs")
 
@@ -67,6 +72,9 @@ class HandoffCoordinator:
         receiver_profile: str,
         acceptance_checks: list[str],
         session_id: str | None = None,
+        *,
+        require_confirmation: bool = False,
+        retry_of: str | None = None,
     ) -> HandoffOutcome:
         if not prompt.strip():
             raise ValueError("prompt must not be empty")
@@ -90,6 +98,8 @@ class HandoffCoordinator:
             session_lock = await self._acquire_session_lock(coordinator_session_id)
             await self._reconcile_verified_handoffs(coordinator_session_id)
             active = self.ledger.active_states()
+            if require_confirmation:
+                active = [item for item in active if not item.data.get("require_confirmation") or item.status != "verified"]
             if active:
                 outstanding = ", ".join(f"{item.handoff_id} ({item.status})" for item in active)
                 raise CollaborationError(
@@ -118,6 +128,10 @@ class HandoffCoordinator:
                     "receiver_worktree": str(receiver_worktree),
                     "source_session_id": source_session_id,
                     "receiver_session_id": receiver_session_id,
+                    "require_confirmation": require_confirmation,
+                    "retry_of": retry_of,
+                    "source_model": source_options["model"],
+                    "receiver_model": receiver_options["model"],
                 },
                 handoff_id,
             )
@@ -280,6 +294,24 @@ class HandoffCoordinator:
             if not self.workspaces.is_ancestor(source_commit, result_commit):
                 raise GitWorkspaceError("Receiver result is not based on the accepted source commit")
 
+            result_files = self.workspaces.changed_files(base_commit, result_commit)
+            result_digest = self.workspaces.diff_digest(base_commit, result_commit)
+            if not result_files:
+                raise HandoffValidationError("The final handoff contains no project changes")
+            self.workspaces.verify_snapshot(base_commit, result_commit, result_files, result_digest)
+            final_package = {
+                "result_commit": result_commit,
+                "result_diff_sha256": result_digest,
+                "changed_files": result_files,
+                "receiver_report": receiver_result.content[:8_000],
+                "receiver_session_id": receiver_session_id,
+            }
+            if require_confirmation:
+                state = self.ledger.transition(
+                    handoff_id, state.version, "receiver_running", "validating", receiver_profile, final_package
+                )
+                self._record_coordinator_state(coordinator_session_id, state)
+
             check_evidence = await self._run_acceptance_checks(
                 receiver_runtime,
                 handoff_id,
@@ -292,10 +324,10 @@ class HandoffCoordinator:
                 state = self.ledger.transition(
                     handoff_id,
                     state.version,
-                    "receiver_running",
+                    state.status,
                     "validation_failed",
                     receiver_profile,
-                    {"acceptance_evidence": check_evidence},
+                    {**final_package, "acceptance_evidence": check_evidence},
                 )
                 self._record_coordinator_state(coordinator_session_id, state)
                 raise HandoffValidationError(
@@ -306,10 +338,11 @@ class HandoffCoordinator:
                 state = self.ledger.transition(
                     handoff_id,
                     state.version,
-                    "receiver_running",
+                    state.status,
                     "validation_failed",
                     receiver_profile,
                     {
+                        **final_package,
                         "acceptance_evidence": check_evidence,
                         "validation_failure": "Acceptance checks left project changes outside the verified commit",
                     },
@@ -320,28 +353,23 @@ class HandoffCoordinator:
                     + post_check_changes
                 )
 
-            result_files = self.workspaces.changed_files(base_commit, result_commit)
-            result_digest = self.workspaces.diff_digest(base_commit, result_commit)
             self.workspaces.verify_snapshot(base_commit, result_commit, result_files, result_digest)
-            final_package = {
-                "result_commit": result_commit,
-                "result_diff_sha256": result_digest,
-                "changed_files": result_files,
-                "receiver_report": receiver_result.content[:8_000],
-                "acceptance_evidence": check_evidence,
-                "receiver_session_id": receiver_session_id,
-            }
             state = self.ledger.transition(
                 handoff_id,
                 state.version,
-                "receiver_running",
+                state.status,
                 "verified",
                 receiver_profile,
-                final_package,
+                {**final_package, "acceptance_evidence": check_evidence},
             )
             self._record_coordinator_state(coordinator_session_id, state)
 
             self._require_original_baseline(base_commit, handoff_id, state)
+            if require_confirmation:
+                return HandoffOutcome(
+                    coordinator_session_id, handoff_id, base_commit, source_commit, result_commit,
+                    tuple(result_files), tuple(check_evidence), receiver_result.content,
+                )
             self.workspaces.integrate(base_commit, result_commit)
             state = self.ledger.transition(
                 handoff_id,
@@ -384,12 +412,13 @@ class HandoffCoordinator:
                         "stale",
                         "abandoned",
                         "verified",
+                        "interrupted",
                     }:
                         state = self.ledger.transition(
                             handoff_id,
                             current.version,
                             current.status,
-                            "failed",
+                            "interrupted" if isinstance(error, asyncio.CancelledError) else "failed",
                             "coordinator",
                             {"failure": f"{type(error).__name__}: {error}"[:2_000]},
                         )
@@ -492,6 +521,7 @@ class HandoffCoordinator:
             max_steps=self.max_steps,
             system_prompt=f"{DEFAULT_SYSTEM_PROMPT}\n\n{role_instructions}",
             secret_values=secret_values,
+            command_runner=self.command_runner,
         )
         if self.event_handler is not None:
             runtime.event_bus.subscribe(self.event_handler)
@@ -655,6 +685,8 @@ class HandoffCoordinator:
         for state in self.ledger.active_states():
             if state.status != "verified":
                 continue
+            if state.data.get("require_confirmation"):
+                continue
             data = state.data
             base_commit = data["base_commit"]
             result_commit = data["result_commit"]
@@ -789,6 +821,8 @@ class HandoffCoordinator:
                 "owner": state.owner,
             },
         )
+        if self.state_handler is not None:
+            self.state_handler(state)
 
     @staticmethod
     def _report_accepts(report: str) -> bool:

@@ -26,6 +26,7 @@ class ModelProfile:
     stream_usage: bool = True
     input_cost_per_million: float | None = None
     output_cost_per_million: float | None = None
+    wire_api: str = "chat_completions"
 
 
 @dataclass(frozen=True)
@@ -66,10 +67,15 @@ class ModelSettings:
                     f"Provider '{provider}' is unsupported. Profiles currently use the OpenAI-compatible API."
                 )
             base_url = values.get("base_url", "https://api.openai.com/v1")
+            wire_api = values.get("wire_api", "chat_completions")
             model = values.get("model")
             api_key_env = values.get("api_key_env")
             if not isinstance(base_url, str) or not base_url.strip():
                 raise ConfigurationError(f"Profile '{name}' needs a non-empty base_url")
+            if not isinstance(wire_api, str) or wire_api not in {"chat_completions", "responses"}:
+                raise ConfigurationError(
+                    f"Profile '{name}' wire_api must be 'chat_completions' or 'responses'"
+                )
             if model is not None and not isinstance(model, str):
                 raise ConfigurationError(f"Profile '{name}' model must be a string")
             if api_key_env is not None and not isinstance(api_key_env, str):
@@ -130,6 +136,7 @@ class ModelSettings:
                 stream_usage=stream_usage,
                 input_cost_per_million=(float(input_cost) if input_cost is not None else None),
                 output_cost_per_million=(float(output_cost) if output_cost is not None else None),
+                wire_api=wire_api,
             )
         default_profile = data.get("default_profile")
         if default_profile is not None and default_profile not in profiles:
@@ -204,6 +211,7 @@ def resolve_model_options(
         "stream_usage": profile.stream_usage if profile else True,
         "input_cost_per_million": profile.input_cost_per_million if profile else None,
         "output_cost_per_million": profile.output_cost_per_million if profile else None,
+        "wire_api": profile.wire_api if profile else "chat_completions",
     }
 
 
@@ -227,6 +235,7 @@ def resolve_profile_options(settings: ModelSettings, profile_name: str) -> dict[
         "stream_usage": profile.stream_usage,
         "input_cost_per_million": profile.input_cost_per_million,
         "output_cost_per_million": profile.output_cost_per_million,
+        "wire_api": profile.wire_api,
     }
 
 

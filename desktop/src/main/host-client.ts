@@ -50,6 +50,15 @@ export class RuntimeHostClient extends EventEmitter {
               model: readString((profile as Record<string, unknown>).model) ?? null,
               default: (profile as Record<string, unknown>).default === true,
               credentialAvailable: (profile as Record<string, unknown>).credentialAvailable === true,
+              baseUrl: readString((profile as Record<string, unknown>).baseUrl),
+              streaming: typeof (profile as Record<string, unknown>).streaming === "boolean"
+                ? (profile as Record<string, unknown>).streaming as boolean
+                : undefined,
+              protocol: readString((profile as Record<string, unknown>).protocol),
+              wireApi: (profile as Record<string, unknown>).wireApi === "responses" ? "responses" : "chat_completions",
+              configuredCapabilities: Array.isArray((profile as Record<string, unknown>).configuredCapabilities)
+                ? ((profile as Record<string, unknown>).configuredCapabilities as unknown[]).filter((value): value is string => typeof value === "string")
+                : [],
             }))
           : [],
       });
@@ -64,25 +73,25 @@ export class RuntimeHostClient extends EventEmitter {
     return { ...this.status };
   }
 
-  request(method: string, params: Record<string, unknown>): Promise<RequestResult> {
+  request(method: string, params: Record<string, unknown>, timeoutMs = 10_000): Promise<RequestResult> {
     if (this.state !== "ready") {
       return Promise.reject(new Error("Python Runtime 当前不可用。"));
     }
-    return this.requestInternal(method, params);
+    return this.requestInternal(method, params, timeoutMs);
   }
 
   async shutdown(): Promise<void> {
     if (this.child.exitCode !== null || this.child.killed) return;
     this.closedIntentionally = true;
     try {
-      if (this.state === "ready") await this.requestInternal("host.shutdown", {}, 2_000);
+      if (this.state === "ready") await this.requestInternal("host.shutdown", {}, 190_000);
     } catch {
       // The process is still closed below. Shutdown failures are reflected in the exit status.
     }
     this.child.stdin.end();
     await Promise.race([
       new Promise<void>((resolve) => this.child.once("exit", () => resolve())),
-      new Promise<void>((resolve) => setTimeout(resolve, 2_500)),
+      new Promise<void>((resolve) => setTimeout(resolve, 5_000)),
     ]);
     if (this.child.exitCode === null && !this.child.killed) this.child.kill();
   }

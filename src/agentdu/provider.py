@@ -31,8 +31,12 @@ class OpenAICompatibleModel:
         stream_usage: bool = True,
         input_cost_per_million: float | None = None,
         output_cost_per_million: float | None = None,
+        wire_api: str = "chat_completions",
     ) -> None:
-        self.endpoint = self._endpoint(base_url)
+        if wire_api not in {"chat_completions", "responses"}:
+            raise ValueError("wire_api must be 'chat_completions' or 'responses'")
+        self.wire_api = wire_api
+        self.endpoint = self._endpoint(base_url, wire_api)
         self.model = model
         self.api_key = api_key
         self.timeout = timeout
@@ -45,30 +49,13 @@ class OpenAICompatibleModel:
     async def complete(
         self, messages: Sequence[Message], tools: Sequence[ToolSchema]
     ) -> AssistantMessage:
-        payload: dict[str, Any] = {
-            "model": self.model,
-            "messages": list(messages),
-            "temperature": self.temperature,
-        }
-        if tools:
-            payload["tools"] = list(tools)
-            payload["tool_choice"] = "auto"
+        payload = self._request_payload(messages, tools)
         return await asyncio.to_thread(self._request, payload)
 
     async def stream(
         self, messages: Sequence[Message], tools: Sequence[ToolSchema]
     ) -> AsyncIterator[ModelStreamEvent]:
-        payload: dict[str, Any] = {
-            "model": self.model,
-            "messages": list(messages),
-            "temperature": self.temperature,
-            "stream": True,
-        }
-        if tools:
-            payload["tools"] = list(tools)
-            payload["tool_choice"] = "auto"
-        if self.stream_usage:
-            payload["stream_options"] = {"include_usage": True}
+        payload = self._request_payload(messages, tools, streaming=True)
 
         events: asyncio.Queue[ModelStreamEvent | BaseException | None] = asyncio.Queue()
         loop = asyncio.get_running_loop()
@@ -105,12 +92,48 @@ class OpenAICompatibleModel:
             if not worker.done():
                 await asyncio.shield(worker)
 
+    def _request_payload(
+        self,
+        messages: Sequence[Message],
+        tools: Sequence[ToolSchema],
+        streaming: bool = False,
+    ) -> dict[str, Any]:
+        if self.wire_api == "responses":
+            payload: dict[str, Any] = {
+                "model": self.model,
+                "input": _responses_input(messages),
+            }
+            if streaming:
+                payload["stream"] = True
+            if tools:
+                payload["tools"] = [_responses_tool(tool) for tool in tools]
+                payload["tool_choice"] = "auto"
+            return payload
+
+        payload = {
+            "model": self.model,
+            "messages": list(messages),
+            "temperature": self.temperature,
+        }
+        if streaming:
+            payload["stream"] = True
+        if tools:
+            payload["tools"] = list(tools)
+            payload["tool_choice"] = "auto"
+        if streaming and self.stream_usage:
+            payload["stream_options"] = {"include_usage": True}
+        return payload
+
     def _stream_request(
         self,
         payload: dict[str, Any],
         cancelled: threading.Event,
         response_ref: dict[str, Any],
     ) -> Iterator[ModelStreamEvent]:
+        if self.wire_api == "responses":
+            yield from self._stream_responses_request(payload, cancelled, response_ref)
+            return
+
         request = urllib.request.Request(
             self.endpoint,
             data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -208,6 +231,98 @@ class OpenAICompatibleModel:
             raise ProviderError(f"Model streamed invalid tool calls: {error}") from error
         yield ModelStreamEvent(message=message)
 
+    def _stream_responses_request(
+        self,
+        payload: dict[str, Any],
+        cancelled: threading.Event,
+        response_ref: dict[str, Any],
+    ) -> Iterator[ModelStreamEvent]:
+        request = urllib.request.Request(
+            self.endpoint,
+            data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            headers=self._headers(),
+        )
+        final_message: AssistantMessage | None = None
+        try:
+            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                response_ref["response"] = response
+                if cancelled.is_set():
+                    return
+                data_lines: list[str] = []
+                for line in response:
+                    if cancelled.is_set():
+                        return
+                    if line in {b"\n", b"\r\n"}:
+                        delta, message = self._consume_responses_event(data_lines)
+                        if delta:
+                            yield ModelStreamEvent(content_delta=delta)
+                        if message is not None:
+                            final_message = message
+                        data_lines.clear()
+                        continue
+                    if line.startswith(b"data:"):
+                        data_lines.append(line[5:].decode("utf-8").strip())
+                if data_lines:
+                    delta, message = self._consume_responses_event(data_lines)
+                    if delta:
+                        yield ModelStreamEvent(content_delta=delta)
+                    if message is not None:
+                        final_message = message
+        except urllib.error.HTTPError as error:
+            detail = error.read(4096).decode("utf-8", errors="replace")
+            raise ProviderError(
+                f"Model API returned HTTP {error.code}: {detail}",
+                retryable=error.code == 429 or error.code >= 500,
+            ) from error
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            if cancelled.is_set():
+                return
+            raise ProviderError(f"Model stream failed: {error}", retryable=True) from error
+
+        if cancelled.is_set():
+            return
+        if final_message is None:
+            raise ProviderError("Responses stream ended without a completed response", retryable=True)
+        yield ModelStreamEvent(message=final_message)
+
+    def _consume_responses_event(
+        self,
+        data_lines: list[str],
+    ) -> tuple[str | None, AssistantMessage | None]:
+        event_data = "\n".join(data_lines)
+        if not event_data or event_data.strip() == "[DONE]":
+            return None, None
+        try:
+            event = json.loads(event_data)
+        except json.JSONDecodeError as error:
+            raise ProviderError(f"Responses stream sent invalid SSE JSON: {error}") from error
+        if not isinstance(event, dict):
+            raise ProviderError("Responses stream sent a non-object event")
+        event_type = event.get("type")
+        if event_type == "response.output_text.delta":
+            delta = event.get("delta")
+            if isinstance(delta, str) and delta:
+                content_delta = delta
+            else:
+                content_delta = None
+        else:
+            content_delta = None
+        if event_type in {"error", "response.failed"}:
+            error = event.get("error")
+            if not isinstance(error, dict):
+                response = event.get("response")
+                error = response.get("error") if isinstance(response, dict) else None
+            message = error.get("message") if isinstance(error, dict) else None
+            raise ProviderError(
+                message if isinstance(message, str) else "Responses API reported a failed response"
+            )
+        if event_type in {"response.completed", "response.incomplete"}:
+            response = event.get("response")
+            if not isinstance(response, dict):
+                raise ProviderError("Responses stream completed without a response object")
+            return content_delta, _parse_responses_message(response)
+        return content_delta, None
+
     def _request(self, payload: dict[str, Any]) -> AssistantMessage:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         headers = {"Content-Type": "application/json"}
@@ -225,6 +340,12 @@ class OpenAICompatibleModel:
             ) from error
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
             raise ProviderError(f"Model request failed: {error}", retryable=True) from error
+
+        if self.wire_api == "responses":
+            try:
+                return _parse_responses_message(result)
+            except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError) as error:
+                raise ProviderError(f"Responses API returned an invalid response: {error}") from error
 
         try:
             choice = result["choices"][0]
@@ -259,14 +380,182 @@ class OpenAICompatibleModel:
             headers["Authorization"] = f"Bearer {self.api_key}"
         return headers
 
+    async def test_connection(self) -> dict[str, Any]:
+        def request_models() -> dict[str, Any]:
+            suffix = "/responses" if self.wire_api == "responses" else "/chat/completions"
+            models_endpoint = self.endpoint.removesuffix(suffix) + "/models"
+            request = urllib.request.Request(models_endpoint, headers=self._headers(), method="GET")
+            try:
+                with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                    return {"reachable": 200 <= response.status < 300, "statusCode": response.status}
+            except urllib.error.HTTPError as error:
+                return {"reachable": False, "statusCode": error.code}
+            except (urllib.error.URLError, TimeoutError, OSError):
+                return {"reachable": False, "statusCode": None}
+
+        return await asyncio.to_thread(request_models)
+
     @staticmethod
-    def _endpoint(base_url: str) -> str:
+    def _endpoint(base_url: str, wire_api: str = "chat_completions") -> str:
         normalized = base_url.rstrip("/")
-        if normalized.endswith("/chat/completions"):
+        suffix = "/responses" if wire_api == "responses" else "/chat/completions"
+        if normalized.endswith(suffix):
             return normalized
         if normalized.endswith("/v1"):
-            return f"{normalized}/chat/completions"
-        return f"{normalized}/v1/chat/completions"
+            return f"{normalized}{suffix}"
+        return f"{normalized}/v1{suffix}"
+
+
+def _responses_input(messages: Sequence[Message]) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    for message in messages:
+        role = message.get("role")
+        content = message.get("content")
+        if role == "tool":
+            call_id = message.get("tool_call_id")
+            if not isinstance(call_id, str) or not call_id:
+                raise ValueError("tool output is missing its tool_call_id")
+            items.append(
+                {
+                    "type": "function_call_output",
+                    "call_id": call_id,
+                    "output": content if isinstance(content, str) else json.dumps(content),
+                }
+            )
+            continue
+        if role not in {"system", "developer", "user", "assistant"}:
+            raise ValueError(f"Responses API does not support message role {role!r}")
+        if content is not None:
+            if not isinstance(content, str):
+                raise ValueError("Responses API input currently requires text messages")
+            items.append({"role": role, "content": content})
+        if role == "assistant":
+            tool_calls = message.get("tool_calls", [])
+            if not isinstance(tool_calls, list):
+                raise ValueError("assistant tool_calls must be an array")
+            for tool_call in tool_calls:
+                if not isinstance(tool_call, dict):
+                    raise ValueError("assistant tool call must be an object")
+                function = tool_call.get("function")
+                if not isinstance(function, dict):
+                    raise ValueError("assistant tool call is missing its function")
+                call_id = tool_call.get("id")
+                name = function.get("name")
+                arguments = function.get("arguments", "{}")
+                if not isinstance(call_id, str) or not call_id or not isinstance(name, str) or not name:
+                    raise ValueError("assistant tool call needs a call id and function name")
+                if not isinstance(arguments, str):
+                    arguments = json.dumps(arguments, ensure_ascii=False)
+                items.append(
+                    {
+                        "type": "function_call",
+                        "call_id": call_id,
+                        "name": name,
+                        "arguments": arguments,
+                    }
+                )
+    return items
+
+
+def _responses_tool(tool: ToolSchema) -> dict[str, Any]:
+    function = tool.get("function")
+    if not isinstance(function, dict):
+        raise ValueError("tool schema is missing its function definition")
+    name = function.get("name")
+    parameters = function.get("parameters")
+    if not isinstance(name, str) or not name or not isinstance(parameters, dict):
+        raise ValueError("tool schema needs a function name and object parameters")
+    result: dict[str, Any] = {
+        "type": "function",
+        "name": name,
+        "parameters": parameters,
+        "strict": False,
+    }
+    description = function.get("description")
+    if isinstance(description, str) and description:
+        result["description"] = description
+    return result
+
+
+def _parse_responses_message(response: dict[str, Any]) -> AssistantMessage:
+    status = response.get("status")
+    if status == "failed":
+        error = response.get("error")
+        detail = error.get("message") if isinstance(error, dict) else None
+        raise ProviderError(detail if isinstance(detail, str) else "Responses API reported a failed response")
+    if status == "incomplete":
+        details = response.get("incomplete_details")
+        reason = details.get("reason") if isinstance(details, dict) else None
+        if reason != "max_output_tokens":
+            raise ProviderError(
+                f"Responses API returned an incomplete response ({reason or 'unknown reason'})"
+            )
+    elif status != "completed":
+        raise ProviderError(f"Responses API returned an unexpected response status ({status or 'missing'})")
+    output = response.get("output", [])
+    if not isinstance(output, list):
+        raise TypeError("response output must be an array")
+    content: list[str] = []
+    calls: list[ToolCall] = []
+    for item in output:
+        if not isinstance(item, dict):
+            raise TypeError("response output item must be an object")
+        if item.get("type") == "message":
+            parts = item.get("content", [])
+            if not isinstance(parts, list):
+                raise TypeError("response message content must be an array")
+            for part in parts:
+                if not isinstance(part, dict):
+                    raise TypeError("response content part must be an object")
+                if part.get("type") in {"output_text", "refusal"}:
+                    text = part.get("text") or part.get("refusal")
+                    if isinstance(text, str):
+                        content.append(text)
+        elif item.get("type") == "function_call":
+            call_id = item.get("call_id") or item.get("id")
+            name = item.get("name")
+            raw_arguments = item.get("arguments", "{}")
+            if not isinstance(call_id, str) or not call_id or not isinstance(name, str) or not name:
+                raise ValueError("response function call needs a call id and function name")
+            if isinstance(raw_arguments, str):
+                arguments = json.loads(raw_arguments or "{}")
+            else:
+                arguments = raw_arguments
+            if not isinstance(arguments, dict):
+                raise TypeError("response function arguments must be an object")
+            calls.append(ToolCall(call_id, name, arguments))
+    if not content and isinstance(response.get("output_text"), str):
+        content.append(response["output_text"])
+    call_ids = [call.id for call in calls]
+    if len(set(call_ids)) != len(call_ids):
+        raise ValueError("response function call ids must be unique")
+    usage = _normalize_responses_usage(response.get("usage"))
+    finish_reason: str | None
+    if status == "completed":
+        finish_reason = "stop"
+    elif status == "incomplete":
+        finish_reason = "length"
+    else:
+        finish_reason = "stop"
+    return AssistantMessage(
+        content="".join(content) or None,
+        tool_calls=tuple(calls),
+        finish_reason=finish_reason,
+        usage=usage,
+    )
+
+
+def _normalize_responses_usage(value: Any) -> dict[str, int] | None:
+    if not isinstance(value, dict):
+        return None
+    normalized: dict[str, int] = {}
+    for name in ("input_tokens", "output_tokens", "total_tokens"):
+        count = value.get(name)
+        if isinstance(count, int) and not isinstance(count, bool) and count >= 0:
+            normalized[name] = count
+    if "total_tokens" not in normalized and {"input_tokens", "output_tokens"} <= normalized.keys():
+        normalized["total_tokens"] = normalized["input_tokens"] + normalized["output_tokens"]
+    return normalized or None
 
 
 def _normalize_usage(value: Any) -> dict[str, int] | None:

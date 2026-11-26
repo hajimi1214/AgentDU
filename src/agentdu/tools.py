@@ -127,8 +127,13 @@ class ToolRegistry:
         return ToolResult(_limit_output(output))
 
 
-def create_builtin_tools(secret_values: Collection[str] = ()) -> list[ToolDefinition]:
+def create_builtin_tools(
+    secret_values: Collection[str] = (),
+    command_runner: Callable[[dict[str, Any], Path, Collection[str]], ToolResult] | None = None,
+) -> list[ToolDefinition]:
     def run_command(arguments: dict[str, Any], workspace: Path) -> ToolResult:
+        if command_runner is not None:
+            return command_runner(arguments, workspace, secret_values)
         return _run_command(arguments, workspace, secret_values)
 
     return [

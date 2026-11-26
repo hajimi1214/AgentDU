@@ -39,10 +39,42 @@ export type RuntimeStatus = {
     model: string | null;
     default: boolean;
     credentialAvailable: boolean;
+    baseUrl?: string;
+    streaming?: boolean;
+    configuredCapabilities?: string[];
+    protocol?: string;
+    wireApi?: "chat_completions" | "responses";
   }>;
   error?: string;
   exitCode?: number | null;
   recoveredAfterCrash?: boolean;
+  workspace?: string | null;
+};
+
+export type WorkspaceEntry = { path: string; name: string; openedAt?: string };
+export type WorkspaceFile = { path: string; size: number };
+export type SessionSummary = {
+  session_id: string;
+  modified_at?: string;
+  message_count?: number;
+  last_prompt?: string;
+  error?: string;
+};
+export type SessionMessage = Record<string, unknown> & { role?: string; content?: string | null };
+export type SessionEvent = {
+  seq: number;
+  kind: string;
+  occurred_at: string;
+  payload: Record<string, unknown>;
+};
+export type ProviderProfileInput = {
+  name: string;
+  baseUrl: string;
+  model: string;
+  wireApi: "chat_completions" | "responses";
+  apiKey?: string;
+  clearCredential?: boolean;
+  default?: boolean;
 };
 
 export type PermissionRequestEvent = {
@@ -52,6 +84,12 @@ export type PermissionRequestEvent = {
   permission: string;
   arguments: Record<string, unknown>;
   workspace: string;
+  operation?: string;
+  operationId?: string;
+  command?: string;
+  targetFiles?: string[];
+  scope?: string;
+  networkRequired?: boolean;
 };
 
 export function isRecord(value: unknown): value is Record<string, unknown> {

@@ -15,7 +15,7 @@ from .models import AssistantMessage, ChatModel, Message, ToolCall
 from .permissions import PermissionPolicy
 from .provider import ProviderError
 from .sessions import SessionStore
-from .tools import ToolRegistry, create_builtin_tools
+from .tools import ToolRegistry, ToolResult, create_builtin_tools
 
 
 DEFAULT_SYSTEM_PROMPT = (
@@ -65,6 +65,7 @@ class AgentRuntime:
         max_model_calls: int | None = None,
         include_builtin_tools: bool = True,
         secret_values: Collection[str] = (),
+        command_runner: Callable[[dict[str, Any], Path, Collection[str]], ToolResult] | None = None,
     ) -> None:
         if max_steps < 1:
             raise ValueError("max_steps must be positive")
@@ -98,7 +99,7 @@ class AgentRuntime:
             f"agentdu_model_cost_complete_{id(self)}", default=True
         )
         if include_builtin_tools:
-            for tool in create_builtin_tools(self.secret_values):
+            for tool in create_builtin_tools(self.secret_values, command_runner):
                 if tool.name not in {schema["function"]["name"] for schema in tools.model_schemas()}:
                     tools.register(tool)
         self.extensions = tuple(extensions)
@@ -440,6 +441,7 @@ def build_default_runtime(
     max_model_calls: int | None = None,
     include_builtin_tools: bool = True,
     secret_values: Collection[str] = (),
+    command_runner: Callable[[dict[str, Any], Path, Collection[str]], ToolResult] | None = None,
 ) -> AgentRuntime:
     if not callable(getattr(permission_policy, "authorize", None)):
         raise TypeError("permission_policy must implement authorize(request)")
@@ -456,6 +458,7 @@ def build_default_runtime(
         max_model_calls=max_model_calls,
         include_builtin_tools=include_builtin_tools,
         secret_values=secret_values,
+        command_runner=command_runner,
     )
 
 

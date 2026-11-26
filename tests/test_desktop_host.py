@@ -28,7 +28,14 @@ class RuntimeHostProcess:
         environment = {
             "PATH": os.environ.get("PATH", ""),
             "APPDATA": str(root / "appdata"),
+            "LOCALAPPDATA": str(root / "local-appdata"),
+            "USERPROFILE": str(root),
+            "HOMEDRIVE": os.environ.get("HOMEDRIVE", "C:"),
+            "HOMEPATH": os.environ.get("HOMEPATH", "\\Users\\AgentDU-Test"),
             "SYSTEMROOT": os.environ.get("SYSTEMROOT", ""),
+            "WINDIR": os.environ.get("WINDIR", r"C:\Windows"),
+            "PATHEXT": os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD"),
+            "COMSPEC": os.environ.get("COMSPEC", r"C:\Windows\System32\cmd.exe"),
             "TEMP": os.environ.get("TEMP", str(root)),
             "TMP": os.environ.get("TMP", str(root)),
             "PYTHONPATH": str(REPOSITORY_ROOT / "src"),
@@ -212,17 +219,21 @@ class DesktopHostTests(unittest.TestCase):
         self.host.process.stdin.close()
         self.assertEqual(self.host.process.wait(timeout=3), 0)
 
-    def test_desktop_permission_policy_blocks_command_execution(self) -> None:
+    def test_desktop_command_permission_requires_explicit_approval(self) -> None:
         from agentdu.desktop_host import DesktopPermissionPolicy, RuntimeHost
         from agentdu.permissions import PermissionRequest
 
         permission_host = RuntimeHost(self.root / "permission-runtime")
-        blocked_events: list[tuple[str, dict[str, Any]]] = []
+        permission_events: list[tuple[str, dict[str, Any]]] = []
 
-        def capture_blocked_event(event: str, payload: dict[str, Any]) -> None:
-            blocked_events.append((event, payload))
+        def approve_denial_for_test(event: str, payload: dict[str, Any]) -> None:
+            permission_events.append((event, payload))
+            if event == "permission.requested":
+                pending = permission_host._pending_approvals[payload["approvalId"]]
+                pending.decision = False
+                pending.event.set()
 
-        permission_host.publish_from_worker = capture_blocked_event  # type: ignore[method-assign]
+        permission_host.publish_from_worker = approve_denial_for_test  # type: ignore[method-assign]
         marker = self.root / "must-not-be-created.txt"
         policy = DesktopPermissionPolicy(permission_host, "task-shell-test")
 
@@ -237,8 +248,11 @@ class DesktopHostTests(unittest.TestCase):
 
         self.assertFalse(authorized)
         self.assertFalse(marker.exists())
-        self.assertEqual(blocked_events[0][0], "security.capability_blocked")
-        self.assertEqual(blocked_events[0][1]["taskId"], "task-shell-test")
+        self.assertEqual(permission_events[0][0], "permission.requested")
+        self.assertEqual(permission_events[0][1]["taskId"], "task-shell-test")
+        self.assertEqual(permission_events[0][1]["operation"], "运行 AppContainer 隔离命令")
+        self.assertEqual(permission_events[0][1]["command"], f"echo blocked > {marker}")
+        self.assertFalse(permission_events[0][1]["networkRequired"])
 
     def test_runtime_executes_controlled_stream_and_cancels_the_real_agent_task(self) -> None:
         started = self.host.request("test.start")
@@ -300,6 +314,124 @@ class DesktopHostTests(unittest.TestCase):
         workspace.mkdir()
         opened = self.host.request("workspace.open", {"path": str(workspace)})
         self.assertEqual(Path(opened["result"]["path"]), workspace.resolve())
+
+    def test_project_files_and_session_can_be_listed_and_restored(self) -> None:
+        workspace = self.root / "project with spaces"
+        workspace.mkdir()
+        source = workspace / "src" / "sample.py"
+        source.parent.mkdir()
+        source.write_text("def answer():\n    return 42\n", encoding="utf-8")
+        opened = self.host.request("workspace.open", {"path": str(workspace)})
+        self.assertEqual(opened["result"]["name"], workspace.name)
+
+        recent = self.host.request("workspace.list")
+        self.assertEqual(recent["result"]["workspaces"][0]["path"], str(workspace.resolve()))
+        listing = self.host.request("workspace.files", {"query": "sample"})
+        self.assertEqual([item["path"] for item in listing["result"]["files"]], ["src/sample.py"])
+        content = self.host.request("file.read", {"path": "src/sample.py"})
+        self.assertIn("return 42", content["result"]["content"])
+        self.assertEqual(self.host.request("file.read", {"path": "../outside.txt"})["error"]["code"], "FILE_READ_FAILED")
+
+        created = self.host.request("session.create")
+        session_id = created["result"]["sessionId"]
+        listed = self.host.request("sessions.list")
+        self.assertEqual(listed["result"]["sessions"][0]["session_id"], session_id)
+        restored = self.host.request("session.read", {"sessionId": session_id})
+        self.assertEqual(restored["result"]["sessionId"], session_id)
+        self.assertEqual(restored["result"]["events"][0]["kind"], "session_created")
+
+    def test_desktop_editor_write_requires_approval_and_persists_decision_and_result(self) -> None:
+        workspace = self.root / "editor project"
+        workspace.mkdir()
+        file_path = workspace / "notes.txt"
+        file_path.write_text("before", encoding="utf-8")
+        self.host.request("workspace.open", {"path": str(workspace)})
+        session_id = self.host.request("session.create")["result"]["sessionId"]
+
+        request_id = self.host.send("file.write", {"path": "notes.txt", "content": "after", "sessionId": session_id})
+        accepted = self.host.wait_for(lambda item: item.get("type") == "response" and item.get("requestId") == request_id)
+        self.assertEqual(accepted["result"]["status"], "pending")
+        operation_id = accepted["result"]["operationId"]
+        approval = self.host.wait_event("permission.requested")
+        self.assertEqual(approval["payload"]["targetFiles"], ["notes.txt"])
+        self.assertEqual(approval["payload"]["operationId"], operation_id)
+        self.assertFalse(approval["payload"]["networkRequired"])
+        response = self.host.request("permission.respond", {"approvalId": approval["payload"]["approvalId"], "decision": "allow"})
+        self.assertEqual(response["result"]["status"], "allow")
+        result = self.host.wait_event("workspace.write.finished")
+        self.assertEqual(result["payload"]["operationId"], operation_id)
+        self.assertEqual(result["payload"]["status"], "completed", result["payload"])
+        self.assertEqual(file_path.read_text(encoding="utf-8"), "after")
+
+        records = self.host.request("session.read", {"sessionId": session_id})["result"]["events"]
+        write_events = [item["kind"] for item in records if item["kind"].startswith("desktop_file_write.")]
+        self.assertEqual(write_events, ["desktop_file_write.requested", "desktop_file_write.approval", "desktop_file_write.result"])
+        self.assertEqual(records[-1]["payload"]["status"], "completed")
+
+    def test_desktop_file_write_rejects_git_metadata_and_escape_paths(self) -> None:
+        workspace = self.root / "bounded project"
+        workspace.mkdir()
+        self.host.request("workspace.open", {"path": str(workspace)})
+        session_id = self.host.request("session.create")["result"]["sessionId"]
+        for relative_path in (".git/config", "../outside.txt"):
+            result = self.host.request("file.write", {"path": relative_path, "content": "blocked", "sessionId": session_id})
+            self.assertEqual(result["error"]["code"], "INVALID_FILE_PATH")
+
+    def test_desktop_file_write_is_rejected_while_agent_task_is_active(self) -> None:
+        workspace = self.root / "serialized project"
+        workspace.mkdir()
+        source = workspace / "source.txt"
+        source.write_text("original", encoding="utf-8")
+        self.host.request("workspace.open", {"path": str(workspace)})
+        session_id = self.host.request("session.create")["result"]["sessionId"]
+        started = self.host.request("test.start")
+        self.host.wait_event("task.accepted")
+
+        result = self.host.request(
+            "file.write",
+            {"path": "source.txt", "content": "overwritten", "sessionId": session_id},
+        )
+
+        self.assertEqual(result["error"]["code"], "TASK_ALREADY_RUNNING")
+        self.assertEqual(source.read_text(encoding="utf-8"), "original")
+        self.assertFalse(any(item.get("type") == "event" and item.get("event") == "permission.requested" for item in self.host.backlog))
+        cancelled = self.host.request("turn.cancel", {"taskId": started["result"]["taskId"]})
+        self.assertEqual(cancelled["result"]["status"], "cancelled")
+
+    @unittest.skipUnless(os.name == "nt", "Windows AppContainer integration test")
+    def test_terminal_command_is_approved_executed_and_persisted(self) -> None:
+        workspace = self.root / "terminal project"
+        workspace.mkdir()
+        self.host.request("workspace.open", {"path": str(workspace)})
+        session_id = self.host.request("session.create")["result"]["sessionId"]
+        command = "echo AgentDU-terminal-verified"
+
+        accepted = self.host.request("terminal.run", {"command": command, "sessionId": session_id})
+        operation_id = accepted["result"]["operationId"]
+        self.assertEqual(accepted["result"]["status"], "pending")
+        approval = self.host.wait_event("permission.requested")
+        self.assertEqual(approval["payload"]["command"], command)
+        self.assertEqual(approval["payload"]["operationId"], operation_id)
+        self.assertEqual(approval["payload"]["workspace"], str(workspace.resolve()))
+        self.assertFalse(approval["payload"]["networkRequired"])
+        self.host.request(
+            "permission.respond",
+            {"approvalId": approval["payload"]["approvalId"], "decision": "allow"},
+        )
+
+        result = self.host.wait_event("terminal.command.finished", timeout=30)
+        self.assertEqual(result["payload"]["operationId"], operation_id)
+        self.assertEqual(result["payload"]["status"], "completed", result["payload"])
+        self.assertEqual(result["payload"]["exitCode"], 0)
+        self.assertIn("AgentDU-terminal-verified", result["payload"]["output"])
+
+        events = self.host.request("session.read", {"sessionId": session_id})["result"]["events"]
+        terminal_events = [item for item in events if item["kind"].startswith("terminal.command.")]
+        self.assertEqual(
+            [item["kind"] for item in terminal_events],
+            ["terminal.command.requested", "terminal.command.approval", "terminal.command.result"],
+        )
+        self.assertEqual(terminal_events[-1]["payload"]["exitCode"], 0)
 
     def test_invalid_json_frame_is_reported_then_host_exits(self) -> None:
         self.host.send_raw(b"{this is not json}\n")

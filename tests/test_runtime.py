@@ -22,7 +22,7 @@ from agentdu.events import AgentEvent
 from agentdu.handoff import HandoffConflict, HandoffLedger
 from agentdu.models import AssistantMessage, Message, ModelStreamEvent, ToolCall, ToolSchema
 from agentdu.permissions import AllowAllPolicy, PermissionRequest, ReadOnlyPolicy
-from agentdu.provider import OpenAICompatibleModel, ProviderError
+from agentdu.provider import OpenAICompatibleModel, ProviderError, _parse_responses_message
 from agentdu.sessions import SessionProcessLock, SessionStore
 from agentdu.settings import ConfigurationError, ModelSettings, resolve_model_options
 from agentdu.tools import MAX_TOOL_OUTPUT_CHARS, ToolDefinition, ToolRegistry, create_builtin_tools
@@ -825,6 +825,172 @@ class RuntimeTests(unittest.TestCase):
             server.server_close()
             worker.join(timeout=2)
 
+    def test_responses_api_http_tool_round_trip(self) -> None:
+        state: dict[str, list[dict[str, object]]] = {"requests": []}
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self) -> None:
+                size = int(self.headers["Content-Length"])
+                state["requests"].append(json.loads(self.rfile.read(size)))
+                if len(state["requests"]) == 1:
+                    output = [
+                        {
+                            "type": "function_call",
+                            "id": "fc_write",
+                            "call_id": "call-write",
+                            "name": "write_file",
+                            "arguments": '{"path":"responses.txt","content":"via responses"}',
+                        }
+                    ]
+                else:
+                    output = [
+                        {
+                            "type": "message",
+                            "content": [{"type": "output_text", "text": "Responses flow complete."}],
+                        }
+                    ]
+                response = json.dumps(
+                    {
+                        "status": "completed",
+                        "output": output,
+                        "usage": {"input_tokens": 9, "output_tokens": 4, "total_tokens": 13},
+                    }
+                ).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(response)))
+                self.end_headers()
+                self.wfile.write(response)
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                model = OpenAICompatibleModel(
+                    f"http://127.0.0.1:{server.server_port}/v1",
+                    "test-model",
+                    "test-key",
+                    streaming=False,
+                    wire_api="responses",
+                )
+                runtime = AgentRuntime(
+                    model,
+                    ToolRegistry(root, AllowAllPolicy()),
+                    SessionStore(root / ".agentdu"),
+                )
+                result = asyncio.run(runtime.run("Write a file"))
+                self.assertEqual(result.content, "Responses flow complete.")
+                self.assertEqual((root / "responses.txt").read_text(encoding="utf-8"), "via responses")
+                first_request, second_request = state["requests"]
+                self.assertEqual(first_request["model"], "test-model")
+                self.assertEqual(first_request["input"][-1], {"role": "user", "content": "Write a file"})
+                self.assertEqual(first_request["tools"][0]["type"], "function")
+                self.assertEqual(first_request["tools"][0]["name"], "edit_file")
+                self.assertEqual(second_request["input"][-2]["type"], "function_call")
+                self.assertEqual(second_request["input"][-1]["type"], "function_call_output")
+                self.assertEqual(second_request["input"][-1]["call_id"], "call-write")
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=2)
+
+    def test_responses_stream_returns_text_deltas_and_final_tool_calls(self) -> None:
+        state: dict[str, str] = {}
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self) -> None:
+                state["path"] = self.path
+                events = [
+                    {
+                        "type": "response.output_text.delta",
+                        "delta": "Inspecting ",
+                    },
+                    {
+                        "type": "response.output_text.delta",
+                        "delta": "the project.",
+                    },
+                    {
+                        "type": "response.completed",
+                        "response": {
+                            "status": "completed",
+                            "output": [
+                                {
+                                    "type": "message",
+                                    "content": [{"type": "output_text", "text": "Inspecting the project."}],
+                                },
+                                {
+                                    "type": "function_call",
+                                    "id": "fc_read",
+                                    "call_id": "call-read",
+                                    "name": "read_file",
+                                    "arguments": '{"path":"README.md"}',
+                                },
+                            ],
+                            "usage": {"input_tokens": 7, "output_tokens": 5},
+                        },
+                    },
+                ]
+                body = "".join(f"data: {json.dumps(event)}\n\n" for event in events).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/event-stream")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            model = OpenAICompatibleModel(
+                f"http://127.0.0.1:{server.server_port}/v1",
+                "test-model",
+                timeout=3,
+                wire_api="responses",
+            )
+
+            async def collect() -> list[ModelStreamEvent]:
+                return [event async for event in model.stream([], [])]
+
+            events = asyncio.run(asyncio.wait_for(collect(), timeout=5))
+            self.assertEqual(state["path"], "/v1/responses")
+            self.assertEqual([event.content_delta for event in events[:-1]], ["Inspecting ", "the project."])
+            final = events[-1].message
+            self.assertEqual(final.content, "Inspecting the project.")
+            self.assertEqual(final.tool_calls[0].id, "call-read")
+            self.assertEqual(final.tool_calls[0].arguments, {"path": "README.md"})
+            self.assertEqual(final.usage, {"input_tokens": 7, "output_tokens": 5, "total_tokens": 12})
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=2)
+
+    def test_responses_incomplete_filter_result_is_not_treated_as_success(self) -> None:
+        with self.assertRaisesRegex(ProviderError, r"incomplete response \(content_filter\)"):
+            _parse_responses_message(
+                {
+                    "status": "incomplete",
+                    "incomplete_details": {"reason": "content_filter"},
+                    "output": [],
+                }
+            )
+
+        truncated = _parse_responses_message(
+            {
+                "status": "incomplete",
+                "incomplete_details": {"reason": "max_output_tokens"},
+                "output": [],
+            }
+        )
+        self.assertEqual(truncated.finish_reason, "length")
+
     def test_cli_runs_against_a_local_openai_compatible_endpoint(self) -> None:
         class Handler(BaseHTTPRequestHandler):
             def do_POST(self) -> None:
@@ -1087,6 +1253,7 @@ class RuntimeTests(unittest.TestCase):
                 "model = 'deepseek-coder'\n"
                 "base_url = 'https://example.invalid/v1'\n"
                 "api_key_env = 'TEST_AGENTDU_KEY'\n"
+                "wire_api = 'responses'\n"
                 "streaming = false\n",
                 encoding="utf-8",
             )
@@ -1097,6 +1264,7 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual(options["base_url"], "https://example.invalid/v1")
             self.assertEqual(options["api_key"], "secret-value")
             self.assertFalse(options["streaming"])
+            self.assertEqual(options["wire_api"], "responses")
 
     def test_model_profile_rejects_non_finite_numeric_settings(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

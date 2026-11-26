@@ -2,7 +2,7 @@
 
 ## 结论
 
-D1 桌面骨架、Runtime Host、JSONL IPC、中文状态界面、Windows 安装包和 AppContainer 隔离原型已经建立并完成自动化验证。D1 **尚未通过完整运行验收**，当前标记为 **BLOCKED**。运行中的安装版已启动并完成 Python Runtime 握手。真实 Runtime 任务与取消通过 Python 子进程测试。由于 Windows 上的窗口输入被另一置顶应用拦截，无法完成安装版 UI 的任务按钮、取消按钮和正常关窗实操。AppContainer 原型没有接入 Runtime 的 Shell 执行路径，产品中的 Shell、MCP 和插件执行保持关闭。
+D1 桌面骨架、Runtime Host、JSONL IPC、中文状态界面、Windows 安装包和 AppContainer 隔离原型已经建立并完成自动化验证。D1 **尚未通过完整运行验收**，当前标记为 **BLOCKED**。后续安装版复核已验证正常关窗、Host 有序退出、异常关闭恢复提示及 Runtime 层真实取消。Renderer UI 发起并取消任务的手工验收仍未完成。Windows AppContainer 隔离命令路径已在后续 D2 中接入并通过集成测试，详细结果见本文后续复核及 D2 验收记录。
 
 基线为 `701d3476d75671a6ea734f5fdd5c7dcf073e47c6`。验证时工作分支为 `main`。本地最终提交 SHA 在本文末尾记录，不推送 GitHub。
 
@@ -82,15 +82,15 @@ AppContainer 验证脚本在 `desktop/scripts/verify-appcontainer.ps1`。它调�
 | Python 输入损坏 IPC | PASS，子进程测试 | 非法 JSON 和 `NaN` 输入发协议错误，退出码 2。 |
 | Runtime 流式事件传输 | PASS，Python bundled 子进程测试 | 真实 AgentRuntime 任务通过 stdio JSONL 收到多条 `assistant_delta`。 |
 | Python Runtime 侧实际取消 | PASS，Python bundled 子进程测试 | 取消请求返回 `cancelled`，同一 task 发出 `task.cancelled`，且未发 `task.completed`。 |
-| 安装版 UI 触发并取消任务 | BLOCKED | Windows 输入代理报告目标点被其他应用窗口覆盖。激活目标并重新截图后唯一一次重试仍被覆盖，按界面自动化约束停止点击。Runtime 层取消已由子进程测试验证。 |
-| 应用正常关窗与 Host orderly shutdown | BLOCKED | `host.shutdown` 和 stdin EOF 清洁退出有 Python 子进程测试。安装版窗口的正常关窗操作未能从 UI 实测。 |
-| 安装版重启恢复提示 | PARTIAL | RuntimeClient 的 crash state 和启动标记代码已测试/审阅。实际安装版窗口异常关闭后再打开的提示未实测。 |
+| 安装版 UI 触发并取消任务 | BLOCKED | Windows 输入代理检测到目标窗口有用户输入，按界面自动化约束停止输入。Runtime 层取消已通过安装版 bundled Python 子进程实测。 |
+| 应用正常关窗与 Host orderly shutdown | PASS | 2026-11-25 对安装版 Electron 主窗口发送正常关闭消息，确认 Electron 主进程退出、Python Host 结束、启动标记移除及 stderr 的 `Host stopped` 记录。 |
+| 安装版重启恢复提示 | PASS | 2026-11-25 强制终止安装版进程树后重启，目视确认“检测到上次异常关闭”提示，Runtime 已连接且未重放任务。 |
 
 安装版恢复提示使用 `userData/desktop-launch.pending` 标记进程生命周期。应用启动时若已有标记则显示“Runtime 上次异常退出”，清洁关闭时先等待 Host shutdown 再移除标记。安装期间的崩溃会保留标记。Runtime task 不会自动重放。
 
 ## 自动化结果
 
-最后一次完整 Python `unittest` 运行结果为 **79 项全部通过**，包含既有测试及全部 D1 Host 测试。相同 11 项 Host D1 测试也在 bundled Python 3.14.10 下单独运行并全部通过。Vitest **2 个文件、9 项通过**，覆盖 stdio schema、Runtime 进程启动错误、异常退出和坏 stdout 协议处理。
+初始 D1 验收时完整 Python `unittest` 结果为 **79 项全部通过**，包含既有测试及全部 D1 Host 测试。2026-11-25 后续复核使用当前工作区源码运行完整测试，**89 项全部通过**。相同 11 项 Host D1 测试也在 bundled Python 3.14.10 下单独运行并全部通过。桌面 Vitest 初始为 **2 个文件、9 项通过**，后续扩展到 **3 个文件、13 项通过**，覆盖 stdio schema、Runtime 进程启动错误、异常退出、坏 stdout 协议处理和 Renderer 启动状态竞态。
 
 TypeScript `pnpm run build` 通过，包含 Renderer 与 Electron Main/Preload TypeScript 类型检查和 Vite production build。最终 NSIS x64 安装包为 `desktop/release/AgentDU-Setup-0.1.0-x64.exe`，大小 134,405,205 bytes，SHA-256 `6651FEF079344F39EB9B4A8D253DD6AC63B255F2CAACC0D11C75485D43D43495`。此安装包未做代码签名，electron-builder 使用默认 Electron 图标。
 
@@ -161,13 +161,45 @@ desktop/
 
 未删除现有测试，未推送 GitHub。
 
-## 需要解除的 D1 阻塞
+## 仍需解除的 D1 阻塞
 
-1. 在无其他窗口拦截的桌面状态下，从最终安装版 UI 启动并取消受控任务。
-2. 从安装版 UI 正常退出并确认 Host 以 0 退出、启动标记被移除。
-3. 异常关闭后重启安装版并目视确认恢复提示。
-4. 将 Python AppContainer launcher 接入需要执行的 Runtime 进程后，重新验证工作区 capability 授权，并覆盖文件、网络及子进程逃逸。集成前继续拒绝 Shell、MCP 与插件执行。
+1. 从安装版 Renderer UI 启动并取消受控任务，确认按钮请求经 Preload、Electron Main 与 JSONL IPC 到达 Runtime Host。Runtime Host 层真实取消已通过安装版 bundled Python 子进程验证。
+2. Renderer UI 的 Provider 保存、重载和状态展示尚未完成验收。真实 Provider 连接属于后续 D2 验收，当前未执行。
+
+安装版正常关窗、Host orderly shutdown、启动标记清理和异常关闭恢复提示已在下方“后续安装版复核”中实测。Windows AppContainer API 探针及 D2 Runtime 中的已审批命令隔离集成测试均通过，结果见 D2 验收报告。
 
 最终 Git 基线为 `701d3476d75671a6ea734f5fdd5c7dcf073e47c6`。D1 实现提交为 `109320dbfeda4fbb5ffbe1c84e22ef05a8e4dc24`，交付时的最终本地 HEAD 以验收记录提交为准。当前工作不推送 GitHub。
 
 完成以上验证后才可将 D1 状态从 BLOCKED 更新为通过或逐项记录新的失败证据。
+
+## 后续安装版复核（2026-11-25）
+
+本节记录 D2 安装包对 D1 运行与恢复验收的补充证据，不替代 D1 对 UI 任务按钮的验收。
+
+| 项目 | 结果 | 实测证据 |
+| --- | --- | --- |
+| 当前 Python 全量测试 | PASS | `python -m unittest discover -s tests -v`，89 项全部通过。 |
+| 桌面构建与测试 | PASS | `cd desktop; pnpm run build` 和 `pnpm test` 通过，Vitest 3 个文件、13 项通过。 |
+| Windows AppContainer | PASS | `cd desktop; pnpm run verify:appcontainer` 返回 `Result: PASS`，包含 workspace 读写拒绝、loopback 网络拒绝、子进程仍在容器内及容器外写入拒绝。 |
+| 新版安装包 | PASS | `desktop/release/d2-final/AgentDU-Setup-0.1.0-x64.exe`，SHA-256 `5C4934D29E8687FB5CEB5BD39AAA449C1C2294545721A75D4E0F23D778C2CD8B`。安装路径为 `desktop/release/d2-final/installed app with spaces`。 |
+| 无全局 Python 启动 Runtime | PASS | 安装版 Python Host 在 `PATH=%WINDIR%\System32` 下启动，初始化、健康检查与关闭均正常，退出码 0。Runtime 报告 Python 3.14.10 与协议版本 1。 |
+| Runtime 实际取消 | PASS，Host 层 | 从安装版 bundled Python 启动受控 AgentRuntime task 并发送取消请求，收到 `task.cancelled`、未收到 `task.completed`，Host 清洁退出。该证据不等同于 UI 按钮验收。 |
+| 应用正常关窗 | PASS | 对本轮启动的安装版 Electron 主窗口发送正常关闭消息。主进程退出、Python Host 进程结束、`desktop-launch.pending` 被清除，stderr 记录 `Python Runtime Host stopped`。 |
+| 异常退出后恢复 | PASS | 强制终止本轮启动的安装版进程树后，`desktop-launch.pending` 保留。重新启动同一安装版，实际窗口显示“检测到上次异常关闭”，同时显示 Runtime 已连接。未自动重放任务。 |
+| Renderer UI 发起并取消受控任务 | BLOCKED | Computer Use 输入操作检测到窗口有用户输入后停止交互。Runtime 层取消已验证，UI 按钮到 Host 的完整手工链路仍需从界面操作确认。 |
+| Provider 与真实模型任务 | BLOCKED | AgentDU 安全 Provider 档案为空。Codex 的凭据未读取或复制到 AgentDU。 |
+
+2026-11-25 复核时仓库 `HEAD` 为 `837efebb80f14a1f10590f9f577fddf6418fd28a`。2026-11-26 的 D1 UI 复核见下文。受控任务在取消按钮生效前完成，因此 D1 状态仍为 BLOCKED。
+
+## 2026-11-26 UI 取消补充验收
+
+本轮从 D1 安装版 Renderer 界面启动受控任务。安装器 SHA-256 与本报告记录一致，独立安装目录为 `desktop/release/D1 UI Verification 2026-11-26`，界面显示 DESKTOP · D1，Runtime 0.6.0 在线，Provider 档案缺失。
+
+| 验收项 | 结果 | 实测证据 |
+| --- | --- | --- |
+| 从 D1 UI 启动受控任务 | PASS | UI 显示活动 task ID，事件序列收到 `task.accepted`、`run_started`、`model_request` 和 4 条 `assistant_delta`。任务不调用 Provider。 |
+| 从 D1 UI 取消受控任务 | FAIL | 点击取消时 Runtime 已发出 `task.completed`，按钮随后禁用。未观察到 `task.cancel_requested` 或 `task.cancelled`。UI 到 Host 的取消链路尚未通过验收。 |
+| 增加受控流式任务的可操作时间 | WIP | 源码中的 `ControlledStreamingModel` 间隔由 0.12 秒调整为 0.75 秒。更新后的 Host 尚未在 D1 安装版重新启动，修复效果未验证。 |
+| 更新后的 D1 Windows 安装包 | BLOCKED | D1 基线副本通过 Python 79 项测试、桌面 9 项测试和生产构建。`package:win` 在 Electron Builder packaging 阶段持续等待 GitHub 443 连接，未产出安装包，随后中断该构建。 |
+
+本轮没有调用真实 Provider，也没有读取、复制或传输 API 凭据。D1 整体仍为 **BLOCKED**。下一步需从已更新的 Host 重新打包安装版并重复 UI 取消验收。

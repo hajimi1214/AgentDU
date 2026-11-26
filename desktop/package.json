@@ -5,7 +5,7 @@
   "description": "AgentDU local-first desktop application",
   "main": "dist-electron/main/index.js",
   "scripts": {
-    "dev": "pnpm run build:electron && concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env AGENTDU_DESKTOP_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
+    "dev": "pnpm run build:electron && node scripts/dev.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.electron.json",
     "build:renderer": "vite build",
     "build:electron": "tsc -p tsconfig.electron.json",
@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "prepare:runtime": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/prepare-runtime.ps1",
     "verify:appcontainer": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/verify-appcontainer.ps1",
-    "package:win": "pnpm run build && pnpm run prepare:runtime && electron-builder --win nsis --x64"
+    "package:win": "pnpm run build && pnpm run prepare:runtime && electron-builder --win nsis --x64 -c.electronDist=./node_modules/electron/dist -c.directories.output=release/d2-final"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.2.8",

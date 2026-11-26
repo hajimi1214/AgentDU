@@ -10,13 +10,14 @@ from .sessions import SessionStore
 
 
 _TRANSITIONS = {
-    "source_running": {"offered", "failed", "stale", "abandoned"},
-    "offered": {"accepted", "rejected", "failed", "stale", "abandoned"},
-    "accepted": {"receiver_running", "failed", "stale", "abandoned"},
-    "receiver_running": {"verified", "validation_failed", "failed", "stale", "abandoned"},
+    "source_running": {"offered", "failed", "stale", "abandoned", "interrupted"},
+    "offered": {"accepted", "rejected", "failed", "stale", "abandoned", "interrupted"},
+    "accepted": {"receiver_running", "failed", "stale", "abandoned", "interrupted"},
+    "receiver_running": {"validating", "verified", "validation_failed", "failed", "stale", "abandoned", "interrupted"},
+    "validating": {"verified", "validation_failed", "failed", "stale", "abandoned", "interrupted"},
     "verified": {"integrated", "stale", "abandoned"},
 }
-_TERMINAL_STATES = {"integrated", "rejected", "validation_failed", "failed", "stale", "abandoned"}
+_TERMINAL_STATES = {"integrated", "rejected", "validation_failed", "failed", "stale", "abandoned", "interrupted"}
 
 
 class HandoffConflict(RuntimeError):
@@ -118,9 +119,9 @@ class HandoffLedger:
             self._validate_actor(current, new_status, actor)
 
             owner = current.owner
-            if new_status in {"accepted", "receiver_running", "verified", "validation_failed"}:
+            if new_status in {"accepted", "receiver_running", "validating", "verified", "validation_failed"}:
                 owner = current.receiver_profile
-            elif new_status in {"integrated", "failed", "stale", "abandoned", "rejected"}:
+            elif new_status in {"integrated", "failed", "stale", "abandoned", "rejected", "interrupted"}:
                 owner = "coordinator"
             updated = {
                 "version": current.version + 1,
@@ -198,6 +199,7 @@ class HandoffLedger:
             "accepted": current.receiver_profile,
             "rejected": current.receiver_profile,
             "receiver_running": current.receiver_profile,
+            "validating": current.receiver_profile,
             "verified": current.receiver_profile,
             "integrated": "coordinator",
             "abandoned": "coordinator",

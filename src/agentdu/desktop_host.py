@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import logging
 import os
@@ -10,6 +11,7 @@ import re
 import sys
 import threading
 import uuid
+from datetime import datetime, timezone
 from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,7 +22,10 @@ from .events import AgentEvent
 from .models import AssistantMessage, Message, ModelStreamEvent, ToolSchema
 from .permissions import PermissionRequest, ReadOnlyPolicy
 from .provider import OpenAICompatibleModel
-from .settings import ModelSettings, default_config_path, resolve_model_options
+from .settings import ModelSettings, default_config_path, resolve_profile_options
+from .sessions import SessionStore
+from .tools import _atomic_write, _git_command, _iter_workspace_files, _workspace_file
+from .windows_sandbox import run_appcontainer_command
 
 
 PROTOCOL_VERSION = 1
@@ -53,16 +58,17 @@ class ActiveTask:
 
 
 class DesktopPermissionPolicy:
-    """Bridge bounded file-write approvals and keep Shell execution unavailable."""
+    """Bridge file and isolated-command approvals to the desktop UI."""
 
-    def __init__(self, host: "RuntimeHost", task_id: str) -> None:
+    def __init__(self, host: "RuntimeHost", task_id: str, operation_id: str | None = None) -> None:
         self.host = host
         self.task_id = task_id
+        self.operation_id = operation_id
 
     def authorize(self, request: PermissionRequest) -> bool:
         if request.permission == "read":
             return True
-        if request.permission == "execute":
+        if request.permission == "execute" and os.name != "nt":
             self.host.publish_from_worker(
                 "security.capability_blocked",
                 {
@@ -72,7 +78,7 @@ class DesktopPermissionPolicy:
                 },
             )
             return False
-        if request.permission != "write":
+        if request.permission not in {"write", "execute"}:
             return False
 
         approval_id = str(uuid.uuid4())
@@ -83,10 +89,16 @@ class DesktopPermissionPolicy:
         payload = {
             "approvalId": approval_id,
             "taskId": self.task_id,
+            "operationId": self.operation_id,
             "toolName": request.tool_name,
             "permission": request.permission,
             "workspace": str(request.workspace),
             "arguments": _approval_summary(request.arguments),
+            "operation": "运行 AppContainer 隔离命令" if request.permission == "execute" else "写入项目文件",
+            "command": request.arguments.get("command") if isinstance(request.arguments.get("command"), str) else None,
+            "targetFiles": [request.arguments["path"]] if isinstance(request.arguments.get("path"), str) else [],
+            "scope": "当前项目工作区；运行期间临时授予 AppContainer 对项目文件的访问权" if request.permission == "execute" else "仅当前项目工作区",
+            "networkRequired": False,
         }
         self.host.publish_from_worker("permission.requested", payload)
         resolved = pending.event.wait(timeout=120)
@@ -95,7 +107,7 @@ class DesktopPermissionPolicy:
         if not resolved:
             self.host.publish_from_worker(
                 "permission.resolved",
-                {"approvalId": approval_id, "taskId": self.task_id, "decision": "timeout"},
+                {"approvalId": approval_id, "taskId": self.task_id, "operationId": self.operation_id, "decision": "timeout"},
             )
             return False
         self.host.publish_from_worker(
@@ -103,6 +115,7 @@ class DesktopPermissionPolicy:
             {
                 "approvalId": approval_id,
                 "taskId": self.task_id,
+                "operationId": self.operation_id,
                 "decision": "allow" if pending.decision else "deny",
             },
         )
@@ -114,7 +127,7 @@ class ControlledStreamingModel:
 
     streaming_enabled = True
 
-    def __init__(self, delay_seconds: float = 0.12) -> None:
+    def __init__(self, delay_seconds: float = 0.75) -> None:
         self.delay_seconds = delay_seconds
 
     async def complete(
@@ -154,12 +167,15 @@ class RuntimeHost:
         self.loop: asyncio.AbstractEventLoop | None = None
         self.input_queue: asyncio.Queue[dict[str, Any] | ProtocolError | object] | None = None
         self.workspace: Path | None = None
+        self.recent_workspaces_path = self.data_dir / "recent-workspaces.json"
         self.initialized = False
         self.sequence = 0
         self._output_lock = threading.Lock()
         self._approval_lock = threading.Lock()
         self._pending_approvals: dict[str, PendingApproval] = {}
         self._tasks: dict[str, ActiveTask] = {}
+        self._file_write_tasks: dict[str, asyncio.Task[None]] = {}
+        self._terminal_tasks: dict[str, asyncio.Task[None]] = {}
         self._request_cache: OrderedDict[
             str, tuple[str, str, dict[str, Any]]
         ] = OrderedDict()
@@ -241,6 +257,7 @@ class RuntimeHost:
                 ensure_ascii=False,
                 separators=(",", ":"),
             )
+            fingerprint = hashlib.sha256(fingerprint.encode("utf-8")).hexdigest()
         except (TypeError, ValueError):
             self._write_error(request_id, "INVALID_REQUEST", "Request params must be JSON values.")
             return
@@ -310,6 +327,8 @@ class RuntimeHost:
         if method == "host.health":
             return self._status_payload()
         if method == "workspace.open":
+            if any(not item.task.done() for item in self._tasks.values()) or self._file_write_tasks or self._terminal_tasks:
+                raise HostRequestError("TASK_ALREADY_RUNNING", "Finish the current task or file operation before switching projects.")
             raw_path = params.get("path")
             if not isinstance(raw_path, str) or not raw_path or len(raw_path) > 32_768:
                 raise HostRequestError("INVALID_PARAMS", "A valid workspace path is required.")
@@ -323,9 +342,122 @@ class RuntimeHost:
             if not resolved.is_dir():
                 raise HostRequestError("INVALID_WORKSPACE", "The selected workspace is not a directory.")
             self.workspace = resolved
+            self._remember_workspace(resolved)
             payload = {"path": str(resolved), "name": resolved.name}
             self._write_event("workspace.opened", payload)
             return payload
+        if method == "workspace.list":
+            return {"workspaces": self._recent_workspaces()}
+        if method == "workspace.inspect":
+            workspace = self._require_workspace()
+            return self._inspect_workspace(workspace)
+        if method == "workspace.files":
+            workspace = self._require_workspace()
+            return self._workspace_files(workspace, params)
+        if method == "file.read":
+            workspace = self._require_workspace()
+            raw_path = params.get("path")
+            if not isinstance(raw_path, str) or not raw_path:
+                raise HostRequestError("INVALID_PARAMS", "A workspace-relative file path is required.")
+            if Path(raw_path).is_absolute() or any(part.casefold() in {".git", ".agentdu"} for part in Path(raw_path).parts):
+                raise HostRequestError("INVALID_FILE_PATH", "File reads must target ordinary project files using a workspace-relative path.")
+            try:
+                path = _workspace_file(workspace, raw_path)
+                if path.is_symlink() or not path.is_file():
+                    raise ValueError("File is not a regular file in the workspace")
+                if path.stat().st_size > 1_000_000:
+                    raise ValueError("File is larger than the 1 MiB viewer limit")
+                content = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeError, ValueError) as error:
+                raise HostRequestError("FILE_READ_FAILED", str(error)) from error
+            return {"path": path.relative_to(workspace).as_posix(), "content": content}
+        if method == "file.write":
+            workspace = self._require_workspace()
+            raw_path = params.get("path")
+            content = params.get("content")
+            if not isinstance(raw_path, str) or not raw_path or not isinstance(content, str) or len(content) > 120_000:
+                raise HostRequestError("INVALID_PARAMS", "A file path and content up to 120,000 characters are required.")
+            if Path(raw_path).is_absolute() or any(part.casefold() in {".git", ".agentdu"} for part in Path(raw_path).parts):
+                raise HostRequestError("INVALID_FILE_PATH", "File writes must target ordinary project files using a workspace-relative path.")
+            if any(not item.task.done() for item in self._tasks.values()) or self._file_write_tasks or self._terminal_tasks:
+                raise HostRequestError("TASK_ALREADY_RUNNING", "Finish the active task or workspace operation before writing a file.")
+            try:
+                path = _workspace_file(workspace, raw_path)
+                if path.exists() and path.is_dir():
+                    raise IsADirectoryError(str(path))
+            except (OSError, ValueError) as error:
+                raise HostRequestError("INVALID_FILE_PATH", str(error)) from error
+            operation_id = str(uuid.uuid4())
+            task_id = f"workspace-edit:{operation_id}"
+            session_id = params.get("sessionId")
+            if not isinstance(session_id, str) or not re.fullmatch(r"[a-f0-9-]{16,64}", session_id) or not self._session_store(workspace).exists(session_id):
+                raise HostRequestError("SESSION_REQUIRED", "File edits must be attached to a valid project session.")
+            task = asyncio.create_task(
+                self._write_workspace_file(workspace, path, content, session_id, operation_id, task_id),
+                name=f"agentdu-desktop-write-{operation_id}",
+            )
+            self._file_write_tasks[operation_id] = task
+            return {"path": str(path.relative_to(workspace)), "operationId": operation_id, "status": "pending"}
+        if method == "terminal.run":
+            workspace = self._require_workspace()
+            command = params.get("command")
+            session_id = params.get("sessionId")
+            if not isinstance(command, str) or not command.strip() or len(command) > 16_000 or "\0" in command:
+                raise HostRequestError("INVALID_PARAMS", "Command must contain 1–16,000 characters and no NUL byte.")
+            if not isinstance(session_id, str) or not re.fullmatch(r"[a-f0-9-]{16,64}", session_id) or not self._session_store(workspace).exists(session_id):
+                raise HostRequestError("SESSION_REQUIRED", "Terminal commands must be attached to a valid project session.")
+            if any(not item.task.done() for item in self._tasks.values()) or self._file_write_tasks or self._terminal_tasks:
+                raise HostRequestError("TASK_ALREADY_RUNNING", "Finish the active task or file operation before starting a terminal command.")
+            operation_id = str(uuid.uuid4())
+            task_id = f"terminal:{operation_id}"
+            task = asyncio.create_task(
+                self._run_terminal_command(workspace, session_id, command.strip(), operation_id, task_id),
+                name=f"agentdu-terminal-{operation_id}",
+            )
+            self._terminal_tasks[operation_id] = task
+            return {"operationId": operation_id, "status": "pending"}
+        if method == "git.status":
+            return {"status": _git_command(self._require_workspace(), "status", "--short", "--branch")}
+        if method == "git.diff":
+            path = params.get("path")
+            arguments = ["diff", "--no-ext-diff"]
+            if params.get("staged") is True:
+                arguments.append("--cached")
+            arguments.append("--")
+            if isinstance(path, str) and path:
+                arguments.append(path)
+            return {"diff": _git_command(self._require_workspace(), *arguments)}
+        if method == "sessions.list":
+            store = self._session_store(self._require_workspace())
+            return {"sessions": store.list_sessions()}
+        if method == "provider.test":
+            profile_name = params.get("profile")
+            if not isinstance(profile_name, str) or not profile_name:
+                raise HostRequestError("INVALID_PARAMS", "A model profile is required.")
+            try:
+                settings = ModelSettings.load(default_config_path())
+                options = resolve_profile_options(settings, profile_name)
+                model = OpenAICompatibleModel(**options)
+            except (ValueError, OSError) as error:
+                raise HostRequestError("PROVIDER_NOT_CONFIGURED", str(error)) from error
+            result = await model.test_connection()
+            return {"profile": profile_name, "model": model.model, **result}
+        if method == "session.create":
+            store = self._session_store(self._require_workspace())
+            session_id = store.create()
+            return {"sessionId": session_id}
+        if method == "session.read":
+            workspace = self._require_workspace()
+            session_id = params.get("sessionId")
+            if not isinstance(session_id, str) or not session_id:
+                raise HostRequestError("INVALID_PARAMS", "A session ID is required.")
+            store = self._session_store(workspace)
+            try:
+                events = store.read_events(session_id)
+                messages = store.read_messages(session_id)
+            except (OSError, ValueError) as error:
+                raise HostRequestError("SESSION_READ_FAILED", str(error)) from error
+            return {"sessionId": session_id, "events": events[-500:], "messages": messages[-200:]}
         if method == "test.start":
             if params:
                 raise HostRequestError("INVALID_PARAMS", "test.start does not accept params.")
@@ -347,24 +479,30 @@ class RuntimeHost:
                 raise HostRequestError("WORKSPACE_REQUIRED", "Open a local workspace before starting a model task.")
             try:
                 settings = ModelSettings.load(default_config_path())
-                options = resolve_model_options(settings, None, None, None, None)
+                profile_name = params.get("profile")
+                if profile_name is not None and not isinstance(profile_name, str):
+                    raise ValueError("Model profile name must be text")
+                options = resolve_profile_options(settings, profile_name or settings.default_profile or "")
             except (ValueError, OSError) as error:
                 raise HostRequestError("PROVIDER_NOT_CONFIGURED", str(error)) from error
-            if settings.default_profile and not options.get("api_key"):
-                selected = settings.resolve(settings.default_profile)
-                if selected and selected.api_key_env and selected.base_url.startswith(("https://", "http://")):
-                    if not _is_local_endpoint(selected.base_url):
-                        raise HostRequestError(
-                            "PROVIDER_CREDENTIAL_MISSING",
-                            "The selected provider credential is unavailable to the desktop Runtime Host.",
-                        )
+            selected = settings.resolve(profile_name or settings.default_profile)
+            if selected and not options.get("api_key") and selected.api_key_env:
+                if not _is_local_endpoint(selected.base_url):
+                    raise HostRequestError(
+                        "PROVIDER_CREDENTIAL_MISSING",
+                        "The selected provider credential is unavailable to the desktop Runtime Host.",
+                    )
             model = OpenAICompatibleModel(**options)
+            session_id = params.get("sessionId")
+            if session_id is not None and not isinstance(session_id, str):
+                raise HostRequestError("INVALID_PARAMS", "Session ID must be text.")
             active = self._start_task(
                 source="provider",
                 workspace=self.workspace,
                 model=model,
                 permission_policy=None,
                 prompt=prompt.strip(),
+                session_id=session_id,
             )
             return {"taskId": active.task_id, "sessionId": active.session_id}
         if method == "turn.cancel":
@@ -397,6 +535,7 @@ class RuntimeHost:
         model: Any,
         permission_policy: Any,
         prompt: str,
+        session_id: str | None = None,
     ) -> ActiveTask:
         if any(not item.task.done() for item in self._tasks.values()):
             raise HostRequestError("TASK_ALREADY_RUNNING", "The D1 Runtime Host supports one active task.")
@@ -410,8 +549,13 @@ class RuntimeHost:
             data_dir=workspace / ".agentdu",
             context_tokens=8_000,
             max_steps=12,
+            command_runner=run_appcontainer_command,
         )
-        session_id = runtime.sessions.create()
+        if session_id is None:
+            session_id = runtime.sessions.create()
+        elif not runtime.sessions.exists(session_id):
+            runtime.close()
+            raise HostRequestError("SESSION_NOT_FOUND", "The selected session does not exist in this workspace.")
         task = asyncio.create_task(
             self._run_task(task_id, session_id, source, runtime, prompt),
             name=f"agentdu-desktop-{task_id}",
@@ -426,6 +570,85 @@ class RuntimeHost:
             {"taskId": task_id, "sessionId": session_id, "source": source},
         )
         return active
+
+    def _require_workspace(self) -> Path:
+        if self.workspace is None:
+            raise HostRequestError("WORKSPACE_REQUIRED", "Open a local workspace first.")
+        return self.workspace
+
+    @staticmethod
+    def _session_store(workspace: Path) -> SessionStore:
+        store = SessionStore(workspace / ".agentdu")
+        store.add_redactions(RuntimeHost._known_secret_values())
+        return store
+
+    @staticmethod
+    def _known_secret_values() -> tuple[str, ...]:
+        return tuple(
+            dict.fromkeys(
+                value
+                for name, value in os.environ.items()
+                if re.search(r"(?:API_KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)", name, re.IGNORECASE)
+                or ("_PROFILE_" in name and name.endswith("_KEY"))
+                if value
+            )
+        )
+
+    def _remember_workspace(self, workspace: Path) -> None:
+        items = self._recent_workspaces()
+        key = str(workspace).casefold()
+        items = [item for item in items if str(item.get("path", "")).casefold() != key]
+        items.insert(0, {"path": str(workspace), "name": workspace.name, "openedAt": datetime.now(timezone.utc).isoformat()})
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        temporary = self.recent_workspaces_path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(items[:20], ensure_ascii=False), encoding="utf-8")
+        os.replace(temporary, self.recent_workspaces_path)
+
+    def _recent_workspaces(self) -> list[dict[str, str]]:
+        try:
+            items = json.loads(self.recent_workspaces_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return []
+        if not isinstance(items, list):
+            return []
+        available = []
+        for item in items:
+            if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+                continue
+            path = Path(item["path"])
+            if path.is_dir():
+                available.append({"path": str(path), "name": str(item.get("name") or path.name), "openedAt": str(item.get("openedAt") or "")})
+        return available[:20]
+
+    def _inspect_workspace(self, workspace: Path) -> dict[str, Any]:
+        files = self._workspace_files(workspace, {"limit": 300})["files"]
+        try:
+            git_status = _git_command(workspace, "status", "--short", "--branch")
+            git_error = None
+        except (OSError, RuntimeError, ValueError) as error:
+            git_status = ""
+            git_error = str(error)
+        return {"path": str(workspace), "name": workspace.name, "files": files, "gitStatus": git_status, "gitError": git_error}
+
+    @staticmethod
+    def _workspace_files(workspace: Path, params: dict[str, Any]) -> dict[str, Any]:
+        limit_value = params.get("limit", 300)
+        limit = max(1, min(limit_value if isinstance(limit_value, int) and not isinstance(limit_value, bool) else 300, 1000))
+        query = params.get("query", "")
+        query = query.casefold() if isinstance(query, str) else ""
+        files = []
+        for path in _iter_workspace_files(workspace):
+            relative = path.relative_to(workspace).as_posix()
+            if query and query not in relative.casefold():
+                continue
+            try:
+                size = path.stat().st_size
+            except OSError:
+                continue
+            files.append({"path": relative, "size": size})
+            if len(files) >= limit:
+                break
+        return {"files": files, "limit": limit}
 
     async def _run_task(
         self,
@@ -490,6 +713,123 @@ class RuntimeHost:
             return {"status": "cancelled"}
         return {"status": "completed"}
 
+    async def _write_workspace_file(
+        self,
+        workspace: Path,
+        path: Path,
+        content: str,
+        session_id: str,
+        operation_id: str,
+        task_id: str,
+    ) -> None:
+        relative_path = path.relative_to(workspace).as_posix()
+        session_store = self._session_store(workspace)
+        audit = {"operationId": operation_id, "path": relative_path, "contentChars": len(content)}
+        try:
+            session_store.append(session_id, "desktop_file_write.requested", audit)
+            request = PermissionRequest(
+                permission="write",
+                tool_name="workspace_editor",
+                arguments={"path": relative_path, "content": content},
+                workspace=workspace,
+            )
+            allowed = await asyncio.to_thread(
+                DesktopPermissionPolicy(self, task_id, operation_id).authorize,
+                request,
+            )
+            session_store.append(
+                session_id,
+                "desktop_file_write.approval",
+                {**audit, "decision": "allow" if allowed else "deny"},
+            )
+            if not allowed:
+                session_store.append(session_id, "desktop_file_write.result", {**audit, "status": "denied"})
+                self._write_event("workspace.write.finished", {**audit, "sessionId": session_id, "status": "denied"})
+                return
+            path.parent.mkdir(parents=True, exist_ok=True)
+            await asyncio.to_thread(_atomic_write, path, content)
+        except asyncio.CancelledError:
+            self._write_event("workspace.write.finished", {**audit, "sessionId": session_id, "status": "cancelled"})
+            raise
+        except Exception as error:
+            session_store.append(
+                session_id,
+                "desktop_file_write.result",
+                {**audit, "status": "failed", "error": type(error).__name__},
+            )
+            self._write_event(
+                "workspace.write.finished",
+                {**audit, "sessionId": session_id, "status": "failed", "error": str(error)[:500]},
+            )
+        else:
+            written_bytes = len(content.encode("utf-8"))
+            session_store.append(
+                session_id,
+                "desktop_file_write.result",
+                {**audit, "status": "completed", "bytes": written_bytes},
+            )
+            self._write_event(
+                "workspace.write.finished",
+                {**audit, "sessionId": session_id, "status": "completed", "bytes": written_bytes},
+            )
+        finally:
+            self._file_write_tasks.pop(operation_id, None)
+
+    async def _run_terminal_command(
+        self,
+        workspace: Path,
+        session_id: str,
+        command: str,
+        operation_id: str,
+        task_id: str,
+    ) -> None:
+        store = self._session_store(workspace)
+        audit = {"operationId": operation_id, "command": command, "workingDirectory": str(workspace)}
+        audit = store.redact(audit)
+        try:
+            store.append(session_id, "terminal.command.requested", audit)
+            self._write_event("terminal.command.started", {"sessionId": session_id, **audit})
+            request = PermissionRequest(
+                permission="execute",
+                tool_name="terminal.run",
+                arguments={"command": command},
+                workspace=workspace,
+            )
+            allowed = await asyncio.to_thread(
+                DesktopPermissionPolicy(self, task_id, operation_id).authorize,
+                request,
+            )
+            store.append(session_id, "terminal.command.approval", {"operationId": operation_id, "decision": "allow" if allowed else "deny"})
+            if not allowed:
+                store.append(session_id, "terminal.command.result", {"operationId": operation_id, "status": "denied"})
+                self._write_event("terminal.command.finished", {"operationId": operation_id, "sessionId": session_id, "status": "denied"})
+                return
+            result = await asyncio.to_thread(
+                run_appcontainer_command,
+                {"command": command},
+                workspace,
+                self._known_secret_values(),
+            )
+            match = re.match(r"exit code: (-?\d+)", result.text)
+            exit_code = int(match.group(1)) if match else None
+            output = result.text.split("\n", 1)[1] if "\n" in result.text else result.text
+            payload = {
+                "operationId": operation_id,
+                "status": "failed" if result.is_error else "completed",
+                "exitCode": exit_code,
+                "output": output[:16_000],
+            }
+            store.append(session_id, "terminal.command.result", payload)
+            self._write_event("terminal.command.finished", {**payload, "sessionId": session_id})
+        except asyncio.CancelledError:
+            self._write_event("terminal.command.finished", {"operationId": operation_id, "sessionId": session_id, "status": "cancelled"})
+            raise
+        except Exception as error:
+            store.append(session_id, "terminal.command.result", {"operationId": operation_id, "status": "failed", "error": type(error).__name__})
+            self._write_event("terminal.command.finished", {"operationId": operation_id, "sessionId": session_id, "status": "failed", "error": str(error)[:500]})
+        finally:
+            self._terminal_tasks.pop(operation_id, None)
+
     def _resolve_pending_approvals(self, task_id: str, allow: bool) -> None:
         with self._approval_lock:
             for pending in self._pending_approvals.values():
@@ -502,8 +842,18 @@ class RuntimeHost:
         for item in active:
             self._resolve_pending_approvals(item.task_id, allow=False)
             item.task.cancel()
+        file_writes = list(self._file_write_tasks.items())
+        for operation_id, _task in file_writes:
+            self._resolve_pending_approvals(f"workspace-edit:{operation_id}", allow=False)
         if active:
             await asyncio.gather(*(item.task for item in active), return_exceptions=True)
+        if file_writes:
+            await asyncio.gather(*(task for _, task in file_writes), return_exceptions=True)
+        terminal_tasks = list(self._terminal_tasks.items())
+        for operation_id, _task in terminal_tasks:
+            self._resolve_pending_approvals(f"terminal:{operation_id}", allow=False)
+        if terminal_tasks:
+            await asyncio.gather(*(task for _, task in terminal_tasks), return_exceptions=True)
         for item in self._tasks.values():
             if not item.task.done():
                 item.runtime.close()
@@ -526,6 +876,15 @@ class RuntimeHost:
                         "model": profile.model,
                         "default": name == settings.default_profile,
                         "credentialAvailable": bool(key),
+                        "baseUrl": profile.base_url,
+                        "streaming": profile.streaming,
+                        "wireApi": profile.wire_api,
+                        "protocol": (
+                            "OpenAI-compatible Responses API"
+                            if profile.wire_api == "responses"
+                            else "OpenAI-compatible Chat Completions"
+                        ),
+                        "configuredCapabilities": list(profile.capabilities),
                     }
                 )
             provider_configured = bool(
@@ -553,7 +912,11 @@ class RuntimeHost:
             "platform": sys.platform,
             "dataDirectory": str(self.data_dir),
             "workspace": str(self.workspace) if self.workspace else None,
-            "activeTasks": sum(not item.task.done() for item in self._tasks.values()),
+            "activeTasks": (
+                sum(not item.task.done() for item in self._tasks.values())
+                + len(self._file_write_tasks)
+                + len(self._terminal_tasks)
+            ),
             **provider_state,
         }
 
