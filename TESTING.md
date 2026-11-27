@@ -23,12 +23,14 @@ Python 测试包含本地 HTTP Provider 夹具、Runtime、会话、工具、CLI
 
 较早的临时 NSIS 安装版位于 `desktop/release/d2-ui-cancel-manual-2026-11-26-60s/installed app with spaces`，Runtime 在线并恢复了最近项目及 Git 状态。该包的 60 秒自检间隔只用于此前的人工取消验证。新源码 NSIS 包已构建到 `desktop/release/d2-lifecycle-2026-11-27`，SHA-256 为 `71337E8ED4C498C44ED549AAA72700D1D39734E914620E3BF6D1359AF91C334B`，但本轮没有通过 NSIS 安装向导完成安装。已将其 `win-unpacked` 内容复制到 `installed app with spaces` 目录启动，Runtime 在线。通过 Renderer 取消后，界面显示任务已取消，JSONL 会话记录包含 task.accepted、task.cancel_requested 和 task.cancelled，且没有 task.completed。截图位于 `docs/desktop/evidence/d2-runtime-lifecycle-persist-2026-11-27.jpg`。当前 tracked 源码自检间隔为 6 秒。临时 profile 关闭后 launch marker 已清除。
 
+2026-11-27 在新源码包副本和隔离 `--user-data-dir` 下完成项目与空白会话恢复检查。重启后 UI 自动恢复临时项目、`新会话` 和 `session_created` 活动事件。磁盘上的 `runtime/recent-workspaces.json` 保留项目路径，项目 `.agentdu/sessions/<session-id>.jsonl` 保留创建事件。该测试 profile 没有 Provider，发送按钮禁用，未验证模型消息或模型任务恢复。
+
 ## 尚待验收
 
 - 在 AgentDU 应用中安全配置真实 Provider，并完成连通性验证。当前档案列表为空，未认证 `/models` 请求返回 HTTP 401。Provider 表单与 Responses API 选项已目视复核，截图位于 `docs/desktop/evidence/d2-provider-responses-profile-form-2026-11-27.jpg`。
 - 用真实 Provider 在真实项目中完成跨文件读取、修改、测试和修复。
 - 在最新 tracked 源码构建的安装包上复测 Renderer 取消，再核对 Host 退出和安装包恢复。
-- 从安装版恢复一个已有模型会话，并核对会话记录和工作区状态。
+- 配置真实 Provider 后，从安装版恢复一个已有模型会话，并核对会话记录和工作区状态。
 - 从 Windows 安装版恢复已有会话，并验证任务状态与工作区内容。
 - 完成桌面 Runtime 接入多 Agent 后的并发、恢复、故障注入和真实多模型验证。
 

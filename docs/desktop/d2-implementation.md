@@ -4,7 +4,7 @@
 
 ## 状态
 
-**D2 尚未通过独立验收。** 本地工作区已实现单模型工作台主要路径，自动化与 Windows AppContainer 集成测试通过。修复了真实冷启动时的 Runtime 就绪竞态，并生成、安装和启动了 D2 Windows 包。针对当前配置增加了 OpenAI-compatible Responses API 支持，覆盖文本输入、流式事件、函数调用和函数结果续传，同时保留 Chat Completions 默认行为。Renderer UI 取消已在此前 NSIS 包端到端验证，生命周期持久化修复又在当前源码包的 unpacked 分发副本中复测。AgentDU 当前没有真实 Provider 档案或凭据，真实 Provider 任务、安装版已有模型会话恢复仍未完成。未将受控测试任务或模拟模型调用作为真实 Provider 证据。
+**D2 尚未通过独立验收。** 本地工作区已实现单模型工作台主要路径，自动化与 Windows AppContainer 集成测试通过。修复了真实冷启动时的 Runtime 就绪竞态，并生成、安装和启动了 D2 Windows 包。针对当前配置增加了 OpenAI-compatible Responses API 支持，覆盖文本输入、流式事件、函数调用和函数结果续传，同时保留 Chat Completions 默认行为。Renderer UI 取消已在此前 NSIS 包端到端验证，生命周期持久化修复又在当前源码包的 unpacked 分发副本中复测。AgentDU 当前没有真实 Provider 档案或凭据。新源码包副本已验证最近项目与空白会话恢复。真实 Provider 任务、已有模型对话恢复仍未完成。未将受控测试任务或模拟模型调用作为真实 Provider 证据。
 
 本轮修复从 `c61933a667b6e044cc9cf2e50a732288824eea72` 开始。D2 仍未通过独立验收。
 
@@ -67,13 +67,20 @@
 - 在新源码包中打开 Provider 设置，目视确认档案名、Endpoint、Model ID、协议、API Key、默认档案和连通性按钮均可见，协议选项包含 Chat Completions 与 Responses API。选中 Responses API 后未保存。截图：[Responses API Provider 表单](evidence/d2-provider-responses-profile-form-2026-11-27.jpg)。
 - AgentDU 隔离测试 profile 与正常用户 profile 的 Provider 档案列表均为空。本轮没有输入、读取或复制任何 API Key。给定 Endpoint 的未认证 `/models` 请求返回 HTTP 401。
 
+## 2026-11-27 新源码包项目与空白会话恢复
+
+- 使用 `desktop/release/d2-lifecycle-2026-11-27/installed app with spaces/AgentDU.exe` 和隔离的 `%TEMP%\AgentDU-D2-Lifecycle-2026-11-27` 用户数据目录，首次启动后从界面打开 `%TEMP%\AgentDU-D2-Session-Recovery-2026-11-27\sample project`。Renderer 显示项目文件 `README.md`、`src/main.py`，Runtime 在线，并创建 `新会话`，活动流出现 `session_created`。
+- 关闭实例后，Host 日志记录 `Python Runtime Host stopped`。使用相同可执行文件和 `--user-data-dir` 重启后，界面自动恢复 `sample project`、`新会话` 和持久事件 `session_created`。
+- 磁盘证据包括隔离 profile 的 `runtime/recent-workspaces.json` 中的项目路径，以及测试项目 `.agentdu/sessions/<session-id>.jsonl` 中唯一的 `session_created` 事件。重启后 UI 展示同一项目、会话和事件。
+- 该结果验证隔离 profile 下的最近项目与空白会话事件恢复。该 profile 没有 Provider 档案，发送按钮处于禁用状态，因此不能证明已有模型消息或真实模型任务恢复。
+
 ## 仍未验证的 D2 验收项
 
-- AgentDU 当前 Windows 安全 Provider 档案为空。用户提供的 Codex 配置使用 `wire_api = "responses"`，现已实现对应适配。用户给定 Endpoint 的未认证 `/models` 请求返回 HTTP 401。未读取或复用 Codex 凭据。真实 Provider 连通性、跨文件模型修改、真实测试修复、真实 Git Diff 审查和界面恢复模型会话均未执行。
+- AgentDU 当前 Windows 安全 Provider 档案为空。用户提供的 Codex 配置使用 `wire_api = "responses"`，现已实现对应适配。用户给定 Endpoint 的未认证 `/models` 请求返回 HTTP 401。未读取或复用 Codex 凭据。真实 Provider 连通性、跨文件模型修改、真实测试修复、真实 Git Diff 审查和已有模型对话恢复均未执行。
 - 较早 NSIS 安装版的 Electron 主进程和 Runtime Host 已联合启动，Runtime 在线。安装版最近项目和 Git 状态已复验并保存截图。新源码包的 Provider 设置表单和 Responses 选项已目视复核。
 - 已验证较早 NSIS 包安装、带空格路径、embedded Python 启动、Host 初始化和关闭，以及最近项目与 Git 状态恢复。新源码 NSIS 包已构建，但本轮没有完成向导安装。其 unpacked 副本在带空格路径成功启动。较早的人工取消包使用 60 秒间隔，当前源码使用 6 秒间隔。
-- 已验证安装版正常关闭、Runtime 有序退出、异常退出恢复提示、Host 层任务取消，以及 Renderer UI 取消受控任务。尚未验证 Runtime 重启按钮、已有模型会话恢复和真实 Provider 任务。
+- 已验证安装版正常关闭、Runtime 有序退出、异常退出恢复提示、Host 层任务取消，以及 Renderer UI 取消受控任务。尚未验证 Runtime 重启按钮、已有模型对话恢复和真实 Provider 任务。
 
 ## 当前结论
 
-D2 的主要桌面工作流和 Runtime IPC 已经落地，自动化及 AppContainer 命令隔离测试通过，较早 NSIS 安装版在含空格路径下成功启动 embedded Runtime，并恢复最近项目和 Git 状态。新源码 NSIS 包成功构建，其 unpacked 副本在含空格路径下启动并完成 Runtime UI 取消和会话生命周期持久化验证。AgentDU 没有 Provider 凭据，因此真实 Provider 任务、已有模型会话恢复和新 NSIS 包向导安装仍未完成。D2 继续为 NOT VERIFIED，不进入 D3。完成真实任务验收需要在 AgentDU 桌面 Provider 设置中配置档案并安全保存 API Key。
+D2 的主要桌面工作流和 Runtime IPC 已经落地，自动化及 AppContainer 命令隔离测试通过，较早 NSIS 安装版在含空格路径下成功启动 embedded Runtime，并恢复最近项目和 Git 状态。新源码 NSIS 包成功构建，其 unpacked 副本在含空格路径下启动并完成 Runtime UI 取消和会话生命周期持久化验证。AgentDU 没有 Provider 凭据，因此真实 Provider 任务、已有模型对话恢复和新 NSIS 包向导安装仍未完成。隔离 profile 下的项目与空白会话恢复已验证，但不能替代真实会话恢复。D2 继续为 NOT VERIFIED，不进入 D3。完成真实任务验收需要在 AgentDU 桌面 Provider 设置中配置档案并安全保存 API Key。
