@@ -6,6 +6,12 @@ import { pathToFileURL } from "node:url";
 import { RuntimeHostClient } from "./host-client";
 import type { EventMessage, RuntimeStatus } from "../shared/protocol";
 
+// Packaged acceptance runs can isolate app data without borrowing the user's profile.
+const isolatedUserDataDirectory = process.env.AGENTDU_DESKTOP_USER_DATA_DIR?.trim();
+if (isolatedUserDataDirectory) {
+  app.setPath("userData", path.resolve(isolatedUserDataDirectory));
+}
+
 const IPC_CHANNELS = [
   "desktop.getStatus",
   "desktop.openWorkspace",
