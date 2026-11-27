@@ -4,7 +4,7 @@
 
 ## 状态
 
-**D2 尚未通过独立验收。** 本地工作区已实现单模型工作台主要路径，自动化与 Windows AppContainer 集成测试通过。修复了真实冷启动时的 Runtime 就绪竞态，并生成、安装和启动了 D2 Windows 包。针对当前配置增加了 OpenAI-compatible Responses API 支持，覆盖文本输入、流式事件、函数调用和函数结果续传，同时保留 Chat Completions 默认行为。真实 Provider 任务仍未完成。新版安装界面已复验 Runtime 在线、最近项目恢复和 Git 状态，并保存了安装版截图。Provider 设置表单仍未复核。未将受控测试任务或模拟模型调用作为真实 Provider 证据。
+**D2 尚未通过独立验收。** 本地工作区已实现单模型工作台主要路径，自动化与 Windows AppContainer 集成测试通过。修复了真实冷启动时的 Runtime 就绪竞态，并生成、安装和启动了 D2 Windows 包。针对当前配置增加了 OpenAI-compatible Responses API 支持，覆盖文本输入、流式事件、函数调用和函数结果续传，同时保留 Chat Completions 默认行为。Renderer UI 取消已在此前 NSIS 包端到端验证，生命周期持久化修复又在当前源码包的 unpacked 分发副本中复测。AgentDU 当前没有真实 Provider 档案或凭据，真实 Provider 任务、安装版已有模型会话恢复仍未完成。未将受控测试任务或模拟模型调用作为真实 Provider 证据。
 
 本轮修复从 `c61933a667b6e044cc9cf2e50a732288824eea72` 开始。D2 仍未通过独立验收。
 
@@ -16,7 +16,7 @@
 - Provider 档案支持 Endpoint、Model ID、API Key 和 Chat Completions / Responses 协议选择。Windows `safeStorage` 加密凭据，Runtime 启动时将解密值注入子进程环境，不通过命令行传密钥。连通性测试只验证 Provider 的 `/models` 响应。
 - 审批事件呈现来源、命令、工作目录、目标文件、范围和网络需求。审批请求、审批结论及实际执行结果分别写入会话事件记录。
 - Runtime Host 对桌面编辑写入、Agent turn 和终端命令实施工作区互斥。Windows 终端命令通过 AppContainer 运行，限制网络、进程、内存、输出及运行时长。
-- Renderer 通过受限 Preload 调用显式 IPC API。窗口最小尺寸、响应式窄屏布局和侧栏横向调整由 Electron 设置和 CSS 实现。
+- Renderer 通过受限 Preload 调用显式 IPC API。任务接受、取消请求及终态持久化进会话 JSONL。窗口最小尺寸、响应式窄屏布局和侧栏横向调整由 Electron 设置和 CSS 实现。
 
 ## 自动化和隔离测试
 
@@ -53,15 +53,27 @@
 - 在 `desktop/release/d2-ui-cancel-manual-2026-11-26-60s` 构建临时 Windows 包，并通过 NSIS 交互安装到 `installed app with spaces`。一次静默安装调用未等待安装器完成，过早启动时 Runtime 退出码为 1，stderr 显示 `SyntaxError: source code string cannot contain null bytes`。本轮没有将这次启动作为通过证据。随后从安装向导完成重装，安装版成功启动，Runtime 显示在线。
 - 安装版从用户数据恢复了 `C:\AgentDU` 和 `C:\Users\ASUS\Downloads\02、模块烧录软件` 两个最近项目。界面显示 `C:\AgentDU`、Git `main...origin/main` 和本地修改状态。截图已保存为 [安装版项目恢复与 Runtime 在线](evidence/d2-installed-project-runtime-online-2026-11-27.png)。截图裁掉了屏幕底部的非应用字幕。应用启动更新了 `recent-workspaces.json` 中 AgentDU 的 `openedAt` 时间，两个最近项目条目均保留。
 - 截图所用安装包的受控自检每段延迟为 60 秒，便于人工操作。当前源码已收敛为 6 秒，并将取消回归测试等待设为 8 秒。源码验证结果为 `python -m unittest discover -s tests`：PASS，92 项；Host 专项 19 项：PASS；Desktop 测试 17 项：PASS；`pnpm run build`：PASS。
-- 安装版 Runtime 自检能启动并流式完成，但 Renderer 的停止按钮仍未取得取消成功证据。Computer Use 窗口报告检测到用户输入且目标窗口已最小化，后续输入已停止。Host 层取消测试通过不能替代此 UI 验收。D2 继续保持 **NOT VERIFIED**。
+- 后续独立 UI 取消复测前，安装版 Runtime 自检能启动并流式完成，但停止按钮尚未取得取消成功证据。当时 Host 层取消测试通过不能替代 UI 验收。该项已在下文完成复测。D2 继续保持 **NOT VERIFIED**。
+
+## 2026-11-27 任务生命周期持久化修复与新源码包复测
+
+- Runtime Host 现将 `task.accepted`、`task.cancel_requested`、`task.cancelled`、`task.failed`、`task.completed` 写入对应会话 JSONL。取消请求事件同时包含 taskId、sessionId 和 source。完成事件只持久化模型步数与调用数，完整响应继续通过实时 IPC 返回。
+- `python -m unittest discover -s tests -p test_desktop_host.py -v`：PASS，19 项。受控取消回归测试确认会话事件包含 accepted、cancel_requested、cancelled，且没有 completed。另一受控任务验证 completed 只记录模型步数和调用数，不重复持久化完整响应。
+- 全量 Python 测试：PASS，92 项。Desktop 测试：PASS，17 项。`pnpm run build`：PASS。Windows Runtime 准备和 NSIS 包构建通过。NSIS 包 SHA-256 为 `71337E8ED4C498C44ED549AAA72700D1D39734E914620E3BF6D1359AF91C334B`。
+- 从新包的 `win-unpacked` 副本在 `desktop/release/d2-lifecycle-2026-11-27/installed app with spaces` 启动，Runtime 在线。Renderer UI 取消成功，临时 Runtime 会话的事件顺序为 `session_created`、`task.accepted`、消息、`run_started`、`model_request`、`task.cancel_requested`、`task.cancelled`，没有 `task.completed`。截图：[新源码包 UI 取消与事件](evidence/d2-runtime-lifecycle-persist-2026-11-27.jpg)。本轮新 NSIS 安装器没有完成安装向导，因此安装器安装验收仍待完成。
+
+## 2026-11-27 Provider 配置表单复核
+
+- 在新源码包中打开 Provider 设置，目视确认档案名、Endpoint、Model ID、协议、API Key、默认档案和连通性按钮均可见，协议选项包含 Chat Completions 与 Responses API。选中 Responses API 后未保存。截图：[Responses API Provider 表单](evidence/d2-provider-responses-profile-form-2026-11-27.jpg)。
+- AgentDU 隔离测试 profile 与正常用户 profile 的 Provider 档案列表均为空。本轮没有输入、读取或复制任何 API Key。给定 Endpoint 的未认证 `/models` 请求返回 HTTP 401。
 
 ## 仍未验证的 D2 验收项
 
-- AgentDU 当前 Windows 安全 Provider 档案为空。用户提供的 Codex 配置使用 `wire_api = "responses"`，现已实现对应适配；Codex 与 AgentDU 的凭据存储互不共享。真实 Provider 连通性、跨文件模型修改、真实测试修复、真实 Git Diff 审查和界面恢复模型会话均未执行，状态为 **BLOCKED**。
-- 新版安装包的 Electron 主进程和 Runtime Host 已联合启动，Runtime 在线。安装版最近项目和 Git 状态已复验并保存截图。Provider 设置表单的 Responses 选项仍未目视复核。
-- 已验证新版 NSIS 安装、带空格安装路径、embedded Python 启动、Host 初始化和关闭，以及最近项目与 Git 状态恢复。临时 UI 取消验证包使用 60 秒受控事件间隔，当前源码使用 6 秒间隔。Renderer 停止按钮尚未完成端到端验收。
-- 已验证安装版正常关闭、Runtime 有序退出、异常退出恢复提示，以及 Host 层任务取消。尚未验证 Renderer UI 取消按钮端到端、Runtime 重启按钮、已有模型会话恢复和真实 Provider 任务。
+- AgentDU 当前 Windows 安全 Provider 档案为空。用户提供的 Codex 配置使用 `wire_api = "responses"`，现已实现对应适配。用户给定 Endpoint 的未认证 `/models` 请求返回 HTTP 401。未读取或复用 Codex 凭据。真实 Provider 连通性、跨文件模型修改、真实测试修复、真实 Git Diff 审查和界面恢复模型会话均未执行。
+- 较早 NSIS 安装版的 Electron 主进程和 Runtime Host 已联合启动，Runtime 在线。安装版最近项目和 Git 状态已复验并保存截图。新源码包的 Provider 设置表单和 Responses 选项已目视复核。
+- 已验证较早 NSIS 包安装、带空格路径、embedded Python 启动、Host 初始化和关闭，以及最近项目与 Git 状态恢复。新源码 NSIS 包已构建，但本轮没有完成向导安装。其 unpacked 副本在带空格路径成功启动。较早的人工取消包使用 60 秒间隔，当前源码使用 6 秒间隔。
+- 已验证安装版正常关闭、Runtime 有序退出、异常退出恢复提示、Host 层任务取消，以及 Renderer UI 取消受控任务。尚未验证 Runtime 重启按钮、已有模型会话恢复和真实 Provider 任务。
 
 ## 当前结论
 
-D2 的主要桌面工作流和 Runtime IPC 已经落地，自动化及 AppContainer 命令隔离测试通过，NSIS 安装版在含空格路径下成功启动 embedded Runtime，并恢复最近项目和 Git 状态。Host 层受控取消通过，安装版截图已保存。Renderer UI 取消端到端、已有模型会话恢复及真实 Provider 任务仍未完成，因此 D2 继续为 NOT VERIFIED，不进入 D3。完成真实任务验收仍需在 AgentDU 桌面 Provider 设置中配置档案并安全保存凭据。
+D2 的主要桌面工作流和 Runtime IPC 已经落地，自动化及 AppContainer 命令隔离测试通过，较早 NSIS 安装版在含空格路径下成功启动 embedded Runtime，并恢复最近项目和 Git 状态。新源码 NSIS 包成功构建，其 unpacked 副本在含空格路径下启动并完成 Runtime UI 取消和会话生命周期持久化验证。AgentDU 没有 Provider 凭据，因此真实 Provider 任务、已有模型会话恢复和新 NSIS 包向导安装仍未完成。D2 继续为 NOT VERIFIED，不进入 D3。完成真实任务验收需要在 AgentDU 桌面 Provider 设置中配置档案并安全保存 API Key。

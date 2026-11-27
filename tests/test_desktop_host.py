@@ -390,6 +390,40 @@ class DesktopHostTests(unittest.TestCase):
             )
         )
 
+        session_files = list(self.host.data_dir.rglob(f"{started['result']['sessionId']}.jsonl"))
+        self.assertEqual(len(session_files), 1)
+        persisted_events = [
+            json.loads(line)
+            for line in session_files[0].read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        event_kinds = [event["kind"] for event in persisted_events]
+        self.assertIn("task.accepted", event_kinds)
+        self.assertIn("task.cancel_requested", event_kinds)
+        self.assertIn("task.cancelled", event_kinds)
+        self.assertNotIn("task.completed", event_kinds)
+
+        completed_task = self.host.request("test.start")
+        completed_task_id = completed_task["result"]["taskId"]
+        self.host.wait_event("task.accepted")
+        completion_event = self.host.wait_event("task.completed", timeout=30.0)
+        self.assertEqual(completion_event["payload"]["taskId"], completed_task_id)
+
+        completed_session = completed_task["result"]["sessionId"]
+        completed_session_file = next(
+            self.host.data_dir.rglob(f"{completed_session}.jsonl")
+        )
+        completed_events = [
+            json.loads(line)
+            for line in completed_session_file.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        completed_record = next(
+            event for event in completed_events if event["kind"] == "task.completed"
+        )
+        self.assertGreaterEqual(completed_record["payload"]["modelCalls"], 1)
+        self.assertNotIn("response", completed_record["payload"])
+
     def test_repeated_request_id_does_not_start_a_second_test_task(self) -> None:
         first_id = self.host.send("test.start", {}, request_id="stable-test")
         first = self.host.wait_for(

@@ -566,10 +566,9 @@ class RuntimeHost:
         runtime.event_bus.subscribe(
             lambda event: self._runtime_event(task_id, source, event)
         )
-        self._write_event(
-            "task.accepted",
-            {"taskId": task_id, "sessionId": session_id, "source": source},
-        )
+        task_payload = {"taskId": task_id, "sessionId": session_id, "source": source}
+        self._persist_task_event(runtime, task_id, session_id, source, "task.accepted")
+        self._write_event("task.accepted", task_payload)
         return active
 
     def _require_workspace(self) -> Path:
@@ -672,6 +671,26 @@ class RuntimeHost:
                 break
         return {"files": files, "limit": limit}
 
+    @staticmethod
+    def _persist_task_event(
+        runtime: AgentRuntime,
+        task_id: str,
+        session_id: str,
+        source: str,
+        event: str,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        payload = {
+            **(details or {}),
+            "taskId": task_id,
+            "sessionId": session_id,
+            "source": source,
+        }
+        try:
+            runtime.sessions.append(session_id, event, payload)
+        except Exception:
+            LOG.exception("Failed to persist %s for Agent task %s", event, task_id)
+
     async def _run_task(
         self,
         task_id: str,
@@ -683,30 +702,41 @@ class RuntimeHost:
         try:
             result = await runtime.run(prompt, session_id)
         except asyncio.CancelledError:
-            self._write_event(
-                "task.cancelled",
-                {"taskId": task_id, "sessionId": session_id, "source": source},
-            )
+            payload = {"taskId": task_id, "sessionId": session_id, "source": source}
+            self._persist_task_event(runtime, task_id, session_id, source, "task.cancelled")
+            self._write_event("task.cancelled", payload)
             raise
         except Exception as error:
             safe_error = runtime.sessions.redact(
                 {"message": f"{type(error).__name__}: {error}"}
             )["message"]
-            self._write_event(
+            payload = {
+                "taskId": task_id,
+                "sessionId": session_id,
+                "source": source,
+                "message": str(safe_error)[:2000],
+            }
+            self._persist_task_event(
+                runtime,
+                task_id,
+                session_id,
+                source,
                 "task.failed",
-                {
-                    "taskId": task_id,
-                    "sessionId": session_id,
-                    "source": source,
-                    "message": str(safe_error)[:2000],
-                },
+                {"message": payload["message"]},
             )
+            self._write_event("task.failed", payload)
             LOG.exception("Agent task %s failed", task_id)
         else:
-            self._write_event(
+            payload = _result_payload(task_id, source, result)
+            self._persist_task_event(
+                runtime,
+                task_id,
+                session_id,
+                source,
                 "task.completed",
-                _result_payload(task_id, source, result),
+                {"modelSteps": result.model_steps, "modelCalls": result.model_calls},
             )
+            self._write_event("task.completed", payload)
         finally:
             runtime.close()
 
@@ -726,7 +756,11 @@ class RuntimeHost:
             return {"status": "not_found"}
         if active.task.done():
             return {"status": "already_finished"}
-        self._write_event("task.cancel_requested", {"taskId": task_id})
+        payload = {"taskId": task_id, "sessionId": active.session_id, "source": active.source}
+        self._persist_task_event(
+            active.runtime, task_id, active.session_id, active.source, "task.cancel_requested"
+        )
+        self._write_event("task.cancel_requested", payload)
         self._resolve_pending_approvals(task_id, allow=False)
         active.task.cancel()
         try:
