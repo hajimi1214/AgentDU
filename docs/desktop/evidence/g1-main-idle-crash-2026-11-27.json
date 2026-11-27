@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-27",
+  "repository_head": "c582fa831de4b92e456a4fefdd9f97139799b052",
+  "installer_sha256": "C2F2ED20CB62022C71EDD84958B1F45DA8AE9CE3B6EC662C49A8E5DD32F54EA0",
+  "electron_main_pid": 40404,
+  "embedded_python_host_pid": 21336,
+  "termination": "External termination of Electron Main only. No process-tree kill was used.",
+  "active_task_before_termination": false,
+  "session_id": "cc5785e0e29b4d2badd5963303f37164",
+  "session_events_before_termination": ["session_created"],
+  "host_exit_observed_within_seconds": 8,
+  "orphan_host_after_termination": false,
+  "acceptance_scope": "Idle process cleanup only. Active task interruption, UI recovery, and duplicate-execution checks remain unverified."
+}

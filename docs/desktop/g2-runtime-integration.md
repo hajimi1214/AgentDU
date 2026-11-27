@@ -1,6 +1,6 @@
 # G2 Desktop Runtime 集成方案
 
-设计基线为 `aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e`，日期为 2026-11-27。本文件记录接口与生命周期方案，不表示桌面多 Agent Runtime 已经实现。
+源码基线为 `aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e`，二次审计日期为 2026-11-27。本文件定义接口与生命周期方案。Desktop Host 仍未接入多 Agent Runtime。
 
 ## 源码审计结论
 
@@ -42,6 +42,7 @@ Main Brain 持有用户目标与计划的所有权。Worker 只能更新自己�
 | --- | --- |
 | `queued` | 等待并发槽位或依赖条件 |
 | `running` | Agent 正在执行模型或工具工作 |
+| `cancelling` | 已确认取消请求，正在停止模型或等待工具安全结束 |
 | `waiting_approval` | 工具权限需要用户决定 |
 | `completed` | Agent 已返回结果，尚不代表结果已验证 |
 | `failed` | 执行失败 |
@@ -79,7 +80,8 @@ Worker 的 `completed` 状态不可直接触发 `integrated`。实现任务需�
 | `agent.task.waiting_approval` | Worker 请求权限审批 |
 | `agent.task.completed` | Worker 结果已持久化 |
 | `agent.task.failed` | Worker 执行失败 |
-| `agent.task.cancelled` | 取消已确认并记录 |
+| `agent.task.cancel_requested` | 记录取消请求方、范围与 request id |
+| `agent.task.cancelled` | 取消已确认、执行已停止且终态已持久化 |
 | `agent.task.interrupted` | 恢复扫描发现未完成任务 |
 | `agent.handoff.changed` | HandoffLedger 状态或 owner 版本变化 |
 | `agent.task.validation_finished` | 快照和验收检查结束 |
@@ -119,3 +121,70 @@ Worker 的 `completed` 状态不可直接触发 `integrated`。实现任务需�
 - 至少两个真实 Provider 完成真实任务交接，并记录模型、请求数、token、时间、费用可用性及最终 Git SHA。
 
 G2 仅在 G1 的关键 D2 验收解除后进入实现。本文件不证明 Desktop 已支持 Worker 或多 Agent 并行。
+
+
+## 二次源码审计与实现契约
+
+二次审计检查了 `src/agentdu/orchestration.py` 中的 `_TERMINAL_STATES`、`TaskStateStore`、`AutonomousCoordinator.close`、`finish_session`、`_running_count`、`_available_model_calls`、`_execute_task` 与 `_reconcile_finished_workers`，以及 `src/agentdu/agent.py` 的 `AgentRuntime.run` 和 `src/agentdu/desktop_host.py` 的 Host 关闭流程。以下是当前实现差距与进入 G2 后必须满足的契约。
+
+| 审计项 | 当前源码证据 | G2 实现要求 |
+| --- | --- | --- |
+| Worker 取消 | `_TERMINAL_STATES` 未包含 `cancelled`。协调器没有公开的 Worker 取消句柄。线程池 future 的取消不能停止已运行的 Worker，已取消 future 目前会按 `interrupted` 对账。 | 支持单 Worker、父任务级联、排队任务与运行任务取消。加入 `cancelling` 状态、`cancel_requested` 事件、稳定的 `cancelled` 终态及幂等取消响应。 |
+| Host 全局资源 | `_running_count` 和 `_available_model_calls` 位于单个 Coordinator 实例。调用预算按会话计算。多个 Coordinator 会各自维护并发与预算。 | Host 维护唯一资源账本，原子分配 Worker 槽位、父任务槽位、模型调用预算、请求期限和费用元数据。 |
+| Worker 权限身份 | 编码 Worker 由 `self.permission_policy` 构造 Runtime。任务有独立 session 和 workspace，审批身份没有独立 task 绑定契约。 | Worker 各自持有 task id、approval id、permission scope、取消令牌、session 和 worktree。审批不复用主任务授权。 |
+| TaskStateStore 所有权 | `_store` 只在一个 Coordinator 的 `_stores` 字典内缓存 Store。`TaskStateStore.lock` 只保护当前对象。两个 Coordinator 同时打开相同会话会各自读取快照并替换 `tasks.json`。 | Host `TaskStateRegistry` 按 workspace 与 session 唯一创建 Store，所有 Coordinator 获得同一受锁定句柄。跨 Host 使用文件锁或拒绝重复 owner，并以状态版本阻止陈旧写入。 |
+
+### Worker 与父任务取消
+
+`AgentRuntime.run` 会传播 `asyncio.CancelledError`。当工具调用已经开始时，Runtime 通过 shield 等待该调用结束，再继续传播取消。这要求 G2 将任务终态和实际工具副作用对齐。
+
+- 排队任务取消时，协调器原子写入 `cancelled` 和取消来源，并阻止该任务启动。
+- 运行任务取消时，Host 向 Worker 专属执行句柄发送取消信号。Worker 在自己的事件循环中取消 `AgentRuntime.run`，等待当前工具调用完成、失败或提供可检查的中断记录，然后持久化终态。
+- 取消父任务时，取消令牌沿依赖图传播到其所有非终结 Worker。取消一个 Worker 时，其他同级任务继续运行。依赖它且尚未启动的任务转为 `blocked` 并记录依赖取消原因。
+- `cancelled` 属于终态，必须纳入 `_TERMINAL_STATES`、失败依赖分类、`finish_session`、等待条件、快照读取与事件去重。重复取消返回同一终态，不重复触发副作用。
+- 取消请求在 Host 崩溃期间尚未落终态时，恢复状态标为 `interrupted`，保留取消请求和最近的工具事件，等待用户检查。恢复不得自动重放模型请求或工具。
+- 明确恢复一个已取消任务时，创建新的 attempt 记录并关联原任务。重试前检查已发生的文件、命令和 Git 副作用。
+
+实现需要独立验证模型流读取、权限等待、文件写入、终端命令和排队任务各自的取消终态。仅取消 `ThreadPoolExecutor.Future` 只覆盖尚未运行的 future，不能作为运行任务取消机制。
+
+### Host 全局资源预算
+
+Host 级资源管理器是并发与预算的唯一分配者。Coordinator 通过租约申请容量，不能各自维护独立的 Host 额度。
+
+- 配置最大活动父任务、最大活动 Worker、每父任务 Worker 数、每任务模型调用数、单个父任务调用总数及 Host 总调用预算。
+- 模型调用前原子预留额度，模型请求结束后按实际调用与 usage 核算并释放未使用额度。没有可用价格数据时费用字段保持未知。
+- 为父任务、Worker 和工具设置可取消的期限。资源租约在完成、失败、取消和中断恢复路径都必须释放或转入恢复队列。
+- 并发压力测试应同时启动多个父会话及多个 Coordinator 实例，确认实际活动数、调用总数和费用累计不突破 Host 上限。
+
+### Worker 独立审批身份
+
+每个 Worker 记录 `taskId`、`parentTaskId`、`agentId`、`workerSessionId`、`approvalId`、`permissionScopeId`、`cancelTokenId` 和专属工作区。高风险审批请求绑定 Worker task、具体操作、工作目录、目标范围、网络需求和请求 digest。用户授予的范围只授权该 Worker 的该项请求，并记录审批者、决定和时间。父任务对自己操作的批准不能被子任务沿用，子任务之间也不能交换审批 ID。
+
+Consult Worker 保持无项目工具权限。Review Worker 使用只读 worktree。Coding Worker 的 PermissionPolicy 由其 profile 和 task scope 单独创建。Renderer 通过 Host 返回带 task 与 approval 身份的待审批记录，不接触凭据或 Worker 私有推理。
+
+### TaskStateStore 唯一写入者与关闭顺序
+
+Host 启动时创建一个 `TaskStateRegistry`。同一 workspace 与 session 的 Coordinator 共享由 Registry 加锁的 `TaskStateStore`。Registry 负责一次性加载、恢复、版本递增、原子落盘和生命周期关闭。Host 检测到同一 session 已有活动 owner 时拒绝第二个 Coordinator 或返回现有句柄。持久化状态带 schema version 和单调 task version。
+
+正常关闭顺序如下。
+
+1. Host 停止接受新的委派、任务和 Runtime 请求，并封存本轮 task registry generation。
+2. Host 对父 Runtime 和所有 Worker 发起显式取消或按策略完成 drain，取消各自的审批等待并释放待启动任务。
+3. 等待运行工具收尾，持久化 `cancelled`、`completed`、`failed` 或带错误的 `interrupted` 终态。超过期限的 Worker 进入 `interrupted` 并保留恢复检查点。
+4. 刷新 TaskStateStore、HandoffLedger 和父会话 SessionStore，确认所有事件序号已持久化。
+5. 调用 `AutonomousCoordinator.close` 并等待执行器退出，随后关闭 Store owner 与资源租约。
+6. 最后完成 Desktop Host 的 `host.shutdown`、关闭 stdin/stdout 协议并退出 Python Host。
+
+`finish_session` 当前会等待运行 Worker 并关闭执行器，但它本身不请求运行任务取消。`close(wait=False)` 会取消未开始的 future，当前对账会将其视作 interrupted。G2 必须建立显式的 session cancellation 与 close 生命周期，使正常关停可持久化 cancelled 状态，强制进程退出时保留 interrupted 状态，并防止对已关闭的 Store 再次写入。
+
+## 二次审计验收矩阵
+
+- 单独取消一个运行 Worker、一个排队 Worker 和一个父任务，分别验证取消事件、持久终态、工具收尾及同级与依赖任务状态。
+- Worker 请求审批期间取消任务，确认其 approval id 不能用于主任务或其他 Worker。
+- 两个并行 Coordinator 争用 Host 额度和同一会话 Store，验证预算不会超发，任务状态不会发生陈旧快照覆盖。
+- 并发启动多个父任务，确认 Host 活动父任务、Worker 数和模型调用预算由同一账本限制。
+- 在模型调用、权限等待、工具执行和终态写入不同点强制关闭 Host，重启后只恢复快照，不重放副作用。
+- 依次验证正常 finish、显式 cancel、shutdown timeout 和强制崩溃的 Coordinator、Store 与 Host 关闭顺序。
+- `cancelled`、`interrupted`、`blocked` 与 `integrated` 状态正确参与终态等待和依赖调度。
+
+2026-11-27 的 G2 设计二次审计为 PASS。上表是 G2 编码与测试准入契约，不是现有代码的实现结果。G1 未解除前，保持 Desktop Host 的单活动任务限制，不开始 G2 实现。

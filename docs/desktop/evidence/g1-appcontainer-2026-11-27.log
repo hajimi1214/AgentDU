@@ -1,0 +1,13 @@
+$ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/verify-appcontainer.ps1
+
+
+AppContainerToken          : True
+WorkspaceReadDenied        : True
+WorkspaceWriteDenied       : True
+LoopbackNetworkDenied      : True
+ChildProcessStarted        : True
+ChildProcessIsAppContainer : True
+ChildProcessWriteDenied    : True
+ChildProcessError          : none
+ProbeExitCode              : 0
+Result                     : PASS

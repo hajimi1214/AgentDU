@@ -1,22 +1,29 @@
 # AgentDU 测试与验证记录
 
-最近全量自动化验证日期为 2026-11-27。被测代码 SHA 为 `aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e`，分支为 `main`。G1 验收矩阵和未完成项见 [G1 验收报告](docs/desktop/g1-closeout-2026-11-27.md)。本轮文件更改是报告与架构文档，测试目标 SHA 保留为实际测试时 HEAD。
+最近全量自动化验证日期为 2026-11-27。验收起始仓库 HEAD 为 `c582fa831de4b92e456a4fefdd9f97139799b052`，源码变更基线为 `aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e`，分支为 `main`。Python、Desktop、生产构建与 AppContainer 检查在 `c582fa8` 工作树重跑。后续提交只更新报告、架构文档与证据，不改变被测代码。G1 矩阵与未通过项见 [G1 验收报告](docs/desktop/g1-closeout-2026-11-27.md)。
 
 ## 本轮验证
 
 | 验证 | 命令 | 结果 |
 | --- | --- | --- |
 | Python 编译 | `python -m compileall -q src tests` | PASS |
-| Python 自动化测试 | `python -m unittest discover -s tests -v` | PASS，96 项，约 94 秒 |
+| Python 自动化测试 | `python -m unittest discover -s tests -v` | PASS，96 项，98.581 秒 |
 | Desktop Host 专项测试 | `python -m unittest discover -s tests -p test_desktop_host.py -v` | PASS。22 项专项结果来自 `f5fc15d7b05b7ab4bf76c636fe7385e66c3c6a5c`；`aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e` 上的 96 项全量测试也包含这些 Host 测试 |
 | Desktop 自动化测试 | `cd desktop; pnpm test` | PASS，4 个测试文件、19 项 |
 | Desktop TypeScript 检查与生产构建 | `cd desktop; pnpm run build` | PASS，类型检查、Vite Renderer 构建和 Electron 构建通过 |
 | Windows AppContainer 探针 | `cd desktop; pnpm run verify:appcontainer` | PASS，项目读写限制、loopback 网络限制和子进程限制 |
 | NSIS 构建 | `pnpm run prepare:runtime` 后运行 electron-builder | PASS，Electron 45.4.1 与嵌入式 Python 3.14.10 |
 
-本轮 NSIS 安装器位于 `desktop/release/g1-closeout-aacf3c2-2026-11-27/AgentDU-Setup-0.1.0-x64.exe`，SHA-256 为 `B5446953C8DB27D0B2EC704830C770F0B8644A6C720EEA60D2B60D8355945FC6`。该产物已构建但没有在隔离 Windows profile 中安装和运行。较早的 `c030c6c` 安装版已验证含空格安装路径、受限 PATH 和嵌入式 Python 启动。尝试以 `APPDATA` 隔离 Electron `userData` 失败后，本轮在主进程增加 `AGENTDU_DESKTOP_USER_DATA_DIR` 覆盖并重建安装器。新覆盖已通过 TypeScript/Electron 构建，但尚未在安装版启动验证。详细结果见 G1 报告。
+当前源码 NSIS 安装器位于 `desktop/release/g1-remaining-c582fa8-2026-11-27/AgentDU-Setup-0.1.0-x64.exe`，SHA-256 为 `C2F2ED20CB62022C71EDD84958B1F45DA8AE9CE3B6EC662C49A8E5DD32F54EA0`。它已安装到 `AgentDU Installed With Spaces` 并在 `AGENTDU_DESKTOP_USER_DATA_DIR` 指定的隔离目录启动。Runtime 使用安装目录的 Embedded Python 3.14.10，合成 Provider 和临时项目在应用重启后恢复。验收曾误启动一个默认 profile 实例，该隔离要求因此判 FAIL。详见 G1 报告。
 
 Python 自动化包含本地 HTTP Provider 夹具、Runtime、会话、工具、CLI Handoff、编排、MCP、Skills、插件及 Windows AppContainer 集成测试。模拟 Provider 结果不代表外部 Provider 的兼容性、质量、延迟或费用。
+
+## G1 安装版与 Provider 验收
+
+- 当前 NSIS 包在含空格安装路径及受限 PATH 下运行，运行证据见 [Runtime 日志](docs/desktop/evidence/g1-installed-runtime-2026-11-27.log)。
+- Electron `safeStorage` 保存的合成 Provider 档案在隔离数据目录中重读成功。Runtime 使用该凭据请求本机 `/v1/models`，服务记录为授权通过及 HTTP 200，见 [本地请求记录](docs/desktop/evidence/g1-provider-http-2026-11-27.jsonl)。该检查不是对真实 Provider 的请求。
+- 安装版启动后显示 Runtime 在线、合成档案、临时 Git 项目和异常关闭提示，见 [隔离安装恢复截图](docs/desktop/evidence/g1-isolated-install-restore-2026-11-27.jpg)。空闲 Main 被单独终止后 Host 在 8 秒内退出，进程记录见 [空闲 Main 退出记录](docs/desktop/evidence/g1-main-idle-crash-2026-11-27.json)。该会话没有活动任务，所以 Main 崩溃期间的任务恢复保持未验证。
+- 自动化原始记录见 [Python 测试](docs/desktop/evidence/g1-python-tests-2026-11-27.log)、[Desktop 测试](docs/desktop/evidence/g1-desktop-tests-2026-11-27.log)、[Desktop 构建](docs/desktop/evidence/g1-desktop-build-2026-11-27.log) 与 [AppContainer 探针](docs/desktop/evidence/g1-appcontainer-2026-11-27.log)。
 
 ## 已有桌面运行证据
 
@@ -31,12 +38,11 @@ Python 自动化包含本地 HTTP Provider 夹具、Runtime、会话、工具、
 
 ## 尚待验收
 
-- 在 AgentDU 应用中安全配置真实 Provider，并完成连通性验证。当前档案列表为空，未认证 `/models` 请求返回 HTTP 401。Provider 表单与 Responses API 选项已目视复核，截图位于 `docs/desktop/evidence/d2-provider-responses-profile-form-2026-11-27.jpg`。
-- 用真实 Provider 在真实项目中完成跨文件读取、修改、测试和修复。
-- 在活动真实 Provider 模型任务期间验证 Runtime 异常退出、重新连接和会话状态恢复。受控测试任务的崩溃恢复已通过安装版 Host 协议验证。
-- 配置真实 Provider 后，从实际 NSIS 安装版恢复已有模型会话，并核对会话记录、任务状态与工作区内容。
-
-- 完成桌面 Runtime 接入多 Agent 后的并发、恢复、故障注入和真实多模型验证。
+- 在新建的隔离目录中重跑 NSIS 检查，并证明默认 profile 文件没有变化。
+- 完成 Provider 默认档案切换、删除、删除后凭据不注入、Runtime 重启失败回滚及 Renderer 隔离测试。
+- 在活动任务期间外部终止安装版 Electron Main，恢复同一项目与会话，检查 `task.interrupted` 只记录一次且任务不自动重放。
+- 用户在 AgentDU 设置中配置真实 Provider 后，完成连通性、跨文件编程和真实模型任务中断恢复。凭据不得通过聊天或读取其他应用配置导入。
+- G1 通过独立验收后再决定是否进入 G2。G2 当前只有经二次审计的设计文档，没有桌面多 Agent 实现。
 
 ## 可复现命令
 

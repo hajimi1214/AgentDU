@@ -1,16 +1,17 @@
 # AgentDU 实现状态
 
-最后核对：2026-11-27。代码与自动化验证基线为 `aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e`，分支为 `main`。验收报告文档单独提交并明确保留测试目标 SHA。
-状态枚举：`PASS`、`CONDITIONAL PASS`、`FAIL`、`NOT VERIFIED`、`BLOCKED`。
+最后核对日期为 2026-11-27。仓库 `main` 与 `origin/main` 的验收起始 HEAD 均为 `c582fa831de4b92e456a4fefdd9f97139799b052`，工作区干净。最近的源码提交为 `aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e`，`c582fa8` 包含验收文档更新。自动化在 `c582fa8` 工作树重跑。完整证据见 [G1 验收记录](docs/desktop/g1-closeout-2026-11-27.md) 与 [测试记录](TESTING.md)。
+
+状态枚举使用 `PASS`、`CONDITIONAL PASS`、`FAIL`、`NOT VERIFIED` 与 `BLOCKED`。
 
 ## 阶段状态
 
 | 阶段 | 状态 | 当前证据与未完成项 |
 | --- | --- | --- |
-| G0 仓库审计与基线 | CONDITIONAL PASS | 初始核对时 `main` 与 `origin/main` 位于 `c030c6c6184a8b2ad3f66e95fa9a244c33a15b0d` 且工作区干净。检查了关键 Runtime、Provider、CLI 协调、Host、IPC 与阶段文档。当前自动化在 `aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e` 上通过 Python 96 项、Desktop 19 项和生产构建。真实 Provider 与安装版全流程仍未验证。 |
-| G1 桌面基础能力稳定化 | NOT VERIFIED | Host 层现有任务恢复机制和重新打开项目时的持久化扫描通过了新增集成测试。会话损坏、工作区不可用和重复恢复有错误与幂等证据。Provider 保存与加密、真实模型任务、Electron Main 异常退出恢复和最新 NSIS 包安装运行仍未完成。详见 [G1 验收记录](docs/desktop/g1-closeout-2026-11-27.md)。 |
-| G2 多 Agent Runtime 集成 | NOT VERIFIED | 已形成 [G2 集成方案](docs/desktop/g2-runtime-integration.md)。Desktop Host 尚未接入 `AutonomousCoordinator`。G1 关键验收通过前不开始实现。 |
-| G3 多 Agent 并行执行 | NOT VERIFIED | CLI 协调器有并行 Worker、依赖和隔离 Worktree 逻辑。桌面并行执行未验收。 |
+| G0 仓库审计与基线 | CONDITIONAL PASS | 当前代码、分支、远端和测试基线已核对。真实 Provider 工作流与隔离 profile 未修改验收仍未通过。 |
+| G1 桌面基础能力稳定化 | BLOCKED | Python 96 项、Desktop 19 项、生产构建、AppContainer 探针与当前 NSIS 包检查通过。实际 Electron `safeStorage` 和本地合成 Provider 注入有部分证据。隔离验收误启动了使用默认 profile 的应用，原用户数据目录因此发生变化。活动任务期间的 Main 崩溃恢复未验证，真实 Provider 编程任务因 AgentDU 内没有已配置的真实凭据而阻塞。详见 G1 报告。 |
+| G2 多 Agent Runtime 集成 | NOT VERIFIED | G2 设计已完成二次审计并补足取消、Host 资源、Worker 权限与状态存储所有权契约。桌面 Host 尚未接入 `AutonomousCoordinator`，G1 关键门槛解除前不开始实现。 |
+| G3 多 Agent 并行执行 | NOT VERIFIED | CLI 协调器有 Worker、依赖和隔离 Worktree 逻辑。桌面并行执行未验收。 |
 | G4 桌面多 Agent 工作台 | NOT VERIFIED | 桌面 Agent、Worker、任务依赖、审批与集成审查界面未完整实现。 |
 | G5 自主协作与独立验证 | NOT VERIFIED | 桌面端和真实 Provider 组合未通过自主委派、审核、整合与重新规划验收。 |
 | G6 容错与长期运行 | NOT VERIFIED | Host 层受控任务恢复已有证据。真实模型故障、长任务、进程树资源限制和产品级恢复仍未完成。 |
@@ -23,16 +24,15 @@
 - CLI 的 `AutonomousCoordinator` 支持有界 Worker 调度、依赖、独立会话、结果验收和 Git 集成。
 - Handoff 使用版本、owner、快照和验收证据。
 - Desktop 使用 Electron、React、TypeScript 和独立 Python Host，通过版本化 JSONL 通信。
-- Desktop Host 持久化主任务的 accepted、completed、failed、cancelled 与 interrupted 生命周期事件。新 Host 打开原项目时扫描会话，恢复未终结任务。恢复不重放不确定的模型或工具操作。
-- Windows AppContainer 探针确认项目读写限制、loopback 网络限制和子进程限制。细节见 D1/D2 与 G1 验收记录。
+- Desktop Host 持久化主任务的 accepted、completed、failed、cancelled 与 interrupted 生命周期事件。Host 恢复扫描会话并恢复未终结任务，不重放不确定的模型或工具操作。
+- Windows AppContainer 探针确认项目读写限制、loopback 网络限制和子进程限制。
+- 当前源码安装包已在含空格路径下启动，进程映像指向安装目录中的 Embedded Python。隔离 profile 中的合成 Provider 档案、Runtime 配置与最近项目在重启后可见。
 
 ## 当前未完成的桌面验收
 
-- AgentDU 设置中没有本轮验证过的 Provider 档案和可用凭据。Codex 或其他客户端的凭据没有读取或复用。
-- Provider 档案创建、`safeStorage` 加密与解密、默认模型、Chat Completions/Responses 配置、连通性检查和应用重启后的配置恢复没有完成端到端测试。
-- 尚无真实 Provider 连通性、真实跨文件编程任务和真实模型任务中断恢复记录。
-- 受控 Runtime 任务取消和 Host 崩溃恢复已有自动化及 NSIS 协议证据，但 Electron Main 异常退出后的完整 Windows UI 恢复仍未验证。
-- 基于验证 SHA 构建的最新 NSIS 安装器 SHA-256 为 `B5446953C8DB27D0B2EC704830C770F0B8644A6C720EEA60D2B60D8355945FC6`。该安装器尚未在隔离 profile 中安装运行。
-- 安装版试运行发现 `APPDATA` 环境变量没有隔离 Electron `userData`。主进程现提供可选 `AGENTDU_DESKTOP_USER_DATA_DIR` 覆盖，并已构建含该更改的安装器。运行时隔离效果仍需验证。
+- NSIS 隔离检查的“原用户 profile 未修改”条件失败。本轮一次默认实例启动写入了 `C:\Users\ASUS\AppData\Roaming\agentdu-desktop` 下的偏好、缓存、Runtime 日志和最近工作区数据。该目录中的 Provider 密文文件时间戳与用户项目会话文件时间戳未变化。完整记录见 G1 报告。
+- Provider 的创建、Endpoint 与 Model ID 保存、默认档案首次选择、Electron `safeStorage` 加密、Runtime 环境注入和本地 `/models` 认证请求已有合成凭据证据。默认档案切换、删除后凭据不再注入、Runtime 重启失败回滚及 Renderer 侧隔离仍需端到端补测。
+- 安装版 Main 空闲异常退出后，嵌入式 Host 在 8 秒内退出且没有 Host 孤儿进程。会话当时只有 `session_created` 事件，活动任务中断写入、重启后的任务恢复和防重复执行尚未验证。
+- 真实 Provider 连通性、真实跨文件编程任务和真实模型任务中断恢复没有运行。Codex 或其他应用凭据没有读取或复用。
 
-G1 维持 `NOT VERIFIED`。在真实 Provider 任务、Electron 应用崩溃恢复及最新安装版验收解除前，不进入 G2 实现。
+G1 当前为 `BLOCKED`。在隔离 profile 复验、活动任务 Main 崩溃恢复及真实 Provider 编程验收完成前，不进入 G2 实现。
