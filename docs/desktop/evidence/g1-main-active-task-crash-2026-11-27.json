@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-27",
+  "repositoryHead": "f54818cc5e1f129bbfd81baad710b0456837b37a",
+  "installerSha256": "56f4da1db43557fd61b0487ce8ce64b5e27a37e11b06c651b4d9711ac0841f33",
+  "installDirectory": "C:\\AgentDU\\desktop\\release\\g1-final-gate-f54818c-2026-11-27\\artifacts\\nsis-install\\AgentDU Installed With Spaces",
+  "isolatedUserDataDirectory": "C:\\AgentDU\\desktop\\release\\g1-final-gate-f54818c-2026-11-27\\artifacts\\isolated user data",
+  "termination": {
+    "process": "Electron Main only",
+    "pid": 46288,
+    "processTreeKill": false,
+    "terminatedAt": "2026-11-27T22:11:12+08:00"
+  },
+  "runtimeHost": {
+    "pid": 41244,
+    "exitedImmediately": true,
+    "presentAfterTwoSeconds": false
+  },
+  "sessionId": "557e56975431487fb31c24c84120ea2d",
+  "initialTaskId": "764fccd0-7901-4090-ace1-5f4ff865ab94",
+  "initialTaskEvents": [
+    "task.accepted",
+    "model_request",
+    "task.interrupted"
+  ],
+  "interruptedEventCount": 1,
+  "restart": {
+    "electronMainPid": 45532,
+    "projectRestored": true,
+    "sessionRestored": true,
+    "uiShowedInterruptedState": true,
+    "automaticReplay": false
+  },
+  "manualRetry": {
+    "taskId": "552529da-1ca8-43e7-a722-a37a5140affa",
+    "distinctTaskId": true,
+    "localProviderRequests": 1,
+    "workspaceWriteEvents": 0,
+    "terminalCommandEvents": 0,
+    "terminalStatus": "task.cancelled"
+  },
+  "providerWasLocalSyntheticEndpoint": true
+}

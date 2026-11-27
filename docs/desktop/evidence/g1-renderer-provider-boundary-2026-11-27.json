@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-27",
+  "environment": "NSIS installed Electron renderer, runtime DevTools inspection",
+  "windowAgentDuApiExposed": true,
+  "encryptedApiKeyInPublicProviderProfile": false,
+  "encryptedApiKeyInRuntimeStatusJson": false,
+  "publicProfileKeys": [
+    "name",
+    "model",
+    "default",
+    "credentialAvailable",
+    "baseUrl",
+    "protocol",
+    "wireApi",
+    "streaming",
+    "configuredCapabilities"
+  ],
+  "evidenceMethod": "window.agentdu.getStatus() in renderer DevTools and object-key enumeration",
+  "syntheticSecretRecorded": false
+}

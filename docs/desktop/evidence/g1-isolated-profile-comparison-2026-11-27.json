@@ -1,0 +1,21 @@
+{
+  "capturedAt": "2026-11-27T22:26:14.1651627+08:00",
+  "rootPath": "C:\\Users\\ASUS\\AppData\\Roaming\\agentdu-desktop",
+  "before": {
+    "files": 240,
+    "directories": 119,
+    "bytes": 24470885.0,
+    "errors": 0
+  },
+  "after": {
+    "files": 240,
+    "directories": 119,
+    "bytes": 24470885.0,
+    "errors": 0
+  },
+  "newFiles": [],
+  "missingFiles": [],
+  "contentChangedFiles": [],
+  "fileTimestampChanges": [],
+  "directoryTimestampChanges": []
+}

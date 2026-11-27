@@ -1,0 +1,4585 @@
+{
+  "date": "2026-11-27",
+  "rootLabel": "%APPDATA%\\agentdu-desktop",
+  "fileContentIncluded": false,
+  "pathIdentifierAlgorithm": "SHA-256 of slash-normalized, lower-case relative path encoded as UTF-8",
+  "before": {
+    "capturedAtUtc": "2026-11-27T13:22:54.3312371Z",
+    "fileCount": 240,
+    "directoryCount": 119,
+    "totalFileBytes": 24470885.0,
+    "errors": [],
+    "files": [
+      {
+        "pathId": "86df96eb0c910ee2113292b6432fbbbdc5f329f729dab9216eda1fa9bd531865",
+        "length": 45056,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.6433294Z",
+        "sha256": "16ef80785220997c5eb02565e76ac35045525100df6abe0fbf2310999cc07b81",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "74c76cde3e459222097daf9fde3e411e90fb410f789b190cc968e24fbf7cce3a",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-26T11:53:58.0031893Z",
+        "sha256": "c0f88900279ca3de0eca19f18016ff45e4192e04686b0ed9cd065087757575f2",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "99fe811ce7854f88b5b35329afc2cdf5340eb2e5981261817d8e7e4e7ca94d7b",
+        "length": 1056768,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3814054Z",
+        "sha256": "786ab630dda4332108fc22971a5286bcc863bd4b29b0e9878f9e0f58a548c05a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ceef9333780d9de121e7e59d79fb878365008f28c86e31aff67f22466318e18d",
+        "length": 4202496,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.6433294Z",
+        "sha256": "a1060d2a3814f115f8a8ecba9100e63c539f86c3aaa1bf2f4a8b593377807f48",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b10556a01acdbcf19e236ccf8aadcd68bee8acc0c534a745550f99e35499fb85",
+        "length": 111894,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6178321Z",
+        "sha256": "fe633113388e056842f0b8df96ea422fcd97761329b79d39fddd71d1fee2f8c7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e5eeb25fb34c2c87c8e38844c58c737e9f2d74933dd204575761ac66160fbe3f",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6391867Z",
+        "sha256": "35c7fbd83d60a8a0737763fc8def062800f95a2b80e1f57ffd9a1f32c7857ddf",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d8907f4cc393f0dfc26866349d6f788bfb4a747380431ba7ef52c68cb918e47e",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6467992Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0f81141a5f61f112703f41a73d626b07c21df5781a604fedff4ce924344cc539",
+        "length": 36932,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.8186269Z",
+        "sha256": "9fea608a947e67020c33cad9a6fe3d60c54119dfb8cff87768a8117a15ed7543",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "559463a80bda67275db8d83afceab83c114f66611ddebf022a5351ff38820b89",
+        "length": 451982,
+        "lastWriteTimeUtc": "2026-11-23T13:36:43.5739203Z",
+        "sha256": "b0d80e6b6c5491879365e176ecbd98074602a663429bcfcfb0a5a8375c051f13",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0e7bd4f0046612268678c29c06da686c77af37f9208f7355b47152c7d80322bd",
+        "length": 179791,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6117113Z",
+        "sha256": "9658a3cb9f6989feaed40369b9dac53f31dabc5db3685ef184a62ee51f269880",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "87e9ff79271208cf615597b72337336dbe0410891af9ff17fa149326d3cf1ac7",
+        "length": 33886,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6128062Z",
+        "sha256": "4e2330d7e2b53eef4caf6775a0f865e6310261622229a5cfe81ef98219f2135b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "278cc752b0c9398a1094c38a5fab14d06a88ea6855ee44dec69133fe907c2b15",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6144002Z",
+        "sha256": "160903341e0edad73b787ef645bbeba4a916a38f8e88ef2f1e325e46091ee878",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "60992b4f05a6abd9db10e4c2d420d395479510782fa25a8fa6a80f543cae7acb",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6150784Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "72ad7acd0849b63d94e32d15b1ef677b8489df51a426359f4f2c049ef81867b0",
+        "length": 179345,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6220829Z",
+        "sha256": "627e7b3b5d96e96e2387e498bf40f41a67a47ffb73419ff223b580cea18df5f6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3cebe6582afb1816d5c796977c53a3a48f173e6038658473ccdbdc695598756f",
+        "length": 111894,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.8668219Z",
+        "sha256": "fe633113388e056842f0b8df96ea422fcd97761329b79d39fddd71d1fee2f8c7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "00c9c872145502f6b9ec11deb0c9c5c4f3e9474b766762fb99efb4b5a7fc93f6",
+        "length": 179347,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.8798196Z",
+        "sha256": "27adf997d6fbe1159715f7d371617c67015c11a722724817a51a6a9d0f02d22e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5af1c8e20c5aeb37802ea6c535c1cbdc3c6debe6f2af77cf57a77ee00e90ce90",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.9591109Z",
+        "sha256": "160903341e0edad73b787ef645bbeba4a916a38f8e88ef2f1e325e46091ee878",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "82855c12c8baff0fd9bfa9de82886ee550f22b39aa8c72857eb1be0fca60bdf2",
+        "length": 179791,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.9804834Z",
+        "sha256": "9658a3cb9f6989feaed40369b9dac53f31dabc5db3685ef184a62ee51f269880",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4bab7a094084c7ce037bb9faf6563eaff665b779606ea89917a679e8d33b306d",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.0443963Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e48cae5af2b2ef3b19ae6f012120274f9a1b0e4b837fb54e0d4f58d7442f61ce",
+        "length": 33886,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1589535Z",
+        "sha256": "4e2330d7e2b53eef4caf6775a0f865e6310261622229a5cfe81ef98219f2135b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "892fd6faa709b22bfef13de3f1c9c883a0c48db0ef37c75b17710b161971e80a",
+        "length": 111894,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.4542959Z",
+        "sha256": "fe633113388e056842f0b8df96ea422fcd97761329b79d39fddd71d1fee2f8c7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "afae3d5d94db500c01613d76e3a9bed45f2bf69ad48d4193448247f4a2a0b67c",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.5452582Z",
+        "sha256": "160903341e0edad73b787ef645bbeba4a916a38f8e88ef2f1e325e46091ee878",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3482faac50541a24f0d8c0a27ceae2f15ef60c7b4b966fa39a4d011392c81da1",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.5749832Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "10d4d35529ea79c635a1ad7e51deae7728827b8b8dd6ed5707583f0bab5354af",
+        "length": 35997,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.7542767Z",
+        "sha256": "80e7ee20aff76cd8a25dd0b07e157c8321ed07fcd8622b76e2974611e8402ed6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4bea3903a6ad33a9ae6aa8c4e30ede3de477c36086a48d6e78d12c96df3caedd",
+        "length": 179347,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.711072Z",
+        "sha256": "59a6526f55befb6d1b397876c667aaaec9b97396383d4b12d0495f526ccf6cd7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0cc2fac159f647f2626582d41795c20c006efe22b6aceb152dd9faebada93d2d",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.8781239Z",
+        "sha256": "899822a38292754097d18190b6b649f044a329ccac5767f06c4305d94fcb040a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "086af4bcb6e4d2b8a7c5644a827dca1889e378d7581f263bdda2ea0b268c01ed",
+        "length": 212296,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.907652Z",
+        "sha256": "35eead9b8ea370c656913c988a3cdbe32e4c9497538fe53e8cf690e854dcdd85",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "56e9c82bd6c465931d2151304977eb3f50c2b2d8319243451e79472a4c0c345c",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9136522Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c390c21c2597750efd30b26d36fc871fbbc303977310ef4bc63bc901b19cd27a",
+        "length": 36932,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9972828Z",
+        "sha256": "9fea608a947e67020c33cad9a6fe3d60c54119dfb8cff87768a8117a15ed7543",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "81b3a5965f499949bc0900a83320c7ae70bd8999833dec2fbf653d93992fe493",
+        "length": 210435,
+        "lastWriteTimeUtc": "2026-11-26T10:06:17.026327Z",
+        "sha256": "4c7b9a71975ba3259095845b5d22ce21a56a0c836559207a16a5e6041f25d091",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fafa1c98e7f5fd9e3b974809d128464e6b7e2fce6609535561af829f7605c84e",
+        "length": 111894,
+        "lastWriteTimeUtc": "2026-11-26T10:08:56.8492466Z",
+        "sha256": "fe633113388e056842f0b8df96ea422fcd97761329b79d39fddd71d1fee2f8c7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "295f88c8aa20a12eb81b8751c8c7c7d6d4674c96edf80ba2de57078c2a595a00",
+        "length": 179347,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.1157604Z",
+        "sha256": "13c3b3f3dc4aa25fae42f10d1452875d37810e9bf924f4798ba18f14074b6b0d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "340d55523803ba0a438d908b3aca0f95c7b21527ba128342652184007210e78f",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.192019Z",
+        "sha256": "8af71bf6b7ae0996e95ce09b44ac36542d8a0b4696c23a66663d9d7be26e0f23",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9be48a66f17b8b8a5bffaf2da05a47ae73f72a89f3b769335d8f6639a93ae671",
+        "length": 210435,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.2110244Z",
+        "sha256": "51fdc1c54695453e7b6fece3c4d17bbb5eaf769eb8d2bcf03bfc8c730a0e295f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ef557ca69c32f0fdd69e967b5bb61fbb80e79cf58178f6b6e79cbdfb34ce1742",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.2220233Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e90989ac6f49168e7903f05f024630e32179f9351c783f36c406ee2f6ca8f3f7",
+        "length": 35997,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3794067Z",
+        "sha256": "80e7ee20aff76cd8a25dd0b07e157c8321ed07fcd8622b76e2974611e8402ed6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "527742665579f20ff6e0da2e47943e0840f0fb5bf4162db25401fd9475c16dca",
+        "length": 36932,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.641825Z",
+        "sha256": "9fea608a947e67020c33cad9a6fe3d60c54119dfb8cff87768a8117a15ed7543",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "57c41a6bbf6370c2ec4dc37fe4dfe7c862d678109520b759bc11c42ad7360e3e",
+        "length": 524656,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9126058Z",
+        "sha256": "fe60d8e016790cee451b5143b8971c0034c5381dfc56738bd75029480fb477dd",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9e8798c338670664b1a62e1db3d0e6959e25da62dcde30a75b2f74cf81ed30d0",
+        "length": 4,
+        "lastWriteTimeUtc": "2026-11-26T10:08:56.3845521Z",
+        "sha256": "9c169428d852e25bd59b27652ed533d2a1f09f96e4c329fa5e06f47e16731543",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "33be9eec10e68cd2570aefbcac6ab00c712394ead71431556a5249b13c2beb58",
+        "length": 20,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9273235Z",
+        "sha256": "0c2dd377ed0cc66161e9db8f89f7d8bcb3ad8c06c4a054bdcba214ab05f58c9a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b5993a75346dbfa4bb529030c6b35ba93a072022a7dc69e922a8aaf562fbf2ff",
+        "length": 2276,
+        "lastWriteTimeUtc": "2026-11-25T05:21:34.9709779Z",
+        "sha256": "b58421f0e85259c9f6db6eae71f9bbb8cddc99d688decb41ebc737591217b99d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "cf7dd30b068b5d0ed1c6bf8510524261f18dbba352b0af86802fbd8c78392566",
+        "length": 4324,
+        "lastWriteTimeUtc": "2026-11-26T13:02:22.1125238Z",
+        "sha256": "7f6d8dda31f14f9b3f771a6abb4d7dcbe8c7ea7e359a2ec00a20eed43a322e33",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a1b55e9c2000ea5795984bfa0325fe630bb18b49dbe45789d440c6359a200126",
+        "length": 4244,
+        "lastWriteTimeUtc": "2026-11-25T05:31:01.0500082Z",
+        "sha256": "4c6b7abca53c54fbf9cd8ed925b98dedb4cd84eeb8a1c6f6bc591c5aa1318307",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b5cbf0f0c851c3bdaa6dcdab9c64ba95568840c4523cb7ce9032412fbc4a9b6b",
+        "length": 4244,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.4600652Z",
+        "sha256": "4c6b7abca53c54fbf9cd8ed925b98dedb4cd84eeb8a1c6f6bc591c5aa1318307",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d13dfc932bff9ebc2c38304bcfae689a619619ea053bbf085ff4922aeed5dab6",
+        "length": 4340,
+        "lastWriteTimeUtc": "2026-11-27T08:25:27.1304691Z",
+        "sha256": "2b310f388e716bff94da5385ac3deb4c2a200c445dc5f47bc597057c36c5d671",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e1cf76b182ed6fdc92ca00f6a70fb7f090e9ead36b9a87917b4559451085317b",
+        "length": 4300,
+        "lastWriteTimeUtc": "2026-11-25T09:05:57.5955168Z",
+        "sha256": "d0ca6b801679fb7d171d0dc543d648235c0e430460eced4cc0263fc9aa7af9c7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b8b6f1a00cc70a53642c3ab4aeca3e15a269f7d2bde0f93ee46906947cc18841",
+        "length": 4324,
+        "lastWriteTimeUtc": "2026-11-26T12:01:33.1610686Z",
+        "sha256": "edce59a1f260f45529bf752a248bc3274baa946e2451838968fe444257e311e0",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ce24fc94cef2382b7549347802584fd89e39e5de36470dc376825481a3f54c2d",
+        "length": 2284,
+        "lastWriteTimeUtc": "2026-11-23T14:26:04.7880262Z",
+        "sha256": "aacef507e76e927f0fa82ee71d449ec6be8f2578fdb3ff6280bbb60f9b0538ba",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7363fb9a2b9c679b02231e0b0fa68fa3c443cc2d08646e8639856260bd428c55",
+        "length": 4332,
+        "lastWriteTimeUtc": "2026-11-27T03:14:17.6188841Z",
+        "sha256": "096858ef80099d6137b8b83ec5e07a8c58424d20b96030bee63b188d6e039d58",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3d1efc43c82f3d500cc2d2af8e330b181cb50a175b096d918017f8e06ce871a5",
+        "length": 2284,
+        "lastWriteTimeUtc": "2026-11-26T07:44:41.0752948Z",
+        "sha256": "6616b1af2e59672e7e3b471c219a9e2998cf216ffe92b8bd986eff32ad796d1a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7aceaba8412629f38f67f001bc1b2a674cfcafd371addd4e9435c6d57e11c9ba",
+        "length": 2276,
+        "lastWriteTimeUtc": "2026-11-25T04:39:12.8349184Z",
+        "sha256": "2793555c7abb2703774ddffd03f3876ee9b97d89c6b13a9d8650f14963935825",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0cc8e9c2d6c0abf92d0e18dc3c64806c5c9a9f097045b5ab142340e697036016",
+        "length": 4308,
+        "lastWriteTimeUtc": "2026-11-25T06:00:44.3149672Z",
+        "sha256": "809522dfb6bc3a557589ed60198c7ce96f04233ecb6ebd1d956d4d7c220bc9e5",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c64b908710a60df49aa896df5d933ee52b4623b15924104b442a2b6386d90a77",
+        "length": 4324,
+        "lastWriteTimeUtc": "2026-11-26T12:22:51.3300369Z",
+        "sha256": "6814021deade7b3a55285c5df461e8c360dccb278ac8aca08365f7f11b75b5a6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e9cb89dd84ee0b509e0dc66d59b9253aa1eb0efcb9ccda9f45924c2ec35b4759",
+        "length": 4340,
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9761997Z",
+        "sha256": "821cb7b31022b8c1905bbc5ab53ad020a2500b560cd3120da11dd025b472cb73",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3a7dcca8307fa77514cf832e915854c6879cde282ac67c633d5d182cf41ce02b",
+        "length": 199,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1106735Z",
+        "sha256": "0f1c14ca406cf577a8d4409bace9a700af94bac94fa5182a0766f6ffd04099e9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "266c6a8ccde0795506b3c833b2b7b73bdf69ed8ac6717955baab4c46b4a2f9d2",
+        "length": 206,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1306743Z",
+        "sha256": "702b39d71cf92ba5c7225bc1140b7d52a223e0d88f8cd4c16c0d30d9cc5eddba",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "58133dbe25406db8ae87baae679b5dcf1b68b5f76797a57bbf1b8e7f42b3607f",
+        "length": 244,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1321778Z",
+        "sha256": "10972e11d3c1074737b4f43ffd318d73cb29ece99c9dc099bc8393bb9cdeaff8",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "92fef64a156ffeda1c2743f36341b6e8724ec544b5bfa74244feed6e9d343abe",
+        "length": 206,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.397407Z",
+        "sha256": "e34ae042f1fd0ed30729d7252779a325dbb6940faecb6148b6a39c668c34bb63",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "79543ba5520716c9e547975be55e86b1422154702fdd67884e866e9dd771360c",
+        "length": 3988,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.7171109Z",
+        "sha256": "9842f39dde9872936ce89ca747571fa16c849452c8e16faf80f5337481bb75ee",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "58049234c0c32907bcababd0607796aada00a2d4e7a423c93fd374cf2778c962",
+        "length": 198,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.9909907Z",
+        "sha256": "4ba206d45be5602ed23ddeacd881c6e449a8023fc2d5432432600a8776cbd326",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4c7a511bcce591ee04625dcfa817afad6599f1950a0c2c524571b08986150173",
+        "length": 290,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1321778Z",
+        "sha256": "8e60529f673d2ff7548a586eb817f8fc520ae5fb5890eb10c31c8befc7226a9d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2e5b277c7b6e208321e84c765642116c4ec35cfd908f45abf89dd20d0db68a02",
+        "length": 207,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1744301Z",
+        "sha256": "7ead1594ec7683056ffe8b055d48b017de7f84f996ca244c2046d03b89a53b11",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "df027c3a6a7794ec2e10042dcbfa95b4d73544a82698398cbcc48aa4eca97725",
+        "length": 284,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.9909907Z",
+        "sha256": "c1c0d1282bc26e9cb3418e4c02a598d40d9c498cebdd554417906801bf7158c6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2ef1275b96443deadca48976fe50939ff42a92e205fa4bb5d5e07c27866a2a15",
+        "length": 200,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.216024Z",
+        "sha256": "a8c9eb94a31c77a237fd93e239c6cd0e0e0a9971da03f70d3ae83d1d34f576be",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f5fd286f7112ff898419cc50668d35864777ab9659d812deee72f146eb866643",
+        "length": 282,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1331827Z",
+        "sha256": "0b2bdd6f8dd6d7af1da20627e504b9a007b021a9ccb0163ee573341b612d2b43",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "86aec031fd38a35d14c9194ebf00877b89088cc8ab7ba47a73f4ea56a91c0c35",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3964054Z",
+        "sha256": "93473eb4ef1d7db28f6e37f862a450d6569c037c14f9c2383a812f1f95727951",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f0da37719e4f07b2286ea839ab3ab8113a248a6436a4805d41224718057db5be",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3954055Z",
+        "sha256": "6b83cc54fc86c869816592bde2ef665da84d16ffde9dd3a928653481aca5bd1c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "62fcabdb2b219950f3713960f2dfbe9b6789fdab56a3182f1be055108f5db0f7",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "db86eea0386e03c10b0c151b544e83bd48668676b1fb29b7b6f35c561a150606",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "36a3a510dedd34e024e5edc8b78766ff229610f6e2e8ab7ed876fb228225af6b",
+        "length": 283,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.397407Z",
+        "sha256": "73987570f57d60e78db50f2796a63f0347f11da2517957ad61ea0a1d3442efde",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "004b1b93c0340ac2dd7c494fe074052d13d65d92b45e73d64e0faedab17e3955",
+        "length": 283,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3964054Z",
+        "sha256": "95b18c2308389dd2baa0e925c52b2188f9659e0a43b2b901f9b35cc0ca16b014",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6a7d7ac23fcf4758ddd700489ec5be292c8409f1dd1f99f100e55d0571c863ee",
+        "length": 4619,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "56ff8bb953f7c1ab86d587f217fbb7c2b99b04276bc622ef9c8a6fa9967b8900",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "98b6fd7fea6e6a426e36656dcb61af62fb3e1b80f2b7121316da87f561ffa071",
+        "length": 200,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.9909907Z",
+        "sha256": "21a809a5ad64db1cfff7f494c146c1ade035b2d01e990c1bf7cbfc0f7b88499c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4b344ca017f256190788129c404145486d56da9e0ec2cf2241d777f5806a9117",
+        "length": 283,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1106735Z",
+        "sha256": "f0da101b1f3a27ee9a9f7976cc441407c21b04779ae9472daeeab977eaa895aa",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "aa85bac0ed1b6f4a0d14220370e1e2f2ee9e5bf7199aa19ca343cd089dc64661",
+        "length": 283,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1754295Z",
+        "sha256": "29fae91aa666c9fcaa17c759c2afda0ef6b305cbef8176d50673f72e28fd60be",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c6c69f3064d284f2a0290ed23eb958acf67a50f4e2b752ab58b488242bd66996",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.7752704Z",
+        "sha256": "53959153fb3576ae73b368ecc3d5cfe0118b4284bd07f24696af7ad39dba9ba0",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "70a7ece626500bf3be93258940ccd4ad54ad89551218b32a0a1218cc0cfbc9b3",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1744301Z",
+        "sha256": "9df942713652412eaff7e76b25da2435615204084d78bdcaabc5d8d4ebca4f4a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "80b644685af0893177db8cf331702922c52ccdcaee091b6137be144694381fe5",
+        "length": 198,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.7171109Z",
+        "sha256": "3762e54473d76e7609cf7dc862e35a1f3ae707f5730eca64526af683d630c2d7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d0f43a0f55430fd7a46240365c07535b32727de9e9cf5f9b6e8f5c6a9ba748fb",
+        "length": 245,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "cd822cf250e6c1b56a2a776d4fec1e432388c2e033eec19892d409f97b36ee54",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d937f04deecf3d9744996f4a35573e8e18f9b17c84ddc58f9268da576db5b442",
+        "length": 239,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6800927Z",
+        "sha256": "d1980e6c7d3367d91f46fee25f9793ae93634b19077270fc1e04c87f02c74aa9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "335cd37fe1e666bf85af409eb7eaa1d892c8c1f78c0f5d1e537eb22cb6726291",
+        "length": 245,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.7742701Z",
+        "sha256": "fc7fdf7968ae48ee6f9b1cb32b1a14cf9851622cd6944ad1da15b9a049a2aed3",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a042bee6277908c42594fbeaafc61504f98b8e44c43a136fbc7487e392dee184",
+        "length": 3337,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9357688Z",
+        "sha256": "f8ed9079073d44207aa24e7ab8553592f07a1f8baa96cf1c492bbc8a54bb0efa",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "13389f3c8d504e34865876116192153487d74bb9599a3c37895f99cdc3b6320f",
+        "length": 197,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1106735Z",
+        "sha256": "0e92f15031cc0992dea31e50470f4cf91bc0a58a7424313aaeca0931e6f3fffd",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7e0dcdea6eb7199ab650946cec0f590ab4da8f940b6a1c8c3552c2777de008eb",
+        "length": 35960,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9377649Z",
+        "sha256": "2a1240dcfac739effe8b130864d2e48ee9de1baa2b7980be1be5c1427601dc6a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "69b51168571ed3bbf9aa2a4c003ba1e0775f16072b412d8acf004c34baec84e9",
+        "length": 100320,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.7176877Z",
+        "sha256": "d753b333ed804b252569c9fdc39af729afc66896aaa85a0667dd7866bff363f0",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "931fb6ed9bf216635baccaf03367dc621a5d452842db79820e08ae01e4394686",
+        "length": 222,
+        "lastWriteTimeUtc": "2026-11-26T10:06:17.0283411Z",
+        "sha256": "97fa5f25bc2e7d9ee5db4488a190155cd0601db193d185eb397bf1ee30f3f2e9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3dd219681656e5d937dae51e6b9ce556d3a09b8c058854b3361150c6412a37bb",
+        "length": 206,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1764307Z",
+        "sha256": "f9f3d20d9482fec6bed4e8397ce40e1c6829edad026402e21a1db608eb62a7a7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "21faff4c3aa2b2c76877e06dceafa998050677b234b5d241732c3686c4931351",
+        "length": 208,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1331827Z",
+        "sha256": "e28195ec89b949e794c3216824851ee9324c878867329aafe78f15a9e69f7132",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "713c85297d361c78350d8675d58b12373bbd1b9ed496c26ac0727fba193cd6d0",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "5b5d57c660115dbd26b2eb816625cd5aca450ac51a32c375a643fe20be6391e7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8bb1b6ae2485a9ff002c52f0018b58d23c319229c5d8d112178ac64112bf3bed",
+        "length": 249,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9357688Z",
+        "sha256": "8463aed2f8b9a255e3570fcaf02283166902cf145b0aebc24e7a1969ca71a75c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "43d810cd62e3da199e922944eb38950a93bea319917bc82a5cbccb5f22061d0b",
+        "length": 4664,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9357688Z",
+        "sha256": "061d0a3d96f652bf876f82e3ca72013a16598c216e1e7c157e7f73311f550e34",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f83d00f367453562305cd2c4b66c94fb6a6493c8304508fe6e261d785d68396d",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.7762704Z",
+        "sha256": "641778a2f976d8784917510a77c588e28f93a7e8994ebe1880c3f49536b098b5",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f2037a285f86f22d6adac3bdf40ef6abb5e1231190edd669acc737b6ca7260f3",
+        "length": 209,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.397407Z",
+        "sha256": "291faec5ccc74dd88aa4559fc3d967c7ffb2119534c32bbf24d271c5202ddeea",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0f54b9f019f88f6c95b0f0ea84863dbf5a8f2e1c87dee068b28410b0c07be842",
+        "length": 291,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3964054Z",
+        "sha256": "a40b071388b1f1944e8668f5e140a5dbfa97610f1fd73d6d625bcd21705e1e09",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bd53dfb8ae395cc5353298bea9e8726f7f14f677323a3f5c87b29c8357148a7c",
+        "length": 283,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1754295Z",
+        "sha256": "83b6e7a774d1c7213d5cf7396b35a6fb6d4bb127e045dedcdd7b354a013babad",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9256e19b3c999af25c023d0757da140062e017a5c5cb2af93ab685e14104713d",
+        "length": 245,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3954055Z",
+        "sha256": "cbafa860be78b92c54251d1c9a25c283ce616337247a1db929738d37987f6ad4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f34a0a9365b4e870099965395c1f30fd95f9a5103f54764ba9f074accb116347",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "d140726ef4f0a564cdc5bcd9127319c21ab25e8978a8b9e5dacf93d3bdad10fe",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "31b91804a2a3c5b0e03a1ade6664be117639d0a7019e5a76bc99ed11bcfa963a",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.7762704Z",
+        "sha256": "eeb7c14bf62b3794846283490c6f3e273ed9a13cf3b0e64e5dc8cd57420feed0",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a7229c916fa404c557d2530f9a5294cbf3689d5a39db6059b7532d6759a572e2",
+        "length": 216,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.397407Z",
+        "sha256": "4aee0edf1b334313c2e157e452cd54bf589cf0cf0209bb76445bfd7d4b5273c9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "987829efad7b5884af4e27e4d90c71e6ed1b513dac0e346caf977bc14fcbdaf0",
+        "length": 239,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1321778Z",
+        "sha256": "ce60827599a6cbd37ba704ecc64b8139beecc47bf82773117bd5e426cb5c3cc9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0d88f1975a521867470fc2bef90892a872caf1ee1f85ac49a3756f2dff402cbc",
+        "length": 237,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6800927Z",
+        "sha256": "2d73944a1159f3d017ce239336781881700228839a48a61f17add6211c33f73a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "95d37b7705811e5571ff3cde3a40d136b117965df5064a4a53e80d46ac9f4c65",
+        "length": 198,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.216024Z",
+        "sha256": "5f8fd5c5b9df922e904f58e93ac65119a9f78c17e59c3aea1ad6c6b225f583eb",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e46bb58c3a8ef8209fde6b49f4c09c2b224532e08cd4b948a3052e9e028da090",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.7171109Z",
+        "sha256": "174e8c4f904dcdc6661a479931c5a8dcef22b5c7edff63f39650131f8c930200",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0ef22815ad51524601ecfaf78370fb5a874bbc841edebc37c9ff8ff038ffc435",
+        "length": 205,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1331827Z",
+        "sha256": "1c4c629bd3529ad3caa0dc176ed8c7702ce7d8eb8cc0a50fb73da7dab162a1b9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "65ed6eef0498811c5e2b1d4691cb04ca02ee0b0c5cfe0366ad45a75e4b19d384",
+        "length": 209,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3984074Z",
+        "sha256": "1d254fc6ded3bde1e0a623bc41296621c016652661703c073363a7b15c437bdf",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8ce640994434fd58e0b324a1bb4d0ddcd48218e344e12f202110f924c6b6e5fd",
+        "length": 2611,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9357688Z",
+        "sha256": "7275cfb4f2cbe3874c4713d72a6b8c3ac99e41e77e4e1aef706487532133f2b2",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2753db3cb86406957ecdd7cf6349ae9c613212a0357d931e5415976aaf1b47e8",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1754295Z",
+        "sha256": "7aa6a567c7904a11c583b87693c28570daa28c9958e98e8181fd637871cab6cf",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fb27077c5dd667d4e37d7a8c314e387955587fa67223fe22ddcdb10f9cdceb82",
+        "length": 284,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.216024Z",
+        "sha256": "caac223b47f5309eb95e89636286bcdb3d275e2961df00cb9ae4b6202fb1a96a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fdb26c1a4c7902597f9d523e14bc9f3d4c8cd0bcd437213e2a7d2b2b45f904e4",
+        "length": 206,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9377649Z",
+        "sha256": "569f33732863c045383c2d751a905ec5866912e86c7d9d9bf12e3844ac188ece",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "918264d00f9aa3fb5e466881a9000789e42f5cf3c4e87630cff1527f6962a81b",
+        "length": 209,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1764307Z",
+        "sha256": "64df0057245f5ec838bad2d64267f73f3589481cf042bab12adce40a254cfc90",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "53a6f6929caea36eeb120f3d7437ce109a2ab9cccb02a8d29bae4ca526c906b7",
+        "length": 237,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1321778Z",
+        "sha256": "f627b7e016269e554533dc9ee2683278e2c5e48ba2071da9dcc790126fe1a23b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c07f38294d0350d7b8555e7422db3fd6bb281fd72c131b6e17019ac619a1204d",
+        "length": 282,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1331827Z",
+        "sha256": "d480a4909a57e15547b5b7201e951a29909530f016f01758a279f4c8849d850b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9e3d3059098c0458a4e70d21627f3fe7e9cb51ef956bcc037f5f79eb1d758849",
+        "length": 291,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1754295Z",
+        "sha256": "833432c996d1af9451e2b4fc9818f0d3bf4dc10c361ed263a1d02e2f8b2a4038",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "daefb2fc9a0ba4af261cdf5855a9a82102918b65ce9df9e8f2acdeec69f9a0c6",
+        "length": 237,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1321778Z",
+        "sha256": "4eaf98660e2bacd44fb69459256482cdf02a115602c6d73ac994d5b1df510062",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "449525d7eb6f0a8a4ac435b767ffe9955602d2010a81e347a557ff8eb67480ff",
+        "length": 98896,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6500853Z",
+        "sha256": "2bd686cb3becd0bdb5df65fe46426b37b825118144105c00b95facb4c8c9a452",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d5cfe159767e0ccf5395f34e30c924767e1b158e69d3c2e61b38b6e1f55686ac",
+        "length": 244,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6790957Z",
+        "sha256": "0663a6608ca98e38b2f4094d4d346e9bd6213ad8a98e910a4dbc17f9496a8a07",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fe87d2a39c58a2e24abe9a2b00aca49d97aa728fbea3a6f5c85b69a97cb3f3d4",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3954055Z",
+        "sha256": "2a8c15a2c8f461bbcdefe53c4707ef63690a17a799bfa7b3a3622979f153e312",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "164c50274d47a1b4ecfc942bbb5e691987c30974879c131e82d3f4f642104721",
+        "length": 207,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "4d2ba9405bc9d9d0ae94e5a72d8742a85ad66e8671ac67007756eb8bbe3d98db",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "077f1137492b20007eb83ef50040da15aba248466f9b07afd19c9cb266fe09a5",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1744301Z",
+        "sha256": "bb5f3837d45912b3e927b565127dd68662eb8e05d683a2c5bdb9b375895f98cf",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a53a3035d2db6454c35108467c4806056eafd53d90f144d25ca558e21cc2b292",
+        "length": 245,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1744301Z",
+        "sha256": "081e0e5dafb22e0689793f2512b4136674f57764a02e0024c175c0eb8700fd3b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "47c09f855b567de3129280266f052fd157189f9676cb866e16ffd84affb9461a",
+        "length": 4619,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9357688Z",
+        "sha256": "eefaa305866429d4d7a7b93218d0348c13852f27db82055390c7bd85d83070bd",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "476975c9379c30ad1395dc8d8136f18fb6677cd4b305a38eea3a1aebde998ea8",
+        "length": 207,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3954055Z",
+        "sha256": "0095461ebbd6da9f55372872addaacef98bb921f4ffc2d2293a0eecc60adb45b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2c59734f137c170a2757213b6b1795baf114be5fc8bd70bd852efc51431f410b",
+        "length": 237,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6800927Z",
+        "sha256": "623c0802215d515d28396a98fa41e1c4d481e8709e16ece087818ee375b02f9f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "15ff1b7bf535b4098fec4f2aea7202c6bab300643bb8112bcbb9733ae79982ba",
+        "length": 24,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8911394Z",
+        "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "88adca02bf9dac24246c33aa9c5674d13e43b84bd4bfd4664fec2ae157682cb3",
+        "length": 1680,
+        "lastWriteTimeUtc": "2026-11-26T10:09:17.3988319Z",
+        "sha256": "cdc06893ef794f39fb01f94a3e14daa23b304e39dd6e6b3d5e9e780ee1abb276",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8762404ac8c1598c3b220bde5b4247d08e333864f92fea8d35f4f7667c851186",
+        "length": 24,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8899769Z",
+        "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "633c2fc1afa7de2717232afba7a78fb1be140c2c886557c4100a24ba3792d91a",
+        "length": 48,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8933364Z",
+        "sha256": "31ee3be4395529a4bebfc88187f43b828a952c263f4c2c06f74e230de6cb4ccc",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "30a72755ddd1115e45bee10170cd121b9f927fbc91b552f8c81a088f5be80451",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9725661Z",
+        "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "32e77b6f88142e658b0bcbf5c55115feff27adb29f5570c861e2db367be303be",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0038423Z",
+        "sha256": "82c79d6de8e62d46e08a4f7621258324c6e19da6c45a5180e87675ccb8bac647",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "84b418f8283b67ab8edca2e7e5bb591b6eebfe7a5841f886889e3866d78b4cbf",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.975556Z",
+        "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "167fa93574137598c26e5e4fead24b6a4634e9d35e8d3cc5d5111955c925cea6",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9765527Z",
+        "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8d84a0940dbf168ad91731c7cbc50eabe8bc5b3b8361b5a1b857a3cef1c5a29c",
+        "length": 262512,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9655894Z",
+        "sha256": "f41c03516105462d098d00b0e3c07dcc05a78087d5db329c1d86909b443896f7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "439f2253cf34e58b3eb957fd3d28332d25b0dbc230628e73f14b7d61234165d4",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9323015Z",
+        "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "73e415fffe40b0c5b950be0c43a53385a42f83bc299299bedd21ff526489faa0",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0038423Z",
+        "sha256": "f779e4c9a58873b9132aa5c9e27ef2fb68ce021617d5932e31148d0834059aef",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8324c1b67e12c2300a446332ae9284d8e41a993925fcd0a47f68eadccff9e8dc",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9343165Z",
+        "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b4ff304ff4bef113f4905cd307eb1aa31d6239d9430269d1a92b3b16e96c728c",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.935454Z",
+        "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bc69559d81d5dcd00eaae687ae227d79bfa512163353c791e4045f37ab230ddd",
+        "length": 262512,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9227314Z",
+        "sha256": "a3ea46293a63fb4501f503594426241e03af806dc1522cc9a430cf09e068fb8f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5a2013e7c55a398c306036beaf1c707e597b29826b90e799802d5aa4df888b02",
+        "length": 32768,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9048666Z",
+        "sha256": "eda4c9567974174f08a1dbcd8badf4d6199a7e9a8b78b8826548f49e20e7badf",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "620230ae010da61c981ef3627e387f2777ee385f95e3bfc43df2717ba114dcfc",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9063306Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ad3ac3177be603087be792c013b49ee4b975a399ea83d1b58afc79b7bdaaa143",
+        "length": 451982,
+        "lastWriteTimeUtc": "2026-11-23T13:36:43.5749329Z",
+        "sha256": "b0d80e6b6c5491879365e176ecbd98074602a663429bcfcfb0a5a8375c051f13",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9b9a2cbe44b2d2c3c209563430ac4933cf56341e30bc7cbad1c5def0620606cc",
+        "length": 36864,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0366674Z",
+        "sha256": "e33d5712025eb2a4e823d463ad746aec782b1aa54537a8a6014b25cee2a16dff",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "eff8556af888cbc0d8965ac7ad8322c17f349e4bba7dce911b6e46e93ecb2a91",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9227314Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "660380b35aa78a090d76275fe6655d34035eceb558c3626e506c84df34844613",
+        "length": 16,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9183747Z",
+        "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "117da7ff465fc41f9a13ff6416a26ad06e360a8b19ac0167d4b4bd4dc9eedea6",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9098058Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "48bd625372d90849127849152a32d604595395630e47da5b065c73bb65d4b785",
+        "length": 290,
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9314049Z",
+        "sha256": "74888e8139fd231432b6da8d48f911b4cc02a5195a090334a5ba262ee89afd9c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2ce04fbff5b4210b814bb62a5ce884cd219b8003b2f26a18dbac4947879daaed",
+        "length": 290,
+        "lastWriteTimeUtc": "2026-11-27T08:25:27.0883118Z",
+        "sha256": "4c2de27aa1cb63484ef01bf7a17a07edd525beec397aa0fb8097a7d2d8e0595e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "24f3d800f0bdd045e5b2091b90796ebb381e833abf060f497f1b161a00cf8154",
+        "length": 41,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9112113Z",
+        "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f16cf9da794df04046cfdff56b8911acd157ad4c3251d914245bc72a64436248",
+        "length": 45056,
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9559684Z",
+        "sha256": "332f42e71b86dacc2f6e15a023b6ddadbbcb1b86db61fbe837b6f4f1e8fa03fe",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "dc7a2e3097c36d0032f9cf32620a8a83cf31b05a3566b93147b290cac448056a",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0028438Z",
+        "sha256": "834987d02ebb79422f52ac6bec190d0cbe4dec6d01ab59d729b99d59d545dc4f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "eeff9fa0c59466b324a1c7e42350dcf329a1991c3e61265d47837c8ec17b1767",
+        "length": 1056768,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.9230311Z",
+        "sha256": "4019c078f481880b35505a452dd96b264cc0c7276985209611359bd0285d241e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "36485f6cc872e5b065e6b41a0587893e3902a0966c8df41109313a957fd2bef0",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9196293Z",
+        "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "989f4ea51f8d4527ec9a0ab25478f0b70ba6f76751dc615a4683fc1e08100d3f",
+        "length": 262512,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9037431Z",
+        "sha256": "0fe128e4373adf5a3f065edcb360207ed2b38c0187daa334e7ceda2b91bc9f8a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a174f7bebfb42503afc45c4cccacacc086e5d2ccd5ac9392738bdadbde5d2a6c",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8679812Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "84ec326e82e04e9e8cc049f3e8e26bc5473e19a4cec7688f306d7437e6dcf5de",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.869129Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5e41f0db4f4c1b6afac9cea4b553c971efc78e6a24d403caf7843c3338c07bf8",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.869129Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f2422f1abf35b3f6b4866eb8cd6bbd32d307ea0678f0061c6b3ccd1a2189774f",
+        "length": 45056,
+        "lastWriteTimeUtc": "2026-11-27T11:34:39.179203Z",
+        "sha256": "5e75c1eeaa0562268101fd56b68f568d85661fd2872fc0874b64623857a4aad3",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "821ba1f8da1510260a031f0e8c1f8229b8e919296069df8e97e4cca5a791c6d0",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0513695Z",
+        "sha256": "5901691d26d6580c8bf11285f2396ade659a83c86842ac3df29a06435f9a44a4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b4418fdcb606218255a20693ee063a93b99d224fa95d3bf90b24def37792a4c1",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.2920583Z",
+        "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ef1fbb9802172e6f557f1f184598e7f0fe4caf29d893aed0cdc0f3fbd81d85c4",
+        "length": 4202496,
+        "lastWriteTimeUtc": "2026-11-27T03:50:08.8947399Z",
+        "sha256": "1218e9006d88f09bb86ed30a0ca8f25fd91681be39f5f05247fec6289bc1989f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f8e0223258db71bdc925da06e53efde8df8f6f0c9db112e477e974434a87398a",
+        "length": 16796,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.8929934Z",
+        "sha256": "49bfc8f01fb1873a284f17d87465222755b329e565045218421d17352f106e3e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ecfb88b2d82fda1f88ed7d7306c66fac222e57b45a114e41d28d4cbca6f51b45",
+        "length": 17088,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.9163292Z",
+        "sha256": "78b2b21d343e0bfed393ad72f2c8f268e30daac739d93d9d04dbd381e848b48b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "03efd46137897cc26118dcda19444c08ebd529afd25c7c73a975be7da6f9451e",
+        "length": 16632,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.7537324Z",
+        "sha256": "9fc4b8b46201312b892f82d35b33f4be052c581adc1b56826d9183b0c97424ea",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5fce879135c50da3a0b6f3b980c5f702da98a05fee4d9b9986d6e5530446b333",
+        "length": 30452,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.8298746Z",
+        "sha256": "1628ce8541622200abc165133c50f1d6f4a26991dd461e35804603a93b15cc27",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c0bab01c5482ef4701439932b4f728b57539b9380f7da8ff95d4de2e13bc4a03",
+        "length": 262512,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.282338Z",
+        "sha256": "f0367f9d2833fcafca9d63c4636e56beaf8098438cc631ca0134cc9d174265fe",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "318fd557aaf7012214ec03559e01cb13aef7e45d56ee0dda3b420598014ed6a2",
+        "length": 490,
+        "lastWriteTimeUtc": "2026-11-23T13:36:41.8504602Z",
+        "sha256": "b5bd416ab451e2736ca2f47951e895faf0a7119dd9df4761a5d20d515b8db3e5",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7315672b4fd25bb2122f036885d0fb128494fae5a2d21ac28df7a2dcb1ff64d2",
+        "length": 448,
+        "lastWriteTimeUtc": "2026-11-27T11:35:38.9297992Z",
+        "sha256": "5f49cfc01dee354c20c39f0b5d2d8c7eec5a600bc680b589be9cf9ed0d6ea882",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e84893d062cc8cda2add3a7ffb38ebd105bac2301b8a4351c9a57705842601e9",
+        "length": 16,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.89231Z",
+        "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e929d69b9472381ec84e6db976bc35a4cd80aebdc62ff9b96267ce6dbd346fc0",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.888947Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d898148991f824b5d818ab2759edfe0e646230c9bef2e62e09cfc9f3a6498234",
+        "length": 302,
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9163748Z",
+        "sha256": "c2ac90b08a3bfaec248707fd7b9b6dbaa61123245614744e0c4c89a1315b25a7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "96e9f6f84c9850a56eb476f47cda572502a1081c7c60524be434608522c11d02",
+        "length": 302,
+        "lastWriteTimeUtc": "2026-11-27T08:25:27.0712337Z",
+        "sha256": "1ebb67c371503f42dabdd774dda0bf22169c060965c7973af1af635a3688a3e7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "523511a730e24b1b62a87ee8dbbf3ba5f3110bd75750eecaafb05543e35c8119",
+        "length": 41,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.888947Z",
+        "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ffddf7392e378c04cbc8ab6a175c0ae59e07bc97202a400f92cb655ef1d42e75",
+        "length": 16116,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0120069Z",
+        "sha256": "336d143c9b267dfb9084dab88e932d27abae1e2a6e61a3c6c67f982a43b5cf02",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "544a4d2d6b926a2abd577c766e78bf64b468f248275ace22e8df3d843062e7cc",
+        "length": 20480,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9308622Z",
+        "sha256": "e63e5ecba16ce902f2c62dda454042ecca66a09d7a33f38fedac458d1a11f81b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6d2ea70f502180e53f603b7c253777b8b2fe08b1d803d961edb3d4423c64d558",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9308622Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2331b4a1c87fe626995cea7dd017bf6de967b600213a235ac3c2011efb46280d",
+        "length": 449,
+        "lastWriteTimeUtc": "2026-11-23T14:34:18.443371Z",
+        "sha256": "77c867c53a9084e551e76f8aa2ae8deff94c291cc20106e7077d6972cc44ca97",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0ab44652b6505b54bf831bc3eabf7633eb502146916522e1cdaec80ba899bd3e",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8956654Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4a16a9f7e3a4aa26ec2d80b1b0775d7b8671938213a93fe22af465d4645d7943",
+        "length": 36864,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9237436Z",
+        "sha256": "88bafa2a265212152b2405502209d64438a416ff594a040e666f031ef442a812",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c306728e81f74e2d61c0bf8b864fdc1c4efe03909ae28b5f6936b616625c296e",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9273235Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bca6842420dbe5146db60f6e644dd6c0559345246d3bd4d28a3894700fcc9c44",
+        "length": 57,
+        "lastWriteTimeUtc": "2026-11-27T11:34:48.9261177Z",
+        "sha256": "be4b8924ab38e8acf350e6e3b9f1f63a1a94952d8002759acd6946c4d5d0b5de",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c4f6ebf2dc5314b501be8c9ec8c07b92aa72f6d01c26ab4c9edb2b752a439f09",
+        "length": 37,
+        "lastWriteTimeUtc": "2026-11-25T04:38:18.6162876Z",
+        "sha256": "b884ac46c78dd4d4e101aa9425d0c2c4fde9f51277e1f6e2ee4cdf7d3595ba4c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "31c5295f1936910d0f59b38d41f6c96d4fa61616cbc0a22a51d3c2ea9d223dec",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T10:21:07.25837Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "098d871d71e7e81d523a2df49a1e230a6b6000faabf6f51a639e7993d09dac72",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T10:21:13.3189652Z",
+        "sha256": "07d1477ae8a99fb11a7d049d8929dad7376c3758cc82c3b80cdf641e7abf5657",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "79a9c019e4fdc1fbd51cf8b96191e4528de24fd2f749869f4a8cd104820d8b04",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6099776Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "61dadc6c471eeebf8e40ed4f6971e4bf4748b1655ac6dde539cbc0c36dbfa9ed",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T13:04:42.6632219Z",
+        "sha256": "c46c884fce01029e9516a77cdeda3d2610a4d832e0110ebbc1eaeade7626807a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f1cc7409206bae6662f13e36db6e099be51836bf42fe36a22250338051868f15",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:54:38.7071381Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "35bbb5c5cfb2474fb30747a177721167003a20e34272ff6f4a7ae541321668f1",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:54:41.7607019Z",
+        "sha256": "fbd0069833bf2bed65592807aaa5676d667741ea9c437b70e07e853eae5aab1b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "20d40319bb44ab2861b2698d327be6a61cd8f029b658e5d732c363bbd1cc6571",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:54:48.8310897Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a947bb7a2a24bc618c65ed41307a6595ed3a0e2f5c819014462d077d85c13ccb",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:54:51.8880287Z",
+        "sha256": "21ac7943c39f0899da0f4b1010b2dc8502dcf6d44347383a389c7d636786e2b6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e0e492f7766b4d48971533b3fe04fc102fe3f998d74a26a49e7aa07d753fa6a7",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:53:39.084253Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "42623881d58ffa3c9a1b12fbaec492077e9e3199d80892bb145deb9290ee5d51",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:53:42.1364042Z",
+        "sha256": "28872673891f8f55d72a0a8a03c964952497d521579780af4e8c0fde219b3fd4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "41df5d4198e86dccbbc2dfbab85e636e70c8c085f50d27596fe89364ea692d7c",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:50:47.5943384Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f3ae2ef035575ea40c347765a2a5f8a22568ab0e982d3063ee9ab1994daeefa7",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:50:50.6302432Z",
+        "sha256": "71f00b757a3bc8541f914ac5ea12ae7a0c0a160ffcffe412b462502c4df20b1f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6456e2fd54b63bcc342d6a36c1b4927a076f777363b77b515528c9ac34301d61",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-25T04:41:58.9925713Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b8aba5f6ba642a13a0094e14a6567c64446caef5770b60bb3f757e7d77b0181d",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-25T04:41:59.5102955Z",
+        "sha256": "76880ca81202a00cdd7e0ad15fc41901f65ca4a6286e4531ceb3051aaa7dac46",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4a41846c256e63f9c3b2e63f8a602d9962995832814a44818323fa9efc77809e",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:47:25.3337858Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bb12289da624262fded13daac1cf93f98d3018a81ecb861b73fcfb2e6270bd87",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:47:37.3868859Z",
+        "sha256": "c92589d1cb437cd4d004c9785714a0fa328e351a36cc2aceebe1f9ccf4cdb78a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4a9d957484385098d62eeb663b215bf82b0b2076607b52fec3d9e6566832e31e",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:51:02.3721857Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2cc592fc51d45ced511ee1c1e3dbe1a994d18bc5d39100f0968327d19058af2d",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:51:05.4059534Z",
+        "sha256": "11f38481b5a01cc6b888a8ea90a9e267f23a148dd323a986983059b116cddf21",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b7cb9592a145eb002b0cc07291a433e9dfdc576544300254b728868267b9ac82",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T07:45:11.6745508Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b21c995fc6e03eaaeb40f3dc9406054772fe42c52ac683338f120e4aa4136039",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T07:45:12.2045789Z",
+        "sha256": "7bdd6450de56bc660868aaaf7b5c724ff7cc62ab9e035eba9d3d3436142bca5a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "eb47818d803b7596ad56d7b52662a9c3cb25caf91e1c2d134c698e6ce5c48e02",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T13:03:38.0090937Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7809a89908d4295503bc1ea179440521236b88eb4031c957b9f41c3ccd48840a",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T13:04:02.0780049Z",
+        "sha256": "83631bf606f887dc0261772776fa4c817719caa9eeb7e321f38fac3bee9b2877",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c1c805a91d565f80697c0deb78be078b4cccd92acbdba0b2b32149f4d804733d",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T13:07:49.1976967Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e05973e105107bee70ee15c5c9b68be54dae1b6025c6c6c551bdf2f1d6209900",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T13:08:13.2452499Z",
+        "sha256": "1a8563bb0b1979012f7757d5c3a01d6162fc867d9d5eb8e58e2b9027e3615136",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9907bf0ef05899ee8e4e420e60e3691e2035c6928c7c306697fb914c0bab157d",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:44:22.9370219Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "22ba1e5ea737dc72dd435339a9e099b36ae714d83b80d36bd959e948b23a45c3",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:44:25.9773893Z",
+        "sha256": "de50e5692641a309f721a7d083bcae654110466a0fbf64d26604d21153b68afb",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "dac8158f9a862bfe4647b4cc593cdfea8829988a7b90606796091a0301361c76",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:47:11.861195Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2eb276a93f47d0b1b9242bdaf89de3ef7778b244ec27632ba9fa3efa48a73dd7",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:47:23.9131572Z",
+        "sha256": "08bcec919f2aa9b266bdfbbcb9b740aeff006820f0f1884e724c7caf0cbcb192",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a52e974a6dc7c8516d0bb01e0389055fdb83f006b34fdefc11ac33e70a0add5f",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:53:51.5427284Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "865936d91e4ebb0677111828c97cd6ca82ed869a925b4df9f30c6ec989e02fe3",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:53:54.5902576Z",
+        "sha256": "f0a2dcc5afc87ecc7b4f3ddfdcc6b5a2b7ee8e05f7fd5f4937f6cf50e4788214",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9577889024cefecf016c022fd26462e627011dff5e330bc8112a37838985c392",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:45:43.880825Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6445ef97d858f853f1b8ef7e65e23619757fd9b9233a794266d78f7077c553df",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:45:55.9400997Z",
+        "sha256": "4e37d50d975a5e324115af3adee5a3645a9317a04c33ffcd5e8366b13ae795f3",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3605d4620b6ee95992356638ac0599026aede1b0d8e6b6735bb25d01263bdcd5",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:09:22.3436148Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "99bcc98f4e51a3e58750e98c7000ac25f07a1e362dbe02b8dd9d3217ecd0c9c7",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:09:28.4052806Z",
+        "sha256": "6536f7a67d8db529850a0a68ed06d28211f6729ac93b15f82ab7f3e52d732d0c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0f49b250f74e3c3782633c85222668e9d54fa9a4c20227195f7d53012da02353",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:52:44.6894092Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9b3e94c85371570c5ffa0dd87458d5dad3800f3954f2c148dc272ea296a9029d",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:52:47.7279606Z",
+        "sha256": "095eef3d9ad77632ce5a147d223e6b2e7d75fa08b2c247c13d851434723022fe",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "27c91595ce2635fd95a596de9341128fe6aafac109d7a76f87f5040a2ac28d2e",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:12:10.7405775Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2315f282aac693e1625424555f56e0120fb3655e2675158379631f1d6970e9f7",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:12:16.8115486Z",
+        "sha256": "64ffb1b33ea317b5b9303db65e7f950d63c4f798698ce22b160480b68998e29c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e2a30b10ea1d61cf4003869bc7a216fd289e8947c06b5b4f78cd702b4c9011dc",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:08:13.0793244Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "538f1797d4ad7fcdc0a6bc735dd9841deb9e630d9bed5974bc17e73fcbb0bdb7",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:08:19.1389094Z",
+        "sha256": "7742f6f05421e3da69536f1072673476e811c17c1fcf54e78be90fb54959ec1c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2088cdfa6faeef8149afe0a3a84ca540ef108146861a8cf458060afcb6ba1462",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:09:03.0152469Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "1bbbac488a614df0fcf235e9cfb2fed2ec22e2100d222c85d8e9ff2870669663",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:09:09.0629717Z",
+        "sha256": "12f4e222e123f5c7a8aff78e87d9b6a78bd1333706ae66d85b8d23bc0d6c2ba2",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "42a55cff89f3c759a384d5dc8e343f39190291f8b1fa87ee3c1cff2df45b3aa9",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:11:53.8943952Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7d36d59b4cdc1ea43ba69f091d01fb73578af49d1cc0c451aa269a9b6b891fdb",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:11:59.9427401Z",
+        "sha256": "a57cdfa812625c88970a892586dc312ad4522c7356355cbc1487d99e8dd52d43",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b47087bbde99f98be14d4c010bb418fb40244fcde4200185988d7c303a06a11a",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9344057Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0b5909ea228224fb3668265a27d0ea9a1210d59d9bf832d90a0bc6077536712c",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-27T11:34:39.1502523Z",
+        "sha256": "e3f9de15e6bd7b1f7955a4dce06efd8a488bf7273458ebbe09b66495410017ff",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a9cb5b8bb6c42f7a15cb12512ab056ed23473d0d850404b5db2d5da8df5a9187",
+        "length": 30,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.5317207Z",
+        "sha256": "ace9875fef7e1426d3590993377bc2e4af93c1c323a00266cdca240e91c0c82a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "708c4f9fa28f77190140f458171874e37f815fdfd3b1718306caa7ef5641972a",
+        "length": 16,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.5296665Z",
+        "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5a20b02c712f1bd94f5199bcd7f3b2162d9503fb564c576c73a4dc1cb6edf9f5",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.527109Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "84fc2f13469af8429ad44f84c3f4c45d8360291158d322ef2a7ee62764698332",
+        "length": 290,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0058399Z",
+        "sha256": "15f9f71f6f7a609d91ce1d996c09efb8500b5b2902d053474219222b0ae586e9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e54acf1ebc6a97e4e7e4847f9e876240e9078f97b9f222fcb5238b7854b21a25",
+        "length": 290,
+        "lastWriteTimeUtc": "2026-11-27T09:55:55.2235593Z",
+        "sha256": "3a7a759e3f8bf44af84f368eba4b46f07ca5f2fe232cd32b89536a7582c3c5a8",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "486a13bccb19b5c8302850d10e585efae38d8ed751921f20f7035380e0f86938",
+        "length": 41,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.527109Z",
+        "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9e6b9bb024ace6a15bc1501a46e7267a1af066bf76b1303b763b62114d687e11",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8768806Z",
+        "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7ac37a07f29334e164cae00f5ba3e8a8923ffb8713dba842f6f029747156c084",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0523688Z",
+        "sha256": "f5befdc78ae6de8b4631e8945804db2996d19c3e25cc804a663066751031dd2d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d0c5df0cd8000ff25470c5b3196b45c92b1ac04a7a830833bb16089ea09d89b0",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8849815Z",
+        "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c214c4fec4e8a917bacfee0a80d8502a8f754086f7045c903eaabbdecc792036",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8943644Z",
+        "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b3a4ff45fbb19b4a6416b72ccccaef06d76b1d1c56058e71a5b81850863b6b8c",
+        "length": 262512,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.869129Z",
+        "sha256": "a67dda31b5f41d02cb46faa5319a5d44e93a32a6385b9cb0381150404d52dcdd",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2cc5791a99e15c9aa776e217ad05c7d3f7b1efc1c2d58fc0fc90cf7776ad9162",
+        "length": 24,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9098058Z",
+        "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5ddeee3edd9640676a70dd85032deaece80237e8491e33010b54a3527f75d2ad",
+        "length": 48,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9112113Z",
+        "sha256": "1a6ee83c6f5a2f9c1cee79939d9a71ccac02bd0cfaaedc8ec5b535c0a1803d4d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "79b5a6f60de31f6e77a3291a9c2636612d9007604eea8cc6d01fb17092af8ead",
+        "length": 45056,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9267327Z",
+        "sha256": "0d6287fecedbc44ed9f51ded9de88629ec9f385ecff5da9a34e47e96fd5a9cba",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ba209e9dc734aae01c328bc4a2941ff70caff6c97d8e5269970352176023c523",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.927825Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      }
+    ],
+    "directories": [
+      {
+        "pathId": "17d8a5c55a1d0a9e516947cce361a73dca74aff1535b0c00cd3efa4d63e1d7e0",
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9062408Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e19f88b12b69b6d63a0849a23606e1cd4391efd6f13c266ebd1722eb85e0aa60",
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9052402Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5e1ecee06a7fc06f305ae5c12acfe7a7f67b8ece7af76932ed3afab00c3c6921",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.89231Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2fc0460a176907cd285e4575a8a1d9b7edb8aec1c01bec5a81425ef0d74855ed",
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.6408254Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6715b65aa12569c5a3369a0aa1cda5f61e7db241a922a874089bf3b1baeb75bc",
+        "lastWriteTimeUtc": "2026-11-26T10:08:56.3845521Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f5607bab14eeef5aad62fa50d55307556c5535399c53504011d4d5717cf79f4e",
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.5301775Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8bd46955a4dd6ffe191e54877a7165b2c25b090a2e468824bcde9a41167db644",
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.974986Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4f6ca3794c0f2dbe89ed7f9b469b8108be8cd46c4923570758dc848c4f1ce0b4",
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.397407Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0e3b7367fd071d15e28b7de954b0dc3c16f3bd6f04a06c759fb2a3ce90a00dbf",
+        "lastWriteTimeUtc": "2026-11-26T10:09:17.4137084Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e00d22e3844d34fe3e0a3c05e322966facc4773699ec422ebef2c0ae8719b916",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.89231Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b162e10e7a889db5a55d67726ea952f2341abd3bccdfd371c1668268285db2a5",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8956654Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ebc003f8f1e89fd9c774f8d81f14da8eaa103b7c2591121ef3e2182509cd23c1",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9765527Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f7762bcb218162be4fc0f854d9f7dc9f8aefd5f726a1eac0725beab4dab56af1",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.935454Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5048e5247095aaa2ec2eb48f380e498321419a8fa8a4adda6189bc448569e5ea",
+        "lastWriteTimeUtc": "2026-11-23T13:36:43.5739203Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "da84a9f79a225fdd8ef35df85ef281656432de98e74acc504bff23fb4a3b48d7",
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9283918Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5667a5b510b19c6ebf529aad3ac74574e279675f7fd4c0d2797c7d5e92534360",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9196293Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ce233bc3187b778d993da6295a2a71f043421cef979ae1388aef876aa0bcf19c",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8669679Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f846e5ab8c3dec582afe81ec713751c06a10b9b3d962815bb18a341dc433c9e5",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8679812Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c797b90f3ca302ca59e2fa2169eb9381a9c0fabd523e1b4babe23aafbde3d4a6",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.869129Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ce182188f15de964449fe2573e25816fb72d770458e02487035932f5c3f7b725",
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.8298746Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "acf7d77e00c9931f96d413f727a200deb855041a561ef52c6a206c5e9952c094",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.888445Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a1e8e0342cedecb877150c59ddc614b72a4a33ae16f189ec747a3b8955cb816b",
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9082397Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "98f38f12db221a8cf8ca7aadfdcd759b01d52eb4ebb3eedbb2d97e92805c6960",
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.1912578Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3009be769fb8f956e8413ee9f3e0836e34968bc40457d0a10c549d2edcf00cc1",
+        "lastWriteTimeUtc": "2026-11-23T14:34:18.4529792Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d92c6a81b2ff50096bcda80885427d1f59a25b5f483f7055523504925d16ab23",
+        "lastWriteTimeUtc": "2026-11-27T11:34:39.1502523Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "624b989cb7d045c48312a6c0f6d4f5656f3cdf8bfa12235d394194e63669f86f",
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6069703Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "1052d54325afad60a48ca9e62cd7d760871f46d518a3c2fa9dba511ec1b6c934",
+        "lastWriteTimeUtc": "2026-11-26T10:21:07.2563657Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8f921e155e66492996705bb383f142779d8c3676876f22d8b71313b0e866d5ce",
+        "lastWriteTimeUtc": "2026-11-26T10:21:07.2563657Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "769d38ea9c235c0852bf18eebbb610bafbf3146a41279499cd3f5951d4c00c04",
+        "lastWriteTimeUtc": "2026-11-26T10:21:07.25837Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bec54533b4d899ad558a7324c2bb789cfdc78b29112ae27424a1b2e6da558170",
+        "lastWriteTimeUtc": "2026-11-26T10:21:07.25837Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "352f3c14c43a8c62726c9525598ecbf9a90259f6a01ef83c96f170ac5efe31a5",
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6079986Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2ae1c0d4c9b151aa91751c2a8b4d9c6dcde6862dc363a4e48ac371e41acec5a6",
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6079986Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6958972606ce8f421a6eb291ca5c3c5ea59dbb2b06ba87b28b722c0280f67039",
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6099776Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ca36d8f91e448d4962c2f0e7f158b221e9bb22a96c326aa77dc9a4eea04ef1dc",
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6099776Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4a113068cfb74bb4f280f89d7489d146d2fbf9b2f9ee822d915c65b3aab89a2d",
+        "lastWriteTimeUtc": "2026-11-26T09:54:38.7040145Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c3f64611794b6b2f7c77c48cd87c10e583f3af9a3901b809164007c59fa7c900",
+        "lastWriteTimeUtc": "2026-11-26T09:54:38.7040145Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8dd4d89c6668958fc9a944651ebf26f4bcb9b6b74576bd34d27adc33a9e1eb74",
+        "lastWriteTimeUtc": "2026-11-26T09:54:38.7071381Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "eef7471e8b766c580cc76698e5639cfd09e3f4bcd3aaa85369891477911a15b9",
+        "lastWriteTimeUtc": "2026-11-26T09:54:38.7071381Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "37b82d7e84f1f1b7f2d7190748d06a5ae95352c2d010cf2e176d203f73f25b45",
+        "lastWriteTimeUtc": "2026-11-26T09:54:48.8274469Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ba3b4dc9e6ede3b41ef89818562fd755d32665ec273a6a4de8c9762147e2237b",
+        "lastWriteTimeUtc": "2026-11-26T09:54:48.8274469Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e43abf9daffd6257425ef7d5ab6c07f1566bfcb11711858927cb3e6973e08c3f",
+        "lastWriteTimeUtc": "2026-11-26T09:54:48.8305994Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "64a5946563d37d1c5d193e4e5c5a0d583749da0c9271090880e64c68c4be40a1",
+        "lastWriteTimeUtc": "2026-11-26T09:54:48.8310897Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "aa6b9a53f6170fd20e213ffc5ce4a380f3cefa2a030ae70aa2e66e60ad7243fd",
+        "lastWriteTimeUtc": "2026-11-26T09:53:39.081255Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "91cef29a824c3dd1378c3a5e6ac1ca5e425bcb2499f6044473e20e08d645d2fe",
+        "lastWriteTimeUtc": "2026-11-26T09:53:39.081255Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "de8203042af9f8456d3069042f88ec8a66dff11fb322967d2dcf22a25ef4725a",
+        "lastWriteTimeUtc": "2026-11-26T09:53:39.084253Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "cc8cabfe94c22b2d21af3b24fbafac520d00273db81d395950bfaf08fbaea806",
+        "lastWriteTimeUtc": "2026-11-26T09:53:39.084253Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "384776fb05c6e47dc9f0adaa1410d11cf1ed7921c805f9f96a9029ec60069ec0",
+        "lastWriteTimeUtc": "2026-11-26T09:50:47.5904949Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4e5cdfda805b1fefb62d98ca46a2d3af5ad0a1e99969ce657d7fa80f4358f6d5",
+        "lastWriteTimeUtc": "2026-11-26T09:50:47.5904949Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "05310af7e5cc336894f84d652bea15de3fe463b682b14e01ec53f6c5dd9b9b22",
+        "lastWriteTimeUtc": "2026-11-26T09:50:47.5938335Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fe270116a119072bf92e64ec4f04625c96cef0cdb74d5b4cbc2838cf8d6d27cc",
+        "lastWriteTimeUtc": "2026-11-26T09:50:47.5943384Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "95b493594ca24aa8b281caa6e1824348238337eb4a04ed15e9ee33d0c609ea05",
+        "lastWriteTimeUtc": "2026-11-25T04:41:58.9885696Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "aa786bce1373f682d3e5657c3f16b8567426018e83025d85e28cdfa83fb365be",
+        "lastWriteTimeUtc": "2026-11-25T04:41:58.9895696Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c92b5e90c2734cbeefea94f94802e5e40ae07bf51daf9be9fa07081cdba82599",
+        "lastWriteTimeUtc": "2026-11-25T04:41:58.9925713Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fa6e5a323d16cafdd0929acf2e62a4a3b3b88770a96312eaaf27a45f3f2bd6c3",
+        "lastWriteTimeUtc": "2026-11-25T04:41:58.9925713Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "161651b0c76e4b96de57b62d9d2ab3ea66d088797854294f8c406a78591bdb10",
+        "lastWriteTimeUtc": "2026-11-26T12:47:25.3303932Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3828949c1bcb38240af597a42fa78a5246cfec2be53d512c4727b3d1a1de6104",
+        "lastWriteTimeUtc": "2026-11-26T12:47:25.3303932Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "1f9208a35137c53ca965ded0058a25d20f8dbdcd97255fa420295879ed9e02a4",
+        "lastWriteTimeUtc": "2026-11-26T12:47:25.3327802Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "491d132491180db6a4383f3f3c309af9e7b1dac2fb482e3f12479ec8cb2b896f",
+        "lastWriteTimeUtc": "2026-11-26T12:47:25.3337858Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a5be795f1c2b6ee6ab43caa8c9829d08dcfb0c5083758bea310e0bc2a766ba38",
+        "lastWriteTimeUtc": "2026-11-26T09:51:02.3691853Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "879d95f62a1c082a7bb95aeca7ee0ba9afe0b47f33f8efd576ee5c0d0aa49f4b",
+        "lastWriteTimeUtc": "2026-11-26T09:51:02.3691853Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "eb0c3961e1b08a96edf82e096a11a15e28668ec1870ded338a0d7d3c13261aca",
+        "lastWriteTimeUtc": "2026-11-26T09:51:02.3711839Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e6a4c716a30b4005ebf7af2632a791ec6f44a2f02a9af4aa8d9ef0deaa1a4489",
+        "lastWriteTimeUtc": "2026-11-26T09:51:02.3721857Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "05c2aba162188f90c21db3936b4711b109139cef68ed31a14df8a239f7f6563c",
+        "lastWriteTimeUtc": "2026-11-26T07:45:11.670551Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2386a714826209d7ae28ebb2908063e766e7385777d5acba4136cbf3818d5049",
+        "lastWriteTimeUtc": "2026-11-26T07:45:11.670551Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "49232a96023621870571312094dd398c6dc2718d77670724a3f798dde0e49b4d",
+        "lastWriteTimeUtc": "2026-11-26T07:45:11.6735514Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e3bc62c188fe681264d58bbab7c0c89c618ac765fa628ba64cd2734b3797c8d0",
+        "lastWriteTimeUtc": "2026-11-26T07:45:11.6745508Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "430a269742572dd51cd3c26b35cf83b478083ba1b058d6a6f6caaf4b58ef9d5b",
+        "lastWriteTimeUtc": "2026-11-26T13:03:38.0050897Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7f02ee252ab1b4446700d13502acfd04e98e2d03e02b2b672436b93d9115be61",
+        "lastWriteTimeUtc": "2026-11-26T13:03:38.006093Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "aa0a1023febcd2402d493b90707b9968471ec9e645c04e1b9958026eae6f3699",
+        "lastWriteTimeUtc": "2026-11-26T13:03:38.0090937Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "44ac09e967b2ea00bb3f81dcb6f10b8d77afd08c86e0e6faf158b129c66d140c",
+        "lastWriteTimeUtc": "2026-11-26T13:03:38.0090937Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fec3488eac08259f97fef0051de05cc976c880303f681a41a38e155d29e9b9f6",
+        "lastWriteTimeUtc": "2026-11-26T13:07:49.1933027Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "43ad296cab478db60a46b6aefc6e7aa8e729bdc90bcf8dcadb106a2656dd617d",
+        "lastWriteTimeUtc": "2026-11-26T13:07:49.1946917Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "266d45cfb60c27d24b9958269457bbac1ca9df38df7fb9736b2666cf94452fce",
+        "lastWriteTimeUtc": "2026-11-26T13:07:49.196696Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "96e4541303928d8b5b5f9c2b450a54f2d89f074b92528eaa57d800b47e7937e7",
+        "lastWriteTimeUtc": "2026-11-26T13:07:49.196696Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ca732679e4f88e43a73bd7f2ad91c7770506b326bbdd16f9e0de3ff5db80e4d0",
+        "lastWriteTimeUtc": "2026-11-26T09:44:22.9240177Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b50d0be5e708b147cef762988da4a9fc9f5dce001df3cffafd9155409467fed9",
+        "lastWriteTimeUtc": "2026-11-26T09:44:22.9240177Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7e613b388abc67bac01c19d7f777d0698512a26e5798388cd134bf1c24cea81f",
+        "lastWriteTimeUtc": "2026-11-26T09:44:22.9370219Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "1056a42900962589ac1497628c7a4590fcf4f3153d69d2f9e157f852cc337d78",
+        "lastWriteTimeUtc": "2026-11-26T09:44:22.9370219Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c27cc316d30ab3830ea128bf843fb48e41cd40cc44e8cc13544aee7cba8e1082",
+        "lastWriteTimeUtc": "2026-11-26T12:47:11.8571945Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "04bd91f5489a718f7fddb8ce685d862da0ae5258fdb514d8913891f206750e00",
+        "lastWriteTimeUtc": "2026-11-26T12:47:11.8581947Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "97663ad2308815d861eac6892d4fb78fd180cf886fd090393bbdc4f7f472a0db",
+        "lastWriteTimeUtc": "2026-11-26T12:47:11.8601935Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "cab1b1eaa938fb3fad4d0a3876dcdc750eeaf26c4b2960ad298befa1f2d6b6ef",
+        "lastWriteTimeUtc": "2026-11-26T12:47:11.8601935Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "06ce8dafea6ae5e500a1d85732f51a2564ce2e7e99a8ed19a094f144ef0f5467",
+        "lastWriteTimeUtc": "2026-11-26T09:53:51.5397317Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3a3a327ed07a2cb171c1ab32ab2881091d1495dc951db52ccf0630b2ffdf3c80",
+        "lastWriteTimeUtc": "2026-11-26T09:53:51.5397317Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "71aecb0d3aefbf8111b1824ddc8b8f9e4818d634b6e8404634bf065af52beb40",
+        "lastWriteTimeUtc": "2026-11-26T09:53:51.5427284Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b3794a52922514ec78f5d4fc4a3d61d46d2ecac309183dc1dea52a2eae01e8db",
+        "lastWriteTimeUtc": "2026-11-26T09:53:51.5427284Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e02c496dd5d124d3bc79e40ac01b5640bf16c5f6397c4672c38707e6d480dcf4",
+        "lastWriteTimeUtc": "2026-11-26T12:45:43.8768248Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "54a5b65b774890b88c2df368410791d8999397cef20b59f0fcdafaefa75ca805",
+        "lastWriteTimeUtc": "2026-11-26T12:45:43.8768248Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "da8c7650a13df653cd05fd39631405b7ac66cdabd562a1d5419ce10ed809cf0e",
+        "lastWriteTimeUtc": "2026-11-26T12:45:43.880825Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "40a6fe7382be397dd8dc25ed29b3ee8d2beab028be7a9f4b3cf35a789e41c4e5",
+        "lastWriteTimeUtc": "2026-11-26T12:45:43.880825Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "38d1ddf7454fc04a8f1088bd7aaceee973360469dcbfb0f001e0e96ebe5eaf8a",
+        "lastWriteTimeUtc": "2026-11-26T12:09:22.3406172Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "03bf553048e50630bca02fd42c54a523d96826622fcd00dfd32b8229b8d6c61c",
+        "lastWriteTimeUtc": "2026-11-26T12:09:22.3406172Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b2585bab26f0af8dc5ba0b8359ff50712cb0f6963211741337ca2948dbee431b",
+        "lastWriteTimeUtc": "2026-11-26T12:09:22.3436148Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d71e549e2ce71e1a2dc9bfb1fe9cf03fdc4288a7227b515d9356ab737cecc0a4",
+        "lastWriteTimeUtc": "2026-11-26T12:09:22.3436148Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "21eaee1c6efb202bcd46eadc4041fc1cfdfc8c7ac7b55ca213cd0f803c594703",
+        "lastWriteTimeUtc": "2026-11-26T09:52:44.6864104Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "07a43295f0bab47194ad6a5f8b7f47e47d90bec2313f66c2a868f20e730ea55e",
+        "lastWriteTimeUtc": "2026-11-26T09:52:44.6864104Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2dfc0f843f67df8e7243f51f8fea97590df0136f621c2253e9204027ce5b8354",
+        "lastWriteTimeUtc": "2026-11-26T09:52:44.6894092Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "efd4b56c8b22e10aa97ed9a4bc25f446a0ae2090649e14f8fe9c2927113822ed",
+        "lastWriteTimeUtc": "2026-11-26T09:52:44.6894092Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "796fb10a6dd8e1f8ef549623ed4221c628f64675723a58834aa4bbf0c384ff7a",
+        "lastWriteTimeUtc": "2026-11-26T12:12:10.7375766Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "df75cb6497cc5e59368aabeef2871b5ba9f05d567f96c1338549e4286e83d800",
+        "lastWriteTimeUtc": "2026-11-26T12:12:10.7375766Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7574030a278e68e0e5769d2618aa3ed02c948be36ef1f36b6136f04550c1d2a4",
+        "lastWriteTimeUtc": "2026-11-26T12:12:10.7405775Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "943174d4a5cf27c553fad5eeead4f4e11a3388f2c7ceacf2000163e15a893bc7",
+        "lastWriteTimeUtc": "2026-11-26T12:12:10.7405775Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "51f50872d9a5a1c84961531df781304d0ee71b789cd9308f113e05156a1b16e8",
+        "lastWriteTimeUtc": "2026-11-26T12:08:13.0743238Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "20fc98236186559acb697d12ef4744cb9a1f2e409cfaa4a79457126d50826c4b",
+        "lastWriteTimeUtc": "2026-11-26T12:08:13.0743238Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5790c402025002d122d3deb6aaa8b6382348a598a6c571f9eba8535b6e631c5a",
+        "lastWriteTimeUtc": "2026-11-26T12:08:13.0783229Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "df2516679320deebdb9e2b754f33e4eea32461ad314d156e8305d19ba3872728",
+        "lastWriteTimeUtc": "2026-11-26T12:08:13.0793244Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5272b364983475e5e2a996ffc297774e80a8060a087bbbdeca87a66c12dbe026",
+        "lastWriteTimeUtc": "2026-11-26T12:09:03.0122476Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9b3f096d95ebc3ee790463686b9a56595d7ee70c9d09ef03f31c71982cfde84b",
+        "lastWriteTimeUtc": "2026-11-26T12:09:03.0122476Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2e07d1dbe178286b85a436092af5cedf491df3e012b36143e158bc54a46c63e8",
+        "lastWriteTimeUtc": "2026-11-26T12:09:03.0142475Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ed7a1cdab67396e83c56c5a6aec57a54eaf566a67564a7ba7372a3d78702bdf7",
+        "lastWriteTimeUtc": "2026-11-26T12:09:03.0152469Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4b8d8abac0fdac602cf045b3b710ed885376a81827b16d33b2bde266624044a9",
+        "lastWriteTimeUtc": "2026-11-26T12:11:53.8913839Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f5b52d6d83811b8b2d16fd86a3ad085755d36ea4e9233a93a5c481ba16190eb0",
+        "lastWriteTimeUtc": "2026-11-26T12:11:53.8913839Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "df21442dfab30a9262d073a5458f02bdcaa284bda8aafa3d7beee0a3c3c8c44d",
+        "lastWriteTimeUtc": "2026-11-26T12:11:53.8933826Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a7fb27e2cd2f67aaa6df7013ff17c158cbc0e4710ec34c71de2f5bfa6681eec2",
+        "lastWriteTimeUtc": "2026-11-26T12:11:53.8943952Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7340a95f14611f6a366325819d588b75edf1bf615c839a77c89b10a61af12df8",
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0038423Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bea4fd8a266ff9069a8ff022d0f48795e95ccd53bd26fc0debe3812d91d2cde1",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8943644Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0b3073f09d087fc4be9c26ad8d74849e5382230235ec3ca0a5a392d5489e2073",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9098058Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "df43733ba7dd6289d97138f69fcd4e81cd04088b271713c6e7709b00deffb00e",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9112113Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "693bd48ba1be6a19e8b6ac030f6db9278c3855b65328cd627ef7389282e56a22",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.914748Z",
+        "isReparsePoint": false
+      }
+    ]
+  },
+  "after": {
+    "capturedAtUtc": "2026-11-27T14:26:14.0284875Z",
+    "fileCount": 240,
+    "directoryCount": 119,
+    "totalFileBytes": 24470885.0,
+    "errors": [],
+    "files": [
+      {
+        "pathId": "86df96eb0c910ee2113292b6432fbbbdc5f329f729dab9216eda1fa9bd531865",
+        "length": 45056,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.6433294Z",
+        "sha256": "16ef80785220997c5eb02565e76ac35045525100df6abe0fbf2310999cc07b81",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "74c76cde3e459222097daf9fde3e411e90fb410f789b190cc968e24fbf7cce3a",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-26T11:53:58.0031893Z",
+        "sha256": "c0f88900279ca3de0eca19f18016ff45e4192e04686b0ed9cd065087757575f2",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "99fe811ce7854f88b5b35329afc2cdf5340eb2e5981261817d8e7e4e7ca94d7b",
+        "length": 1056768,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3814054Z",
+        "sha256": "786ab630dda4332108fc22971a5286bcc863bd4b29b0e9878f9e0f58a548c05a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ceef9333780d9de121e7e59d79fb878365008f28c86e31aff67f22466318e18d",
+        "length": 4202496,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.6433294Z",
+        "sha256": "a1060d2a3814f115f8a8ecba9100e63c539f86c3aaa1bf2f4a8b593377807f48",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b10556a01acdbcf19e236ccf8aadcd68bee8acc0c534a745550f99e35499fb85",
+        "length": 111894,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6178321Z",
+        "sha256": "fe633113388e056842f0b8df96ea422fcd97761329b79d39fddd71d1fee2f8c7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e5eeb25fb34c2c87c8e38844c58c737e9f2d74933dd204575761ac66160fbe3f",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6391867Z",
+        "sha256": "35c7fbd83d60a8a0737763fc8def062800f95a2b80e1f57ffd9a1f32c7857ddf",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d8907f4cc393f0dfc26866349d6f788bfb4a747380431ba7ef52c68cb918e47e",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6467992Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0f81141a5f61f112703f41a73d626b07c21df5781a604fedff4ce924344cc539",
+        "length": 36932,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.8186269Z",
+        "sha256": "9fea608a947e67020c33cad9a6fe3d60c54119dfb8cff87768a8117a15ed7543",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "559463a80bda67275db8d83afceab83c114f66611ddebf022a5351ff38820b89",
+        "length": 451982,
+        "lastWriteTimeUtc": "2026-11-23T13:36:43.5739203Z",
+        "sha256": "b0d80e6b6c5491879365e176ecbd98074602a663429bcfcfb0a5a8375c051f13",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0e7bd4f0046612268678c29c06da686c77af37f9208f7355b47152c7d80322bd",
+        "length": 179791,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6117113Z",
+        "sha256": "9658a3cb9f6989feaed40369b9dac53f31dabc5db3685ef184a62ee51f269880",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "87e9ff79271208cf615597b72337336dbe0410891af9ff17fa149326d3cf1ac7",
+        "length": 33886,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6128062Z",
+        "sha256": "4e2330d7e2b53eef4caf6775a0f865e6310261622229a5cfe81ef98219f2135b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "278cc752b0c9398a1094c38a5fab14d06a88ea6855ee44dec69133fe907c2b15",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6144002Z",
+        "sha256": "160903341e0edad73b787ef645bbeba4a916a38f8e88ef2f1e325e46091ee878",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "60992b4f05a6abd9db10e4c2d420d395479510782fa25a8fa6a80f543cae7acb",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6150784Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "72ad7acd0849b63d94e32d15b1ef677b8489df51a426359f4f2c049ef81867b0",
+        "length": 179345,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6220829Z",
+        "sha256": "627e7b3b5d96e96e2387e498bf40f41a67a47ffb73419ff223b580cea18df5f6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3cebe6582afb1816d5c796977c53a3a48f173e6038658473ccdbdc695598756f",
+        "length": 111894,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.8668219Z",
+        "sha256": "fe633113388e056842f0b8df96ea422fcd97761329b79d39fddd71d1fee2f8c7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "00c9c872145502f6b9ec11deb0c9c5c4f3e9474b766762fb99efb4b5a7fc93f6",
+        "length": 179347,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.8798196Z",
+        "sha256": "27adf997d6fbe1159715f7d371617c67015c11a722724817a51a6a9d0f02d22e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5af1c8e20c5aeb37802ea6c535c1cbdc3c6debe6f2af77cf57a77ee00e90ce90",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.9591109Z",
+        "sha256": "160903341e0edad73b787ef645bbeba4a916a38f8e88ef2f1e325e46091ee878",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "82855c12c8baff0fd9bfa9de82886ee550f22b39aa8c72857eb1be0fca60bdf2",
+        "length": 179791,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.9804834Z",
+        "sha256": "9658a3cb9f6989feaed40369b9dac53f31dabc5db3685ef184a62ee51f269880",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4bab7a094084c7ce037bb9faf6563eaff665b779606ea89917a679e8d33b306d",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.0443963Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e48cae5af2b2ef3b19ae6f012120274f9a1b0e4b837fb54e0d4f58d7442f61ce",
+        "length": 33886,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1589535Z",
+        "sha256": "4e2330d7e2b53eef4caf6775a0f865e6310261622229a5cfe81ef98219f2135b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "892fd6faa709b22bfef13de3f1c9c883a0c48db0ef37c75b17710b161971e80a",
+        "length": 111894,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.4542959Z",
+        "sha256": "fe633113388e056842f0b8df96ea422fcd97761329b79d39fddd71d1fee2f8c7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "afae3d5d94db500c01613d76e3a9bed45f2bf69ad48d4193448247f4a2a0b67c",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.5452582Z",
+        "sha256": "160903341e0edad73b787ef645bbeba4a916a38f8e88ef2f1e325e46091ee878",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3482faac50541a24f0d8c0a27ceae2f15ef60c7b4b966fa39a4d011392c81da1",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.5749832Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "10d4d35529ea79c635a1ad7e51deae7728827b8b8dd6ed5707583f0bab5354af",
+        "length": 35997,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.7542767Z",
+        "sha256": "80e7ee20aff76cd8a25dd0b07e157c8321ed07fcd8622b76e2974611e8402ed6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4bea3903a6ad33a9ae6aa8c4e30ede3de477c36086a48d6e78d12c96df3caedd",
+        "length": 179347,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.711072Z",
+        "sha256": "59a6526f55befb6d1b397876c667aaaec9b97396383d4b12d0495f526ccf6cd7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0cc2fac159f647f2626582d41795c20c006efe22b6aceb152dd9faebada93d2d",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.8781239Z",
+        "sha256": "899822a38292754097d18190b6b649f044a329ccac5767f06c4305d94fcb040a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "086af4bcb6e4d2b8a7c5644a827dca1889e378d7581f263bdda2ea0b268c01ed",
+        "length": 212296,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.907652Z",
+        "sha256": "35eead9b8ea370c656913c988a3cdbe32e4c9497538fe53e8cf690e854dcdd85",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "56e9c82bd6c465931d2151304977eb3f50c2b2d8319243451e79472a4c0c345c",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9136522Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c390c21c2597750efd30b26d36fc871fbbc303977310ef4bc63bc901b19cd27a",
+        "length": 36932,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9972828Z",
+        "sha256": "9fea608a947e67020c33cad9a6fe3d60c54119dfb8cff87768a8117a15ed7543",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "81b3a5965f499949bc0900a83320c7ae70bd8999833dec2fbf653d93992fe493",
+        "length": 210435,
+        "lastWriteTimeUtc": "2026-11-26T10:06:17.026327Z",
+        "sha256": "4c7b9a71975ba3259095845b5d22ce21a56a0c836559207a16a5e6041f25d091",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fafa1c98e7f5fd9e3b974809d128464e6b7e2fce6609535561af829f7605c84e",
+        "length": 111894,
+        "lastWriteTimeUtc": "2026-11-26T10:08:56.8492466Z",
+        "sha256": "fe633113388e056842f0b8df96ea422fcd97761329b79d39fddd71d1fee2f8c7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "295f88c8aa20a12eb81b8751c8c7c7d6d4674c96edf80ba2de57078c2a595a00",
+        "length": 179347,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.1157604Z",
+        "sha256": "13c3b3f3dc4aa25fae42f10d1452875d37810e9bf924f4798ba18f14074b6b0d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "340d55523803ba0a438d908b3aca0f95c7b21527ba128342652184007210e78f",
+        "length": 1005547,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.192019Z",
+        "sha256": "8af71bf6b7ae0996e95ce09b44ac36542d8a0b4696c23a66663d9d7be26e0f23",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9be48a66f17b8b8a5bffaf2da05a47ae73f72a89f3b769335d8f6639a93ae671",
+        "length": 210435,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.2110244Z",
+        "sha256": "51fdc1c54695453e7b6fece3c4d17bbb5eaf769eb8d2bcf03bfc8c730a0e295f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ef557ca69c32f0fdd69e967b5bb61fbb80e79cf58178f6b6e79cbdfb34ce1742",
+        "length": 45882,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.2220233Z",
+        "sha256": "7542418ce4c506684132aa39c6cc417fccb7cd1a7203db1a161f034c49512a80",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e90989ac6f49168e7903f05f024630e32179f9351c783f36c406ee2f6ca8f3f7",
+        "length": 35997,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3794067Z",
+        "sha256": "80e7ee20aff76cd8a25dd0b07e157c8321ed07fcd8622b76e2974611e8402ed6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "527742665579f20ff6e0da2e47943e0840f0fb5bf4162db25401fd9475c16dca",
+        "length": 36932,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.641825Z",
+        "sha256": "9fea608a947e67020c33cad9a6fe3d60c54119dfb8cff87768a8117a15ed7543",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "57c41a6bbf6370c2ec4dc37fe4dfe7c862d678109520b759bc11c42ad7360e3e",
+        "length": 524656,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9126058Z",
+        "sha256": "fe60d8e016790cee451b5143b8971c0034c5381dfc56738bd75029480fb477dd",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9e8798c338670664b1a62e1db3d0e6959e25da62dcde30a75b2f74cf81ed30d0",
+        "length": 4,
+        "lastWriteTimeUtc": "2026-11-26T10:08:56.3845521Z",
+        "sha256": "9c169428d852e25bd59b27652ed533d2a1f09f96e4c329fa5e06f47e16731543",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "33be9eec10e68cd2570aefbcac6ab00c712394ead71431556a5249b13c2beb58",
+        "length": 20,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9273235Z",
+        "sha256": "0c2dd377ed0cc66161e9db8f89f7d8bcb3ad8c06c4a054bdcba214ab05f58c9a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b5993a75346dbfa4bb529030c6b35ba93a072022a7dc69e922a8aaf562fbf2ff",
+        "length": 2276,
+        "lastWriteTimeUtc": "2026-11-25T05:21:34.9709779Z",
+        "sha256": "b58421f0e85259c9f6db6eae71f9bbb8cddc99d688decb41ebc737591217b99d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "cf7dd30b068b5d0ed1c6bf8510524261f18dbba352b0af86802fbd8c78392566",
+        "length": 4324,
+        "lastWriteTimeUtc": "2026-11-26T13:02:22.1125238Z",
+        "sha256": "7f6d8dda31f14f9b3f771a6abb4d7dcbe8c7ea7e359a2ec00a20eed43a322e33",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a1b55e9c2000ea5795984bfa0325fe630bb18b49dbe45789d440c6359a200126",
+        "length": 4244,
+        "lastWriteTimeUtc": "2026-11-25T05:31:01.0500082Z",
+        "sha256": "4c6b7abca53c54fbf9cd8ed925b98dedb4cd84eeb8a1c6f6bc591c5aa1318307",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b5cbf0f0c851c3bdaa6dcdab9c64ba95568840c4523cb7ce9032412fbc4a9b6b",
+        "length": 4244,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.4600652Z",
+        "sha256": "4c6b7abca53c54fbf9cd8ed925b98dedb4cd84eeb8a1c6f6bc591c5aa1318307",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d13dfc932bff9ebc2c38304bcfae689a619619ea053bbf085ff4922aeed5dab6",
+        "length": 4340,
+        "lastWriteTimeUtc": "2026-11-27T08:25:27.1304691Z",
+        "sha256": "2b310f388e716bff94da5385ac3deb4c2a200c445dc5f47bc597057c36c5d671",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e1cf76b182ed6fdc92ca00f6a70fb7f090e9ead36b9a87917b4559451085317b",
+        "length": 4300,
+        "lastWriteTimeUtc": "2026-11-25T09:05:57.5955168Z",
+        "sha256": "d0ca6b801679fb7d171d0dc543d648235c0e430460eced4cc0263fc9aa7af9c7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b8b6f1a00cc70a53642c3ab4aeca3e15a269f7d2bde0f93ee46906947cc18841",
+        "length": 4324,
+        "lastWriteTimeUtc": "2026-11-26T12:01:33.1610686Z",
+        "sha256": "edce59a1f260f45529bf752a248bc3274baa946e2451838968fe444257e311e0",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ce24fc94cef2382b7549347802584fd89e39e5de36470dc376825481a3f54c2d",
+        "length": 2284,
+        "lastWriteTimeUtc": "2026-11-23T14:26:04.7880262Z",
+        "sha256": "aacef507e76e927f0fa82ee71d449ec6be8f2578fdb3ff6280bbb60f9b0538ba",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7363fb9a2b9c679b02231e0b0fa68fa3c443cc2d08646e8639856260bd428c55",
+        "length": 4332,
+        "lastWriteTimeUtc": "2026-11-27T03:14:17.6188841Z",
+        "sha256": "096858ef80099d6137b8b83ec5e07a8c58424d20b96030bee63b188d6e039d58",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3d1efc43c82f3d500cc2d2af8e330b181cb50a175b096d918017f8e06ce871a5",
+        "length": 2284,
+        "lastWriteTimeUtc": "2026-11-26T07:44:41.0752948Z",
+        "sha256": "6616b1af2e59672e7e3b471c219a9e2998cf216ffe92b8bd986eff32ad796d1a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7aceaba8412629f38f67f001bc1b2a674cfcafd371addd4e9435c6d57e11c9ba",
+        "length": 2276,
+        "lastWriteTimeUtc": "2026-11-25T04:39:12.8349184Z",
+        "sha256": "2793555c7abb2703774ddffd03f3876ee9b97d89c6b13a9d8650f14963935825",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0cc8e9c2d6c0abf92d0e18dc3c64806c5c9a9f097045b5ab142340e697036016",
+        "length": 4308,
+        "lastWriteTimeUtc": "2026-11-25T06:00:44.3149672Z",
+        "sha256": "809522dfb6bc3a557589ed60198c7ce96f04233ecb6ebd1d956d4d7c220bc9e5",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c64b908710a60df49aa896df5d933ee52b4623b15924104b442a2b6386d90a77",
+        "length": 4324,
+        "lastWriteTimeUtc": "2026-11-26T12:22:51.3300369Z",
+        "sha256": "6814021deade7b3a55285c5df461e8c360dccb278ac8aca08365f7f11b75b5a6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e9cb89dd84ee0b509e0dc66d59b9253aa1eb0efcb9ccda9f45924c2ec35b4759",
+        "length": 4340,
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9761997Z",
+        "sha256": "821cb7b31022b8c1905bbc5ab53ad020a2500b560cd3120da11dd025b472cb73",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3a7dcca8307fa77514cf832e915854c6879cde282ac67c633d5d182cf41ce02b",
+        "length": 199,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1106735Z",
+        "sha256": "0f1c14ca406cf577a8d4409bace9a700af94bac94fa5182a0766f6ffd04099e9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "266c6a8ccde0795506b3c833b2b7b73bdf69ed8ac6717955baab4c46b4a2f9d2",
+        "length": 206,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1306743Z",
+        "sha256": "702b39d71cf92ba5c7225bc1140b7d52a223e0d88f8cd4c16c0d30d9cc5eddba",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "58133dbe25406db8ae87baae679b5dcf1b68b5f76797a57bbf1b8e7f42b3607f",
+        "length": 244,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1321778Z",
+        "sha256": "10972e11d3c1074737b4f43ffd318d73cb29ece99c9dc099bc8393bb9cdeaff8",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "92fef64a156ffeda1c2743f36341b6e8724ec544b5bfa74244feed6e9d343abe",
+        "length": 206,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.397407Z",
+        "sha256": "e34ae042f1fd0ed30729d7252779a325dbb6940faecb6148b6a39c668c34bb63",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "79543ba5520716c9e547975be55e86b1422154702fdd67884e866e9dd771360c",
+        "length": 3988,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.7171109Z",
+        "sha256": "9842f39dde9872936ce89ca747571fa16c849452c8e16faf80f5337481bb75ee",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "58049234c0c32907bcababd0607796aada00a2d4e7a423c93fd374cf2778c962",
+        "length": 198,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.9909907Z",
+        "sha256": "4ba206d45be5602ed23ddeacd881c6e449a8023fc2d5432432600a8776cbd326",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4c7a511bcce591ee04625dcfa817afad6599f1950a0c2c524571b08986150173",
+        "length": 290,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1321778Z",
+        "sha256": "8e60529f673d2ff7548a586eb817f8fc520ae5fb5890eb10c31c8befc7226a9d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2e5b277c7b6e208321e84c765642116c4ec35cfd908f45abf89dd20d0db68a02",
+        "length": 207,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1744301Z",
+        "sha256": "7ead1594ec7683056ffe8b055d48b017de7f84f996ca244c2046d03b89a53b11",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "df027c3a6a7794ec2e10042dcbfa95b4d73544a82698398cbcc48aa4eca97725",
+        "length": 284,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.9909907Z",
+        "sha256": "c1c0d1282bc26e9cb3418e4c02a598d40d9c498cebdd554417906801bf7158c6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2ef1275b96443deadca48976fe50939ff42a92e205fa4bb5d5e07c27866a2a15",
+        "length": 200,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.216024Z",
+        "sha256": "a8c9eb94a31c77a237fd93e239c6cd0e0e0a9971da03f70d3ae83d1d34f576be",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f5fd286f7112ff898419cc50668d35864777ab9659d812deee72f146eb866643",
+        "length": 282,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1331827Z",
+        "sha256": "0b2bdd6f8dd6d7af1da20627e504b9a007b021a9ccb0163ee573341b612d2b43",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "86aec031fd38a35d14c9194ebf00877b89088cc8ab7ba47a73f4ea56a91c0c35",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3964054Z",
+        "sha256": "93473eb4ef1d7db28f6e37f862a450d6569c037c14f9c2383a812f1f95727951",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f0da37719e4f07b2286ea839ab3ab8113a248a6436a4805d41224718057db5be",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3954055Z",
+        "sha256": "6b83cc54fc86c869816592bde2ef665da84d16ffde9dd3a928653481aca5bd1c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "62fcabdb2b219950f3713960f2dfbe9b6789fdab56a3182f1be055108f5db0f7",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "db86eea0386e03c10b0c151b544e83bd48668676b1fb29b7b6f35c561a150606",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "36a3a510dedd34e024e5edc8b78766ff229610f6e2e8ab7ed876fb228225af6b",
+        "length": 283,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.397407Z",
+        "sha256": "73987570f57d60e78db50f2796a63f0347f11da2517957ad61ea0a1d3442efde",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "004b1b93c0340ac2dd7c494fe074052d13d65d92b45e73d64e0faedab17e3955",
+        "length": 283,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3964054Z",
+        "sha256": "95b18c2308389dd2baa0e925c52b2188f9659e0a43b2b901f9b35cc0ca16b014",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6a7d7ac23fcf4758ddd700489ec5be292c8409f1dd1f99f100e55d0571c863ee",
+        "length": 4619,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "56ff8bb953f7c1ab86d587f217fbb7c2b99b04276bc622ef9c8a6fa9967b8900",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "98b6fd7fea6e6a426e36656dcb61af62fb3e1b80f2b7121316da87f561ffa071",
+        "length": 200,
+        "lastWriteTimeUtc": "2026-11-25T05:36:11.9909907Z",
+        "sha256": "21a809a5ad64db1cfff7f494c146c1ade035b2d01e990c1bf7cbfc0f7b88499c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4b344ca017f256190788129c404145486d56da9e0ec2cf2241d777f5806a9117",
+        "length": 283,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1106735Z",
+        "sha256": "f0da101b1f3a27ee9a9f7976cc441407c21b04779ae9472daeeab977eaa895aa",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "aa85bac0ed1b6f4a0d14220370e1e2f2ee9e5bf7199aa19ca343cd089dc64661",
+        "length": 283,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1754295Z",
+        "sha256": "29fae91aa666c9fcaa17c759c2afda0ef6b305cbef8176d50673f72e28fd60be",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c6c69f3064d284f2a0290ed23eb958acf67a50f4e2b752ab58b488242bd66996",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.7752704Z",
+        "sha256": "53959153fb3576ae73b368ecc3d5cfe0118b4284bd07f24696af7ad39dba9ba0",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "70a7ece626500bf3be93258940ccd4ad54ad89551218b32a0a1218cc0cfbc9b3",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1744301Z",
+        "sha256": "9df942713652412eaff7e76b25da2435615204084d78bdcaabc5d8d4ebca4f4a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "80b644685af0893177db8cf331702922c52ccdcaee091b6137be144694381fe5",
+        "length": 198,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.7171109Z",
+        "sha256": "3762e54473d76e7609cf7dc862e35a1f3ae707f5730eca64526af683d630c2d7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d0f43a0f55430fd7a46240365c07535b32727de9e9cf5f9b6e8f5c6a9ba748fb",
+        "length": 245,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "cd822cf250e6c1b56a2a776d4fec1e432388c2e033eec19892d409f97b36ee54",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d937f04deecf3d9744996f4a35573e8e18f9b17c84ddc58f9268da576db5b442",
+        "length": 239,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6800927Z",
+        "sha256": "d1980e6c7d3367d91f46fee25f9793ae93634b19077270fc1e04c87f02c74aa9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "335cd37fe1e666bf85af409eb7eaa1d892c8c1f78c0f5d1e537eb22cb6726291",
+        "length": 245,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.7742701Z",
+        "sha256": "fc7fdf7968ae48ee6f9b1cb32b1a14cf9851622cd6944ad1da15b9a049a2aed3",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a042bee6277908c42594fbeaafc61504f98b8e44c43a136fbc7487e392dee184",
+        "length": 3337,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9357688Z",
+        "sha256": "f8ed9079073d44207aa24e7ab8553592f07a1f8baa96cf1c492bbc8a54bb0efa",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "13389f3c8d504e34865876116192153487d74bb9599a3c37895f99cdc3b6320f",
+        "length": 197,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1106735Z",
+        "sha256": "0e92f15031cc0992dea31e50470f4cf91bc0a58a7424313aaeca0931e6f3fffd",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7e0dcdea6eb7199ab650946cec0f590ab4da8f940b6a1c8c3552c2777de008eb",
+        "length": 35960,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9377649Z",
+        "sha256": "2a1240dcfac739effe8b130864d2e48ee9de1baa2b7980be1be5c1427601dc6a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "69b51168571ed3bbf9aa2a4c003ba1e0775f16072b412d8acf004c34baec84e9",
+        "length": 100320,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.7176877Z",
+        "sha256": "d753b333ed804b252569c9fdc39af729afc66896aaa85a0667dd7866bff363f0",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "931fb6ed9bf216635baccaf03367dc621a5d452842db79820e08ae01e4394686",
+        "length": 222,
+        "lastWriteTimeUtc": "2026-11-26T10:06:17.0283411Z",
+        "sha256": "97fa5f25bc2e7d9ee5db4488a190155cd0601db193d185eb397bf1ee30f3f2e9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3dd219681656e5d937dae51e6b9ce556d3a09b8c058854b3361150c6412a37bb",
+        "length": 206,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1764307Z",
+        "sha256": "f9f3d20d9482fec6bed4e8397ce40e1c6829edad026402e21a1db608eb62a7a7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "21faff4c3aa2b2c76877e06dceafa998050677b234b5d241732c3686c4931351",
+        "length": 208,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1331827Z",
+        "sha256": "e28195ec89b949e794c3216824851ee9324c878867329aafe78f15a9e69f7132",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "713c85297d361c78350d8675d58b12373bbd1b9ed496c26ac0727fba193cd6d0",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "5b5d57c660115dbd26b2eb816625cd5aca450ac51a32c375a643fe20be6391e7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8bb1b6ae2485a9ff002c52f0018b58d23c319229c5d8d112178ac64112bf3bed",
+        "length": 249,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9357688Z",
+        "sha256": "8463aed2f8b9a255e3570fcaf02283166902cf145b0aebc24e7a1969ca71a75c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "43d810cd62e3da199e922944eb38950a93bea319917bc82a5cbccb5f22061d0b",
+        "length": 4664,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9357688Z",
+        "sha256": "061d0a3d96f652bf876f82e3ca72013a16598c216e1e7c157e7f73311f550e34",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f83d00f367453562305cd2c4b66c94fb6a6493c8304508fe6e261d785d68396d",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.7762704Z",
+        "sha256": "641778a2f976d8784917510a77c588e28f93a7e8994ebe1880c3f49536b098b5",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f2037a285f86f22d6adac3bdf40ef6abb5e1231190edd669acc737b6ca7260f3",
+        "length": 209,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.397407Z",
+        "sha256": "291faec5ccc74dd88aa4559fc3d967c7ffb2119534c32bbf24d271c5202ddeea",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0f54b9f019f88f6c95b0f0ea84863dbf5a8f2e1c87dee068b28410b0c07be842",
+        "length": 291,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3964054Z",
+        "sha256": "a40b071388b1f1944e8668f5e140a5dbfa97610f1fd73d6d625bcd21705e1e09",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bd53dfb8ae395cc5353298bea9e8726f7f14f677323a3f5c87b29c8357148a7c",
+        "length": 283,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1754295Z",
+        "sha256": "83b6e7a774d1c7213d5cf7396b35a6fb6d4bb127e045dedcdd7b354a013babad",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9256e19b3c999af25c023d0757da140062e017a5c5cb2af93ab685e14104713d",
+        "length": 245,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3954055Z",
+        "sha256": "cbafa860be78b92c54251d1c9a25c283ce616337247a1db929738d37987f6ad4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f34a0a9365b4e870099965395c1f30fd95f9a5103f54764ba9f074accb116347",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "d140726ef4f0a564cdc5bcd9127319c21ab25e8978a8b9e5dacf93d3bdad10fe",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "31b91804a2a3c5b0e03a1ade6664be117639d0a7019e5a76bc99ed11bcfa963a",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-26T09:42:55.7762704Z",
+        "sha256": "eeb7c14bf62b3794846283490c6f3e273ed9a13cf3b0e64e5dc8cd57420feed0",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a7229c916fa404c557d2530f9a5294cbf3689d5a39db6059b7532d6759a572e2",
+        "length": 216,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.397407Z",
+        "sha256": "4aee0edf1b334313c2e157e452cd54bf589cf0cf0209bb76445bfd7d4b5273c9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "987829efad7b5884af4e27e4d90c71e6ed1b513dac0e346caf977bc14fcbdaf0",
+        "length": 239,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1321778Z",
+        "sha256": "ce60827599a6cbd37ba704ecc64b8139beecc47bf82773117bd5e426cb5c3cc9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0d88f1975a521867470fc2bef90892a872caf1ee1f85ac49a3756f2dff402cbc",
+        "length": 237,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6800927Z",
+        "sha256": "2d73944a1159f3d017ce239336781881700228839a48a61f17add6211c33f73a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "95d37b7705811e5571ff3cde3a40d136b117965df5064a4a53e80d46ac9f4c65",
+        "length": 198,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.216024Z",
+        "sha256": "5f8fd5c5b9df922e904f58e93ac65119a9f78c17e59c3aea1ad6c6b225f583eb",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e46bb58c3a8ef8209fde6b49f4c09c2b224532e08cd4b948a3052e9e028da090",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.7171109Z",
+        "sha256": "174e8c4f904dcdc6661a479931c5a8dcef22b5c7edff63f39650131f8c930200",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0ef22815ad51524601ecfaf78370fb5a874bbc841edebc37c9ff8ff038ffc435",
+        "length": 205,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1331827Z",
+        "sha256": "1c4c629bd3529ad3caa0dc176ed8c7702ce7d8eb8cc0a50fb73da7dab162a1b9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "65ed6eef0498811c5e2b1d4691cb04ca02ee0b0c5cfe0366ad45a75e4b19d384",
+        "length": 209,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3984074Z",
+        "sha256": "1d254fc6ded3bde1e0a623bc41296621c016652661703c073363a7b15c437bdf",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8ce640994434fd58e0b324a1bb4d0ddcd48218e344e12f202110f924c6b6e5fd",
+        "length": 2611,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9357688Z",
+        "sha256": "7275cfb4f2cbe3874c4713d72a6b8c3ac99e41e77e4e1aef706487532133f2b2",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2753db3cb86406957ecdd7cf6349ae9c613212a0357d931e5415976aaf1b47e8",
+        "length": 238,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1754295Z",
+        "sha256": "7aa6a567c7904a11c583b87693c28570daa28c9958e98e8181fd637871cab6cf",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fb27077c5dd667d4e37d7a8c314e387955587fa67223fe22ddcdb10f9cdceb82",
+        "length": 284,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.216024Z",
+        "sha256": "caac223b47f5309eb95e89636286bcdb3d275e2961df00cb9ae4b6202fb1a96a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fdb26c1a4c7902597f9d523e14bc9f3d4c8cd0bcd437213e2a7d2b2b45f904e4",
+        "length": 206,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9377649Z",
+        "sha256": "569f33732863c045383c2d751a905ec5866912e86c7d9d9bf12e3844ac188ece",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "918264d00f9aa3fb5e466881a9000789e42f5cf3c4e87630cff1527f6962a81b",
+        "length": 209,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1764307Z",
+        "sha256": "64df0057245f5ec838bad2d64267f73f3589481cf042bab12adce40a254cfc90",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "53a6f6929caea36eeb120f3d7437ce109a2ab9cccb02a8d29bae4ca526c906b7",
+        "length": 237,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1321778Z",
+        "sha256": "f627b7e016269e554533dc9ee2683278e2c5e48ba2071da9dcc790126fe1a23b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c07f38294d0350d7b8555e7422db3fd6bb281fd72c131b6e17019ac619a1204d",
+        "length": 282,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1331827Z",
+        "sha256": "d480a4909a57e15547b5b7201e951a29909530f016f01758a279f4c8849d850b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9e3d3059098c0458a4e70d21627f3fe7e9cb51ef956bcc037f5f79eb1d758849",
+        "length": 291,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1754295Z",
+        "sha256": "833432c996d1af9451e2b4fc9818f0d3bf4dc10c361ed263a1d02e2f8b2a4038",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "daefb2fc9a0ba4af261cdf5855a9a82102918b65ce9df9e8f2acdeec69f9a0c6",
+        "length": 237,
+        "lastWriteTimeUtc": "2026-11-25T05:15:02.1321778Z",
+        "sha256": "4eaf98660e2bacd44fb69459256482cdf02a115602c6d73ac994d5b1df510062",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "449525d7eb6f0a8a4ac435b767ffe9955602d2010a81e347a557ff8eb67480ff",
+        "length": 98896,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.6500853Z",
+        "sha256": "2bd686cb3becd0bdb5df65fe46426b37b825118144105c00b95facb4c8c9a452",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d5cfe159767e0ccf5395f34e30c924767e1b158e69d3c2e61b38b6e1f55686ac",
+        "length": 244,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6790957Z",
+        "sha256": "0663a6608ca98e38b2f4094d4d346e9bd6213ad8a98e910a4dbc17f9496a8a07",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fe87d2a39c58a2e24abe9a2b00aca49d97aa728fbea3a6f5c85b69a97cb3f3d4",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3954055Z",
+        "sha256": "2a8c15a2c8f461bbcdefe53c4707ef63690a17a799bfa7b3a3622979f153e312",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "164c50274d47a1b4ecfc942bbb5e691987c30974879c131e82d3f4f642104721",
+        "length": 207,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9367642Z",
+        "sha256": "4d2ba9405bc9d9d0ae94e5a72d8742a85ad66e8671ac67007756eb8bbe3d98db",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "077f1137492b20007eb83ef50040da15aba248466f9b07afd19c9cb266fe09a5",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1744301Z",
+        "sha256": "bb5f3837d45912b3e927b565127dd68662eb8e05d683a2c5bdb9b375895f98cf",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a53a3035d2db6454c35108467c4806056eafd53d90f144d25ca558e21cc2b292",
+        "length": 245,
+        "lastWriteTimeUtc": "2026-11-25T05:36:12.1744301Z",
+        "sha256": "081e0e5dafb22e0689793f2512b4136674f57764a02e0024c175c0eb8700fd3b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "47c09f855b567de3129280266f052fd157189f9676cb866e16ffd84affb9461a",
+        "length": 4619,
+        "lastWriteTimeUtc": "2026-11-26T09:50:02.9357688Z",
+        "sha256": "eefaa305866429d4d7a7b93218d0348c13852f27db82055390c7bd85d83070bd",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "476975c9379c30ad1395dc8d8136f18fb6677cd4b305a38eea3a1aebde998ea8",
+        "length": 207,
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.3954055Z",
+        "sha256": "0095461ebbd6da9f55372872addaacef98bb921f4ffc2d2293a0eecc60adb45b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2c59734f137c170a2757213b6b1795baf114be5fc8bd70bd852efc51431f410b",
+        "length": 237,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.6800927Z",
+        "sha256": "623c0802215d515d28396a98fa41e1c4d481e8709e16ece087818ee375b02f9f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "15ff1b7bf535b4098fec4f2aea7202c6bab300643bb8112bcbb9733ae79982ba",
+        "length": 24,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8911394Z",
+        "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "88adca02bf9dac24246c33aa9c5674d13e43b84bd4bfd4664fec2ae157682cb3",
+        "length": 1680,
+        "lastWriteTimeUtc": "2026-11-26T10:09:17.3988319Z",
+        "sha256": "cdc06893ef794f39fb01f94a3e14daa23b304e39dd6e6b3d5e9e780ee1abb276",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8762404ac8c1598c3b220bde5b4247d08e333864f92fea8d35f4f7667c851186",
+        "length": 24,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8899769Z",
+        "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "633c2fc1afa7de2717232afba7a78fb1be140c2c886557c4100a24ba3792d91a",
+        "length": 48,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8933364Z",
+        "sha256": "31ee3be4395529a4bebfc88187f43b828a952c263f4c2c06f74e230de6cb4ccc",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "30a72755ddd1115e45bee10170cd121b9f927fbc91b552f8c81a088f5be80451",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9725661Z",
+        "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "32e77b6f88142e658b0bcbf5c55115feff27adb29f5570c861e2db367be303be",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0038423Z",
+        "sha256": "82c79d6de8e62d46e08a4f7621258324c6e19da6c45a5180e87675ccb8bac647",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "84b418f8283b67ab8edca2e7e5bb591b6eebfe7a5841f886889e3866d78b4cbf",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.975556Z",
+        "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "167fa93574137598c26e5e4fead24b6a4634e9d35e8d3cc5d5111955c925cea6",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9765527Z",
+        "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8d84a0940dbf168ad91731c7cbc50eabe8bc5b3b8361b5a1b857a3cef1c5a29c",
+        "length": 262512,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9655894Z",
+        "sha256": "f41c03516105462d098d00b0e3c07dcc05a78087d5db329c1d86909b443896f7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "439f2253cf34e58b3eb957fd3d28332d25b0dbc230628e73f14b7d61234165d4",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9323015Z",
+        "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "73e415fffe40b0c5b950be0c43a53385a42f83bc299299bedd21ff526489faa0",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0038423Z",
+        "sha256": "f779e4c9a58873b9132aa5c9e27ef2fb68ce021617d5932e31148d0834059aef",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8324c1b67e12c2300a446332ae9284d8e41a993925fcd0a47f68eadccff9e8dc",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9343165Z",
+        "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b4ff304ff4bef113f4905cd307eb1aa31d6239d9430269d1a92b3b16e96c728c",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.935454Z",
+        "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bc69559d81d5dcd00eaae687ae227d79bfa512163353c791e4045f37ab230ddd",
+        "length": 262512,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9227314Z",
+        "sha256": "a3ea46293a63fb4501f503594426241e03af806dc1522cc9a430cf09e068fb8f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5a2013e7c55a398c306036beaf1c707e597b29826b90e799802d5aa4df888b02",
+        "length": 32768,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9048666Z",
+        "sha256": "eda4c9567974174f08a1dbcd8badf4d6199a7e9a8b78b8826548f49e20e7badf",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "620230ae010da61c981ef3627e387f2777ee385f95e3bfc43df2717ba114dcfc",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9063306Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ad3ac3177be603087be792c013b49ee4b975a399ea83d1b58afc79b7bdaaa143",
+        "length": 451982,
+        "lastWriteTimeUtc": "2026-11-23T13:36:43.5749329Z",
+        "sha256": "b0d80e6b6c5491879365e176ecbd98074602a663429bcfcfb0a5a8375c051f13",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9b9a2cbe44b2d2c3c209563430ac4933cf56341e30bc7cbad1c5def0620606cc",
+        "length": 36864,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0366674Z",
+        "sha256": "e33d5712025eb2a4e823d463ad746aec782b1aa54537a8a6014b25cee2a16dff",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "eff8556af888cbc0d8965ac7ad8322c17f349e4bba7dce911b6e46e93ecb2a91",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9227314Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "660380b35aa78a090d76275fe6655d34035eceb558c3626e506c84df34844613",
+        "length": 16,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9183747Z",
+        "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "117da7ff465fc41f9a13ff6416a26ad06e360a8b19ac0167d4b4bd4dc9eedea6",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9098058Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "48bd625372d90849127849152a32d604595395630e47da5b065c73bb65d4b785",
+        "length": 290,
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9314049Z",
+        "sha256": "74888e8139fd231432b6da8d48f911b4cc02a5195a090334a5ba262ee89afd9c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2ce04fbff5b4210b814bb62a5ce884cd219b8003b2f26a18dbac4947879daaed",
+        "length": 290,
+        "lastWriteTimeUtc": "2026-11-27T08:25:27.0883118Z",
+        "sha256": "4c2de27aa1cb63484ef01bf7a17a07edd525beec397aa0fb8097a7d2d8e0595e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "24f3d800f0bdd045e5b2091b90796ebb381e833abf060f497f1b161a00cf8154",
+        "length": 41,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9112113Z",
+        "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f16cf9da794df04046cfdff56b8911acd157ad4c3251d914245bc72a64436248",
+        "length": 45056,
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9559684Z",
+        "sha256": "332f42e71b86dacc2f6e15a023b6ddadbbcb1b86db61fbe837b6f4f1e8fa03fe",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "dc7a2e3097c36d0032f9cf32620a8a83cf31b05a3566b93147b290cac448056a",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0028438Z",
+        "sha256": "834987d02ebb79422f52ac6bec190d0cbe4dec6d01ab59d729b99d59d545dc4f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "eeff9fa0c59466b324a1c7e42350dcf329a1991c3e61265d47837c8ec17b1767",
+        "length": 1056768,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.9230311Z",
+        "sha256": "4019c078f481880b35505a452dd96b264cc0c7276985209611359bd0285d241e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "36485f6cc872e5b065e6b41a0587893e3902a0966c8df41109313a957fd2bef0",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9196293Z",
+        "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "989f4ea51f8d4527ec9a0ab25478f0b70ba6f76751dc615a4683fc1e08100d3f",
+        "length": 262512,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9037431Z",
+        "sha256": "0fe128e4373adf5a3f065edcb360207ed2b38c0187daa334e7ceda2b91bc9f8a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a174f7bebfb42503afc45c4cccacacc086e5d2ccd5ac9392738bdadbde5d2a6c",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8679812Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "84ec326e82e04e9e8cc049f3e8e26bc5473e19a4cec7688f306d7437e6dcf5de",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.869129Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5e41f0db4f4c1b6afac9cea4b553c971efc78e6a24d403caf7843c3338c07bf8",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.869129Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f2422f1abf35b3f6b4866eb8cd6bbd32d307ea0678f0061c6b3ccd1a2189774f",
+        "length": 45056,
+        "lastWriteTimeUtc": "2026-11-27T11:34:39.179203Z",
+        "sha256": "5e75c1eeaa0562268101fd56b68f568d85661fd2872fc0874b64623857a4aad3",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "821ba1f8da1510260a031f0e8c1f8229b8e919296069df8e97e4cca5a791c6d0",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0513695Z",
+        "sha256": "5901691d26d6580c8bf11285f2396ade659a83c86842ac3df29a06435f9a44a4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b4418fdcb606218255a20693ee063a93b99d224fa95d3bf90b24def37792a4c1",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.2920583Z",
+        "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ef1fbb9802172e6f557f1f184598e7f0fe4caf29d893aed0cdc0f3fbd81d85c4",
+        "length": 4202496,
+        "lastWriteTimeUtc": "2026-11-27T03:50:08.8947399Z",
+        "sha256": "1218e9006d88f09bb86ed30a0ca8f25fd91681be39f5f05247fec6289bc1989f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f8e0223258db71bdc925da06e53efde8df8f6f0c9db112e477e974434a87398a",
+        "length": 16796,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.8929934Z",
+        "sha256": "49bfc8f01fb1873a284f17d87465222755b329e565045218421d17352f106e3e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ecfb88b2d82fda1f88ed7d7306c66fac222e57b45a114e41d28d4cbca6f51b45",
+        "length": 17088,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.9163292Z",
+        "sha256": "78b2b21d343e0bfed393ad72f2c8f268e30daac739d93d9d04dbd381e848b48b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "03efd46137897cc26118dcda19444c08ebd529afd25c7c73a975be7da6f9451e",
+        "length": 16632,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.7537324Z",
+        "sha256": "9fc4b8b46201312b892f82d35b33f4be052c581adc1b56826d9183b0c97424ea",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5fce879135c50da3a0b6f3b980c5f702da98a05fee4d9b9986d6e5530446b333",
+        "length": 30452,
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.8298746Z",
+        "sha256": "1628ce8541622200abc165133c50f1d6f4a26991dd461e35804603a93b15cc27",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c0bab01c5482ef4701439932b4f728b57539b9380f7da8ff95d4de2e13bc4a03",
+        "length": 262512,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.282338Z",
+        "sha256": "f0367f9d2833fcafca9d63c4636e56beaf8098438cc631ca0134cc9d174265fe",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "318fd557aaf7012214ec03559e01cb13aef7e45d56ee0dda3b420598014ed6a2",
+        "length": 490,
+        "lastWriteTimeUtc": "2026-11-23T13:36:41.8504602Z",
+        "sha256": "b5bd416ab451e2736ca2f47951e895faf0a7119dd9df4761a5d20d515b8db3e5",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7315672b4fd25bb2122f036885d0fb128494fae5a2d21ac28df7a2dcb1ff64d2",
+        "length": 448,
+        "lastWriteTimeUtc": "2026-11-27T11:35:38.9297992Z",
+        "sha256": "5f49cfc01dee354c20c39f0b5d2d8c7eec5a600bc680b589be9cf9ed0d6ea882",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e84893d062cc8cda2add3a7ffb38ebd105bac2301b8a4351c9a57705842601e9",
+        "length": 16,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.89231Z",
+        "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e929d69b9472381ec84e6db976bc35a4cd80aebdc62ff9b96267ce6dbd346fc0",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.888947Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d898148991f824b5d818ab2759edfe0e646230c9bef2e62e09cfc9f3a6498234",
+        "length": 302,
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9163748Z",
+        "sha256": "c2ac90b08a3bfaec248707fd7b9b6dbaa61123245614744e0c4c89a1315b25a7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "96e9f6f84c9850a56eb476f47cda572502a1081c7c60524be434608522c11d02",
+        "length": 302,
+        "lastWriteTimeUtc": "2026-11-27T08:25:27.0712337Z",
+        "sha256": "1ebb67c371503f42dabdd774dda0bf22169c060965c7973af1af635a3688a3e7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "523511a730e24b1b62a87ee8dbbf3ba5f3110bd75750eecaafb05543e35c8119",
+        "length": 41,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.888947Z",
+        "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ffddf7392e378c04cbc8ab6a175c0ae59e07bc97202a400f92cb655ef1d42e75",
+        "length": 16116,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0120069Z",
+        "sha256": "336d143c9b267dfb9084dab88e932d27abae1e2a6e61a3c6c67f982a43b5cf02",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "544a4d2d6b926a2abd577c766e78bf64b468f248275ace22e8df3d843062e7cc",
+        "length": 20480,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9308622Z",
+        "sha256": "e63e5ecba16ce902f2c62dda454042ecca66a09d7a33f38fedac458d1a11f81b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6d2ea70f502180e53f603b7c253777b8b2fe08b1d803d961edb3d4423c64d558",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9308622Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2331b4a1c87fe626995cea7dd017bf6de967b600213a235ac3c2011efb46280d",
+        "length": 449,
+        "lastWriteTimeUtc": "2026-11-23T14:34:18.443371Z",
+        "sha256": "77c867c53a9084e551e76f8aa2ae8deff94c291cc20106e7077d6972cc44ca97",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0ab44652b6505b54bf831bc3eabf7633eb502146916522e1cdaec80ba899bd3e",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8956654Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4a16a9f7e3a4aa26ec2d80b1b0775d7b8671938213a93fe22af465d4645d7943",
+        "length": 36864,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9237436Z",
+        "sha256": "88bafa2a265212152b2405502209d64438a416ff594a040e666f031ef442a812",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c306728e81f74e2d61c0bf8b864fdc1c4efe03909ae28b5f6936b616625c296e",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9273235Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bca6842420dbe5146db60f6e644dd6c0559345246d3bd4d28a3894700fcc9c44",
+        "length": 57,
+        "lastWriteTimeUtc": "2026-11-27T11:34:48.9261177Z",
+        "sha256": "be4b8924ab38e8acf350e6e3b9f1f63a1a94952d8002759acd6946c4d5d0b5de",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c4f6ebf2dc5314b501be8c9ec8c07b92aa72f6d01c26ab4c9edb2b752a439f09",
+        "length": 37,
+        "lastWriteTimeUtc": "2026-11-25T04:38:18.6162876Z",
+        "sha256": "b884ac46c78dd4d4e101aa9425d0c2c4fde9f51277e1f6e2ee4cdf7d3595ba4c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "31c5295f1936910d0f59b38d41f6c96d4fa61616cbc0a22a51d3c2ea9d223dec",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T10:21:07.25837Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "098d871d71e7e81d523a2df49a1e230a6b6000faabf6f51a639e7993d09dac72",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T10:21:13.3189652Z",
+        "sha256": "07d1477ae8a99fb11a7d049d8929dad7376c3758cc82c3b80cdf641e7abf5657",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "79a9c019e4fdc1fbd51cf8b96191e4528de24fd2f749869f4a8cd104820d8b04",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6099776Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "61dadc6c471eeebf8e40ed4f6971e4bf4748b1655ac6dde539cbc0c36dbfa9ed",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T13:04:42.6632219Z",
+        "sha256": "c46c884fce01029e9516a77cdeda3d2610a4d832e0110ebbc1eaeade7626807a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f1cc7409206bae6662f13e36db6e099be51836bf42fe36a22250338051868f15",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:54:38.7071381Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "35bbb5c5cfb2474fb30747a177721167003a20e34272ff6f4a7ae541321668f1",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:54:41.7607019Z",
+        "sha256": "fbd0069833bf2bed65592807aaa5676d667741ea9c437b70e07e853eae5aab1b",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "20d40319bb44ab2861b2698d327be6a61cd8f029b658e5d732c363bbd1cc6571",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:54:48.8310897Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a947bb7a2a24bc618c65ed41307a6595ed3a0e2f5c819014462d077d85c13ccb",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:54:51.8880287Z",
+        "sha256": "21ac7943c39f0899da0f4b1010b2dc8502dcf6d44347383a389c7d636786e2b6",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e0e492f7766b4d48971533b3fe04fc102fe3f998d74a26a49e7aa07d753fa6a7",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:53:39.084253Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "42623881d58ffa3c9a1b12fbaec492077e9e3199d80892bb145deb9290ee5d51",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:53:42.1364042Z",
+        "sha256": "28872673891f8f55d72a0a8a03c964952497d521579780af4e8c0fde219b3fd4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "41df5d4198e86dccbbc2dfbab85e636e70c8c085f50d27596fe89364ea692d7c",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:50:47.5943384Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f3ae2ef035575ea40c347765a2a5f8a22568ab0e982d3063ee9ab1994daeefa7",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:50:50.6302432Z",
+        "sha256": "71f00b757a3bc8541f914ac5ea12ae7a0c0a160ffcffe412b462502c4df20b1f",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6456e2fd54b63bcc342d6a36c1b4927a076f777363b77b515528c9ac34301d61",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-25T04:41:58.9925713Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b8aba5f6ba642a13a0094e14a6567c64446caef5770b60bb3f757e7d77b0181d",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-25T04:41:59.5102955Z",
+        "sha256": "76880ca81202a00cdd7e0ad15fc41901f65ca4a6286e4531ceb3051aaa7dac46",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4a41846c256e63f9c3b2e63f8a602d9962995832814a44818323fa9efc77809e",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:47:25.3337858Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bb12289da624262fded13daac1cf93f98d3018a81ecb861b73fcfb2e6270bd87",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:47:37.3868859Z",
+        "sha256": "c92589d1cb437cd4d004c9785714a0fa328e351a36cc2aceebe1f9ccf4cdb78a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4a9d957484385098d62eeb663b215bf82b0b2076607b52fec3d9e6566832e31e",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:51:02.3721857Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2cc592fc51d45ced511ee1c1e3dbe1a994d18bc5d39100f0968327d19058af2d",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:51:05.4059534Z",
+        "sha256": "11f38481b5a01cc6b888a8ea90a9e267f23a148dd323a986983059b116cddf21",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b7cb9592a145eb002b0cc07291a433e9dfdc576544300254b728868267b9ac82",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T07:45:11.6745508Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b21c995fc6e03eaaeb40f3dc9406054772fe42c52ac683338f120e4aa4136039",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T07:45:12.2045789Z",
+        "sha256": "7bdd6450de56bc660868aaaf7b5c724ff7cc62ab9e035eba9d3d3436142bca5a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "eb47818d803b7596ad56d7b52662a9c3cb25caf91e1c2d134c698e6ce5c48e02",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T13:03:38.0090937Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7809a89908d4295503bc1ea179440521236b88eb4031c957b9f41c3ccd48840a",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T13:04:02.0780049Z",
+        "sha256": "83631bf606f887dc0261772776fa4c817719caa9eeb7e321f38fac3bee9b2877",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c1c805a91d565f80697c0deb78be078b4cccd92acbdba0b2b32149f4d804733d",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T13:07:49.1976967Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e05973e105107bee70ee15c5c9b68be54dae1b6025c6c6c551bdf2f1d6209900",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T13:08:13.2452499Z",
+        "sha256": "1a8563bb0b1979012f7757d5c3a01d6162fc867d9d5eb8e58e2b9027e3615136",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9907bf0ef05899ee8e4e420e60e3691e2035c6928c7c306697fb914c0bab157d",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:44:22.9370219Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "22ba1e5ea737dc72dd435339a9e099b36ae714d83b80d36bd959e948b23a45c3",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:44:25.9773893Z",
+        "sha256": "de50e5692641a309f721a7d083bcae654110466a0fbf64d26604d21153b68afb",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "dac8158f9a862bfe4647b4cc593cdfea8829988a7b90606796091a0301361c76",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:47:11.861195Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2eb276a93f47d0b1b9242bdaf89de3ef7778b244ec27632ba9fa3efa48a73dd7",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:47:23.9131572Z",
+        "sha256": "08bcec919f2aa9b266bdfbbcb9b740aeff006820f0f1884e724c7caf0cbcb192",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a52e974a6dc7c8516d0bb01e0389055fdb83f006b34fdefc11ac33e70a0add5f",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:53:51.5427284Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "865936d91e4ebb0677111828c97cd6ca82ed869a925b4df9f30c6ec989e02fe3",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:53:54.5902576Z",
+        "sha256": "f0a2dcc5afc87ecc7b4f3ddfdcc6b5a2b7ee8e05f7fd5f4937f6cf50e4788214",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9577889024cefecf016c022fd26462e627011dff5e330bc8112a37838985c392",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:45:43.880825Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6445ef97d858f853f1b8ef7e65e23619757fd9b9233a794266d78f7077c553df",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:45:55.9400997Z",
+        "sha256": "4e37d50d975a5e324115af3adee5a3645a9317a04c33ffcd5e8366b13ae795f3",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3605d4620b6ee95992356638ac0599026aede1b0d8e6b6735bb25d01263bdcd5",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:09:22.3436148Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "99bcc98f4e51a3e58750e98c7000ac25f07a1e362dbe02b8dd9d3217ecd0c9c7",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:09:28.4052806Z",
+        "sha256": "6536f7a67d8db529850a0a68ed06d28211f6729ac93b15f82ab7f3e52d732d0c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0f49b250f74e3c3782633c85222668e9d54fa9a4c20227195f7d53012da02353",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T09:52:44.6894092Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9b3e94c85371570c5ffa0dd87458d5dad3800f3954f2c148dc272ea296a9029d",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T09:52:47.7279606Z",
+        "sha256": "095eef3d9ad77632ce5a147d223e6b2e7d75fa08b2c247c13d851434723022fe",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "27c91595ce2635fd95a596de9341128fe6aafac109d7a76f87f5040a2ac28d2e",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:12:10.7405775Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2315f282aac693e1625424555f56e0120fb3655e2675158379631f1d6970e9f7",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:12:16.8115486Z",
+        "sha256": "64ffb1b33ea317b5b9303db65e7f950d63c4f798698ce22b160480b68998e29c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e2a30b10ea1d61cf4003869bc7a216fd289e8947c06b5b4f78cd702b4c9011dc",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:08:13.0793244Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "538f1797d4ad7fcdc0a6bc735dd9841deb9e630d9bed5974bc17e73fcbb0bdb7",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:08:19.1389094Z",
+        "sha256": "7742f6f05421e3da69536f1072673476e811c17c1fcf54e78be90fb54959ec1c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2088cdfa6faeef8149afe0a3a84ca540ef108146861a8cf458060afcb6ba1462",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:09:03.0152469Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "1bbbac488a614df0fcf235e9cfb2fed2ec22e2100d222c85d8e9ff2870669663",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:09:09.0629717Z",
+        "sha256": "12f4e222e123f5c7a8aff78e87d9b6a78bd1333706ae66d85b8d23bc0d6c2ba2",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "42a55cff89f3c759a384d5dc8e343f39190291f8b1fa87ee3c1cff2df45b3aa9",
+        "length": 1,
+        "lastWriteTimeUtc": "2026-11-26T12:11:53.8943952Z",
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7d36d59b4cdc1ea43ba69f091d01fb73578af49d1cc0c451aa269a9b6b891fdb",
+        "length": 2143,
+        "lastWriteTimeUtc": "2026-11-26T12:11:59.9427401Z",
+        "sha256": "a57cdfa812625c88970a892586dc312ad4522c7356355cbc1487d99e8dd52d43",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b47087bbde99f98be14d4c010bb418fb40244fcde4200185988d7c303a06a11a",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9344057Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0b5909ea228224fb3668265a27d0ea9a1210d59d9bf832d90a0bc6077536712c",
+        "length": 240,
+        "lastWriteTimeUtc": "2026-11-27T11:34:39.1502523Z",
+        "sha256": "e3f9de15e6bd7b1f7955a4dce06efd8a488bf7273458ebbe09b66495410017ff",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a9cb5b8bb6c42f7a15cb12512ab056ed23473d0d850404b5db2d5da8df5a9187",
+        "length": 30,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.5317207Z",
+        "sha256": "ace9875fef7e1426d3590993377bc2e4af93c1c323a00266cdca240e91c0c82a",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "708c4f9fa28f77190140f458171874e37f815fdfd3b1718306caa7ef5641972a",
+        "length": 16,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.5296665Z",
+        "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5a20b02c712f1bd94f5199bcd7f3b2162d9503fb564c576c73a4dc1cb6edf9f5",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.527109Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "84fc2f13469af8429ad44f84c3f4c45d8360291158d322ef2a7ee62764698332",
+        "length": 290,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0058399Z",
+        "sha256": "15f9f71f6f7a609d91ce1d996c09efb8500b5b2902d053474219222b0ae586e9",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e54acf1ebc6a97e4e7e4847f9e876240e9078f97b9f222fcb5238b7854b21a25",
+        "length": 290,
+        "lastWriteTimeUtc": "2026-11-27T09:55:55.2235593Z",
+        "sha256": "3a7a759e3f8bf44af84f368eba4b46f07ca5f2fe232cd32b89536a7582c3c5a8",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "486a13bccb19b5c8302850d10e585efae38d8ed751921f20f7035380e0f86938",
+        "length": 41,
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.527109Z",
+        "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9e6b9bb024ace6a15bc1501a46e7267a1af066bf76b1303b763b62114d687e11",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8768806Z",
+        "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7ac37a07f29334e164cae00f5ba3e8a8923ffb8713dba842f6f029747156c084",
+        "length": 270336,
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0523688Z",
+        "sha256": "f5befdc78ae6de8b4631e8945804db2996d19c3e25cc804a663066751031dd2d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d0c5df0cd8000ff25470c5b3196b45c92b1ac04a7a830833bb16089ea09d89b0",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8849815Z",
+        "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c214c4fec4e8a917bacfee0a80d8502a8f754086f7045c903eaabbdecc792036",
+        "length": 8192,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8943644Z",
+        "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b3a4ff45fbb19b4a6416b72ccccaef06d76b1d1c56058e71a5b81850863b6b8c",
+        "length": 262512,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.869129Z",
+        "sha256": "a67dda31b5f41d02cb46faa5319a5d44e93a32a6385b9cb0381150404d52dcdd",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2cc5791a99e15c9aa776e217ad05c7d3f7b1efc1c2d58fc0fc90cf7776ad9162",
+        "length": 24,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9098058Z",
+        "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5ddeee3edd9640676a70dd85032deaece80237e8491e33010b54a3527f75d2ad",
+        "length": 48,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9112113Z",
+        "sha256": "1a6ee83c6f5a2f9c1cee79939d9a71ccac02bd0cfaaedc8ec5b535c0a1803d4d",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "79b5a6f60de31f6e77a3291a9c2636612d9007604eea8cc6d01fb17092af8ead",
+        "length": 45056,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9267327Z",
+        "sha256": "0d6287fecedbc44ed9f51ded9de88629ec9f385ecff5da9a34e47e96fd5a9cba",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ba209e9dc734aae01c328bc4a2941ff70caff6c97d8e5269970352176023c523",
+        "length": 0,
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.927825Z",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "isReparsePoint": false
+      }
+    ],
+    "directories": [
+      {
+        "pathId": "17d8a5c55a1d0a9e516947cce361a73dca74aff1535b0c00cd3efa4d63e1d7e0",
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9062408Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e19f88b12b69b6d63a0849a23606e1cd4391efd6f13c266ebd1722eb85e0aa60",
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9052402Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5e1ecee06a7fc06f305ae5c12acfe7a7f67b8ece7af76932ed3afab00c3c6921",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.89231Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2fc0460a176907cd285e4575a8a1d9b7edb8aec1c01bec5a81425ef0d74855ed",
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.6408254Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6715b65aa12569c5a3369a0aa1cda5f61e7db241a922a874089bf3b1baeb75bc",
+        "lastWriteTimeUtc": "2026-11-26T10:08:56.3845521Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f5607bab14eeef5aad62fa50d55307556c5535399c53504011d4d5717cf79f4e",
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.5301775Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8bd46955a4dd6ffe191e54877a7165b2c25b090a2e468824bcde9a41167db644",
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.974986Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4f6ca3794c0f2dbe89ed7f9b469b8108be8cd46c4923570758dc848c4f1ce0b4",
+        "lastWriteTimeUtc": "2026-11-26T10:08:57.397407Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0e3b7367fd071d15e28b7de954b0dc3c16f3bd6f04a06c759fb2a3ce90a00dbf",
+        "lastWriteTimeUtc": "2026-11-26T10:09:17.4137084Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e00d22e3844d34fe3e0a3c05e322966facc4773699ec422ebef2c0ae8719b916",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.89231Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b162e10e7a889db5a55d67726ea952f2341abd3bccdfd371c1668268285db2a5",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8956654Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ebc003f8f1e89fd9c774f8d81f14da8eaa103b7c2591121ef3e2182509cd23c1",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9765527Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f7762bcb218162be4fc0f854d9f7dc9f8aefd5f726a1eac0725beab4dab56af1",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.935454Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5048e5247095aaa2ec2eb48f380e498321419a8fa8a4adda6189bc448569e5ea",
+        "lastWriteTimeUtc": "2026-11-23T13:36:43.5739203Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "da84a9f79a225fdd8ef35df85ef281656432de98e74acc504bff23fb4a3b48d7",
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9283918Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5667a5b510b19c6ebf529aad3ac74574e279675f7fd4c0d2797c7d5e92534360",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9196293Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ce233bc3187b778d993da6295a2a71f043421cef979ae1388aef876aa0bcf19c",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8669679Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f846e5ab8c3dec582afe81ec713751c06a10b9b3d962815bb18a341dc433c9e5",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8679812Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c797b90f3ca302ca59e2fa2169eb9381a9c0fabd523e1b4babe23aafbde3d4a6",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.869129Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ce182188f15de964449fe2573e25816fb72d770458e02487035932f5c3f7b725",
+        "lastWriteTimeUtc": "2026-11-25T04:38:19.8298746Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "acf7d77e00c9931f96d413f727a200deb855041a561ef52c6a206c5e9952c094",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.888445Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a1e8e0342cedecb877150c59ddc614b72a4a33ae16f189ec747a3b8955cb816b",
+        "lastWriteTimeUtc": "2026-11-27T11:34:38.9082397Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "98f38f12db221a8cf8ca7aadfdcd759b01d52eb4ebb3eedbb2d97e92805c6960",
+        "lastWriteTimeUtc": "2026-11-23T13:36:32.1912578Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3009be769fb8f956e8413ee9f3e0836e34968bc40457d0a10c549d2edcf00cc1",
+        "lastWriteTimeUtc": "2026-11-23T14:34:18.4529792Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d92c6a81b2ff50096bcda80885427d1f59a25b5f483f7055523504925d16ab23",
+        "lastWriteTimeUtc": "2026-11-27T11:34:39.1502523Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "624b989cb7d045c48312a6c0f6d4f5656f3cdf8bfa12235d394194e63669f86f",
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6069703Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "1052d54325afad60a48ca9e62cd7d760871f46d518a3c2fa9dba511ec1b6c934",
+        "lastWriteTimeUtc": "2026-11-26T10:21:07.2563657Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8f921e155e66492996705bb383f142779d8c3676876f22d8b71313b0e866d5ce",
+        "lastWriteTimeUtc": "2026-11-26T10:21:07.2563657Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "769d38ea9c235c0852bf18eebbb610bafbf3146a41279499cd3f5951d4c00c04",
+        "lastWriteTimeUtc": "2026-11-26T10:21:07.25837Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bec54533b4d899ad558a7324c2bb789cfdc78b29112ae27424a1b2e6da558170",
+        "lastWriteTimeUtc": "2026-11-26T10:21:07.25837Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "352f3c14c43a8c62726c9525598ecbf9a90259f6a01ef83c96f170ac5efe31a5",
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6079986Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2ae1c0d4c9b151aa91751c2a8b4d9c6dcde6862dc363a4e48ac371e41acec5a6",
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6079986Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "6958972606ce8f421a6eb291ca5c3c5ea59dbb2b06ba87b28b722c0280f67039",
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6099776Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ca36d8f91e448d4962c2f0e7f158b221e9bb22a96c326aa77dc9a4eea04ef1dc",
+        "lastWriteTimeUtc": "2026-11-26T13:04:18.6099776Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4a113068cfb74bb4f280f89d7489d146d2fbf9b2f9ee822d915c65b3aab89a2d",
+        "lastWriteTimeUtc": "2026-11-26T09:54:38.7040145Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c3f64611794b6b2f7c77c48cd87c10e583f3af9a3901b809164007c59fa7c900",
+        "lastWriteTimeUtc": "2026-11-26T09:54:38.7040145Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "8dd4d89c6668958fc9a944651ebf26f4bcb9b6b74576bd34d27adc33a9e1eb74",
+        "lastWriteTimeUtc": "2026-11-26T09:54:38.7071381Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "eef7471e8b766c580cc76698e5639cfd09e3f4bcd3aaa85369891477911a15b9",
+        "lastWriteTimeUtc": "2026-11-26T09:54:38.7071381Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "37b82d7e84f1f1b7f2d7190748d06a5ae95352c2d010cf2e176d203f73f25b45",
+        "lastWriteTimeUtc": "2026-11-26T09:54:48.8274469Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ba3b4dc9e6ede3b41ef89818562fd755d32665ec273a6a4de8c9762147e2237b",
+        "lastWriteTimeUtc": "2026-11-26T09:54:48.8274469Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e43abf9daffd6257425ef7d5ab6c07f1566bfcb11711858927cb3e6973e08c3f",
+        "lastWriteTimeUtc": "2026-11-26T09:54:48.8305994Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "64a5946563d37d1c5d193e4e5c5a0d583749da0c9271090880e64c68c4be40a1",
+        "lastWriteTimeUtc": "2026-11-26T09:54:48.8310897Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "aa6b9a53f6170fd20e213ffc5ce4a380f3cefa2a030ae70aa2e66e60ad7243fd",
+        "lastWriteTimeUtc": "2026-11-26T09:53:39.081255Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "91cef29a824c3dd1378c3a5e6ac1ca5e425bcb2499f6044473e20e08d645d2fe",
+        "lastWriteTimeUtc": "2026-11-26T09:53:39.081255Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "de8203042af9f8456d3069042f88ec8a66dff11fb322967d2dcf22a25ef4725a",
+        "lastWriteTimeUtc": "2026-11-26T09:53:39.084253Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "cc8cabfe94c22b2d21af3b24fbafac520d00273db81d395950bfaf08fbaea806",
+        "lastWriteTimeUtc": "2026-11-26T09:53:39.084253Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "384776fb05c6e47dc9f0adaa1410d11cf1ed7921c805f9f96a9029ec60069ec0",
+        "lastWriteTimeUtc": "2026-11-26T09:50:47.5904949Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4e5cdfda805b1fefb62d98ca46a2d3af5ad0a1e99969ce657d7fa80f4358f6d5",
+        "lastWriteTimeUtc": "2026-11-26T09:50:47.5904949Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "05310af7e5cc336894f84d652bea15de3fe463b682b14e01ec53f6c5dd9b9b22",
+        "lastWriteTimeUtc": "2026-11-26T09:50:47.5938335Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fe270116a119072bf92e64ec4f04625c96cef0cdb74d5b4cbc2838cf8d6d27cc",
+        "lastWriteTimeUtc": "2026-11-26T09:50:47.5943384Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "95b493594ca24aa8b281caa6e1824348238337eb4a04ed15e9ee33d0c609ea05",
+        "lastWriteTimeUtc": "2026-11-25T04:41:58.9885696Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "aa786bce1373f682d3e5657c3f16b8567426018e83025d85e28cdfa83fb365be",
+        "lastWriteTimeUtc": "2026-11-25T04:41:58.9895696Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c92b5e90c2734cbeefea94f94802e5e40ae07bf51daf9be9fa07081cdba82599",
+        "lastWriteTimeUtc": "2026-11-25T04:41:58.9925713Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fa6e5a323d16cafdd0929acf2e62a4a3b3b88770a96312eaaf27a45f3f2bd6c3",
+        "lastWriteTimeUtc": "2026-11-25T04:41:58.9925713Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "161651b0c76e4b96de57b62d9d2ab3ea66d088797854294f8c406a78591bdb10",
+        "lastWriteTimeUtc": "2026-11-26T12:47:25.3303932Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3828949c1bcb38240af597a42fa78a5246cfec2be53d512c4727b3d1a1de6104",
+        "lastWriteTimeUtc": "2026-11-26T12:47:25.3303932Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "1f9208a35137c53ca965ded0058a25d20f8dbdcd97255fa420295879ed9e02a4",
+        "lastWriteTimeUtc": "2026-11-26T12:47:25.3327802Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "491d132491180db6a4383f3f3c309af9e7b1dac2fb482e3f12479ec8cb2b896f",
+        "lastWriteTimeUtc": "2026-11-26T12:47:25.3337858Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a5be795f1c2b6ee6ab43caa8c9829d08dcfb0c5083758bea310e0bc2a766ba38",
+        "lastWriteTimeUtc": "2026-11-26T09:51:02.3691853Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "879d95f62a1c082a7bb95aeca7ee0ba9afe0b47f33f8efd576ee5c0d0aa49f4b",
+        "lastWriteTimeUtc": "2026-11-26T09:51:02.3691853Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "eb0c3961e1b08a96edf82e096a11a15e28668ec1870ded338a0d7d3c13261aca",
+        "lastWriteTimeUtc": "2026-11-26T09:51:02.3711839Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e6a4c716a30b4005ebf7af2632a791ec6f44a2f02a9af4aa8d9ef0deaa1a4489",
+        "lastWriteTimeUtc": "2026-11-26T09:51:02.3721857Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "05c2aba162188f90c21db3936b4711b109139cef68ed31a14df8a239f7f6563c",
+        "lastWriteTimeUtc": "2026-11-26T07:45:11.670551Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2386a714826209d7ae28ebb2908063e766e7385777d5acba4136cbf3818d5049",
+        "lastWriteTimeUtc": "2026-11-26T07:45:11.670551Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "49232a96023621870571312094dd398c6dc2718d77670724a3f798dde0e49b4d",
+        "lastWriteTimeUtc": "2026-11-26T07:45:11.6735514Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e3bc62c188fe681264d58bbab7c0c89c618ac765fa628ba64cd2734b3797c8d0",
+        "lastWriteTimeUtc": "2026-11-26T07:45:11.6745508Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "430a269742572dd51cd3c26b35cf83b478083ba1b058d6a6f6caaf4b58ef9d5b",
+        "lastWriteTimeUtc": "2026-11-26T13:03:38.0050897Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7f02ee252ab1b4446700d13502acfd04e98e2d03e02b2b672436b93d9115be61",
+        "lastWriteTimeUtc": "2026-11-26T13:03:38.006093Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "aa0a1023febcd2402d493b90707b9968471ec9e645c04e1b9958026eae6f3699",
+        "lastWriteTimeUtc": "2026-11-26T13:03:38.0090937Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "44ac09e967b2ea00bb3f81dcb6f10b8d77afd08c86e0e6faf158b129c66d140c",
+        "lastWriteTimeUtc": "2026-11-26T13:03:38.0090937Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "fec3488eac08259f97fef0051de05cc976c880303f681a41a38e155d29e9b9f6",
+        "lastWriteTimeUtc": "2026-11-26T13:07:49.1933027Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "43ad296cab478db60a46b6aefc6e7aa8e729bdc90bcf8dcadb106a2656dd617d",
+        "lastWriteTimeUtc": "2026-11-26T13:07:49.1946917Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "266d45cfb60c27d24b9958269457bbac1ca9df38df7fb9736b2666cf94452fce",
+        "lastWriteTimeUtc": "2026-11-26T13:07:49.196696Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "96e4541303928d8b5b5f9c2b450a54f2d89f074b92528eaa57d800b47e7937e7",
+        "lastWriteTimeUtc": "2026-11-26T13:07:49.196696Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ca732679e4f88e43a73bd7f2ad91c7770506b326bbdd16f9e0de3ff5db80e4d0",
+        "lastWriteTimeUtc": "2026-11-26T09:44:22.9240177Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b50d0be5e708b147cef762988da4a9fc9f5dce001df3cffafd9155409467fed9",
+        "lastWriteTimeUtc": "2026-11-26T09:44:22.9240177Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7e613b388abc67bac01c19d7f777d0698512a26e5798388cd134bf1c24cea81f",
+        "lastWriteTimeUtc": "2026-11-26T09:44:22.9370219Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "1056a42900962589ac1497628c7a4590fcf4f3153d69d2f9e157f852cc337d78",
+        "lastWriteTimeUtc": "2026-11-26T09:44:22.9370219Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "c27cc316d30ab3830ea128bf843fb48e41cd40cc44e8cc13544aee7cba8e1082",
+        "lastWriteTimeUtc": "2026-11-26T12:47:11.8571945Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "04bd91f5489a718f7fddb8ce685d862da0ae5258fdb514d8913891f206750e00",
+        "lastWriteTimeUtc": "2026-11-26T12:47:11.8581947Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "97663ad2308815d861eac6892d4fb78fd180cf886fd090393bbdc4f7f472a0db",
+        "lastWriteTimeUtc": "2026-11-26T12:47:11.8601935Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "cab1b1eaa938fb3fad4d0a3876dcdc750eeaf26c4b2960ad298befa1f2d6b6ef",
+        "lastWriteTimeUtc": "2026-11-26T12:47:11.8601935Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "06ce8dafea6ae5e500a1d85732f51a2564ce2e7e99a8ed19a094f144ef0f5467",
+        "lastWriteTimeUtc": "2026-11-26T09:53:51.5397317Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "3a3a327ed07a2cb171c1ab32ab2881091d1495dc951db52ccf0630b2ffdf3c80",
+        "lastWriteTimeUtc": "2026-11-26T09:53:51.5397317Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "71aecb0d3aefbf8111b1824ddc8b8f9e4818d634b6e8404634bf065af52beb40",
+        "lastWriteTimeUtc": "2026-11-26T09:53:51.5427284Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b3794a52922514ec78f5d4fc4a3d61d46d2ecac309183dc1dea52a2eae01e8db",
+        "lastWriteTimeUtc": "2026-11-26T09:53:51.5427284Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "e02c496dd5d124d3bc79e40ac01b5640bf16c5f6397c4672c38707e6d480dcf4",
+        "lastWriteTimeUtc": "2026-11-26T12:45:43.8768248Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "54a5b65b774890b88c2df368410791d8999397cef20b59f0fcdafaefa75ca805",
+        "lastWriteTimeUtc": "2026-11-26T12:45:43.8768248Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "da8c7650a13df653cd05fd39631405b7ac66cdabd562a1d5419ce10ed809cf0e",
+        "lastWriteTimeUtc": "2026-11-26T12:45:43.880825Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "40a6fe7382be397dd8dc25ed29b3ee8d2beab028be7a9f4b3cf35a789e41c4e5",
+        "lastWriteTimeUtc": "2026-11-26T12:45:43.880825Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "38d1ddf7454fc04a8f1088bd7aaceee973360469dcbfb0f001e0e96ebe5eaf8a",
+        "lastWriteTimeUtc": "2026-11-26T12:09:22.3406172Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "03bf553048e50630bca02fd42c54a523d96826622fcd00dfd32b8229b8d6c61c",
+        "lastWriteTimeUtc": "2026-11-26T12:09:22.3406172Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "b2585bab26f0af8dc5ba0b8359ff50712cb0f6963211741337ca2948dbee431b",
+        "lastWriteTimeUtc": "2026-11-26T12:09:22.3436148Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "d71e549e2ce71e1a2dc9bfb1fe9cf03fdc4288a7227b515d9356ab737cecc0a4",
+        "lastWriteTimeUtc": "2026-11-26T12:09:22.3436148Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "21eaee1c6efb202bcd46eadc4041fc1cfdfc8c7ac7b55ca213cd0f803c594703",
+        "lastWriteTimeUtc": "2026-11-26T09:52:44.6864104Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "07a43295f0bab47194ad6a5f8b7f47e47d90bec2313f66c2a868f20e730ea55e",
+        "lastWriteTimeUtc": "2026-11-26T09:52:44.6864104Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2dfc0f843f67df8e7243f51f8fea97590df0136f621c2253e9204027ce5b8354",
+        "lastWriteTimeUtc": "2026-11-26T09:52:44.6894092Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "efd4b56c8b22e10aa97ed9a4bc25f446a0ae2090649e14f8fe9c2927113822ed",
+        "lastWriteTimeUtc": "2026-11-26T09:52:44.6894092Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "796fb10a6dd8e1f8ef549623ed4221c628f64675723a58834aa4bbf0c384ff7a",
+        "lastWriteTimeUtc": "2026-11-26T12:12:10.7375766Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "df75cb6497cc5e59368aabeef2871b5ba9f05d567f96c1338549e4286e83d800",
+        "lastWriteTimeUtc": "2026-11-26T12:12:10.7375766Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7574030a278e68e0e5769d2618aa3ed02c948be36ef1f36b6136f04550c1d2a4",
+        "lastWriteTimeUtc": "2026-11-26T12:12:10.7405775Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "943174d4a5cf27c553fad5eeead4f4e11a3388f2c7ceacf2000163e15a893bc7",
+        "lastWriteTimeUtc": "2026-11-26T12:12:10.7405775Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "51f50872d9a5a1c84961531df781304d0ee71b789cd9308f113e05156a1b16e8",
+        "lastWriteTimeUtc": "2026-11-26T12:08:13.0743238Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "20fc98236186559acb697d12ef4744cb9a1f2e409cfaa4a79457126d50826c4b",
+        "lastWriteTimeUtc": "2026-11-26T12:08:13.0743238Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5790c402025002d122d3deb6aaa8b6382348a598a6c571f9eba8535b6e631c5a",
+        "lastWriteTimeUtc": "2026-11-26T12:08:13.0783229Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "df2516679320deebdb9e2b754f33e4eea32461ad314d156e8305d19ba3872728",
+        "lastWriteTimeUtc": "2026-11-26T12:08:13.0793244Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "5272b364983475e5e2a996ffc297774e80a8060a087bbbdeca87a66c12dbe026",
+        "lastWriteTimeUtc": "2026-11-26T12:09:03.0122476Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "9b3f096d95ebc3ee790463686b9a56595d7ee70c9d09ef03f31c71982cfde84b",
+        "lastWriteTimeUtc": "2026-11-26T12:09:03.0122476Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "2e07d1dbe178286b85a436092af5cedf491df3e012b36143e158bc54a46c63e8",
+        "lastWriteTimeUtc": "2026-11-26T12:09:03.0142475Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "ed7a1cdab67396e83c56c5a6aec57a54eaf566a67564a7ba7372a3d78702bdf7",
+        "lastWriteTimeUtc": "2026-11-26T12:09:03.0152469Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "4b8d8abac0fdac602cf045b3b710ed885376a81827b16d33b2bde266624044a9",
+        "lastWriteTimeUtc": "2026-11-26T12:11:53.8913839Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "f5b52d6d83811b8b2d16fd86a3ad085755d36ea4e9233a93a5c481ba16190eb0",
+        "lastWriteTimeUtc": "2026-11-26T12:11:53.8913839Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "df21442dfab30a9262d073a5458f02bdcaa284bda8aafa3d7beee0a3c3c8c44d",
+        "lastWriteTimeUtc": "2026-11-26T12:11:53.8933826Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "a7fb27e2cd2f67aaa6df7013ff17c158cbc0e4710ec34c71de2f5bfa6681eec2",
+        "lastWriteTimeUtc": "2026-11-26T12:11:53.8943952Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "7340a95f14611f6a366325819d588b75edf1bf615c839a77c89b10a61af12df8",
+        "lastWriteTimeUtc": "2026-11-27T11:36:16.0038423Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "bea4fd8a266ff9069a8ff022d0f48795e95ccd53bd26fc0debe3812d91d2cde1",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.8943644Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "0b3073f09d087fc4be9c26ad8d74849e5382230235ec3ca0a5a392d5489e2073",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9098058Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "df43733ba7dd6289d97138f69fcd4e81cd04088b271713c6e7709b00deffb00e",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.9112113Z",
+        "isReparsePoint": false
+      },
+      {
+        "pathId": "693bd48ba1be6a19e8b6ac030f6db9278c3855b65328cd627ef7389282e56a22",
+        "lastWriteTimeUtc": "2026-11-23T13:36:31.914748Z",
+        "isReparsePoint": false
+      }
+    ]
+  },
+  "comparison": {
+    "filePathSetSame": true,
+    "directoryPathSetSame": true,
+    "contentHashDifferences": 0,
+    "fileTimestampDifferences": 0,
+    "directoryTimestampDifferences": 0
+  }
+}

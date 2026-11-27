@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-27",
+  "environment": "NSIS installed Electron safeStorage with synthetic credentials",
+  "safeStorageEncryptionAvailable": true,
+  "profilesCreated": 2,
+  "defaultProviderSwitchVerified": true,
+  "apiKeyUpdateVerified": true,
+  "nonDefaultProviderDeletionVerified": true,
+  "defaultProviderDeletionVerified": true,
+  "finalProviderStore": {
+    "path": "isolated user data/providers.secure.json",
+    "profileCount": 0,
+    "defaultProfile": null
+  },
+  "finalRuntimeProviderConfig": {
+    "path": "isolated user data/runtime/providers.toml",
+    "bytes": 0
+  },
+  "runtimeRestartFailure": {
+    "injection": "temporarily removed embedded python.exe",
+    "failedCandidateNotPersisted": true,
+    "oldDefaultModelRestored": true,
+    "embeddedPythonRestored": true
+  },
+  "runtimeEnvironmentAfterDeletion": {
+    "hostEnvironmentRead": true,
+    "providerCredentialVariables": [],
+    "syntheticCredentialPresent": false
+  },
+  "rendererBoundary": {
+    "runtimeInspection": true,
+    "encryptedApiKeyExposed": false
+  },
+  "logs": {
+    "syntheticCredentialPlaintextFound": false,
+    "scannedUserDataFiles": 83
+  },
+  "requestPath": "Only a loopback synthetic test endpoint was used for Main crash testing. This does not satisfy real Provider acceptance."
+}

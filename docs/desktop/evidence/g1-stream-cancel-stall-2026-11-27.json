@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-27",
+  "status": "ISSUE",
+  "environment": "Latest NSIS installed Electron Main plus embedded Python Runtime",
+  "testEndpoint": "Loopback-only synthetic OpenAI-compatible streaming endpoint",
+  "taskId": "552529da-1ca8-43e7-a722-a37a5140affa",
+  "sessionId": "557e56975431487fb31c24c84120ea2d",
+  "modelRequestPersisted": true,
+  "firstStreamChunkObserved": true,
+  "endpointThenHeldSseOpenWithoutFurtherChunks": true,
+  "uiCancelRequested": true,
+  "cancelRequestedEventPersisted": true,
+  "desktopCancelTaskResponse": "Runtime 请求超时：turn.cancel",
+  "runtimeIpcDefaultTimeoutMs": 10000,
+  "taskTerminalAfterLoopbackEndpointStopped": "task.cancelled",
+  "terminalOccurredAt": "2026-11-27T22:14:50.295866+08:00",
+  "providerHttpRequests": 1,
+  "workspaceWriteEvents": 0,
+  "terminalCommandEvents": 0,
+  "interpretation": "The Main-crash task recovery passed its stated interrupted-state and no-replay checks. The manual retry cancellation did not return promptly while the stream stayed open. Keep this as a separate observed runtime cancellation issue."
+}

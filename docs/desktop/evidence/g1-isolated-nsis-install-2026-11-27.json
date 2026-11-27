@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-27",
+  "repoHead": "f54818cc5e1f129bbfd81baad710b0456837b37a",
+  "installerSha256": "56f4da1db43557fd61b0487ce8ce64b5e27a37e11b06c651b4d9711ac0841f33",
+  "installDirectory": "C:\\AgentDU\\desktop\\release\\g1-final-gate-f54818c-2026-11-27\\artifacts\\nsis-install\\AgentDU Installed With Spaces",
+  "isolatedUserDataDirectory": "C:\\AgentDU\\desktop\\release\\g1-final-gate-f54818c-2026-11-27\\artifacts\\isolated user data",
+  "launcher": "desktop/scripts/run-isolated-acceptance.ps1",
+  "launcherRejectsMissingIsolationVariable": true,
+  "launcherRejectsDefaultProfile": true,
+  "startupExitRestartCycleCompleted": true,
+  "preferences": true,
+  "cache": true,
+  "providerStore": "C:\\AgentDU\\desktop\\release\\g1-final-gate-f54818c-2026-11-27\\artifacts\\isolated user data\\providers.secure.json",
+  "runtimeConfig": "C:\\AgentDU\\desktop\\release\\g1-final-gate-f54818c-2026-11-27\\artifacts\\isolated user data\\runtime\\providers.toml",
+  "runtimeLog": "C:\\AgentDU\\desktop\\release\\g1-final-gate-f54818c-2026-11-27\\artifacts\\isolated user data\\logs\\runtime.stderr.log",
+  "recentWorkspaces": [
+    "C:\\AgentDU\\desktop\\release\\g1-final-gate-f54818c-2026-11-27\\artifacts\\main-crash-workspace"
+  ],
+  "providerProfilesAfterCleanup": 0,
+  "runtimeProcessesAfterCleanExit": 0,
+  "cleanExitMarkerPresent": false,
+  "originalProfileComparison": "g1-isolated-profile-comparison-2026-11-27.json"
+}
