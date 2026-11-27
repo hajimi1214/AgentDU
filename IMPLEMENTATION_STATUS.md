@@ -30,7 +30,7 @@
 
 - AgentDU 本地 Provider 档案和凭据未配置。未授权读取或复用 Codex 凭据。对用户给定 Endpoint 的未认证 `/models` 请求返回 HTTP 401。
 - 尚无真实 Provider 连通性和真实跨文件编程任务记录。
-- 安装版 Electron 窗口已显示 Runtime 在线、最近项目及 Git 状态。2026-11-27 在隔离用户数据目录的安装版中，从 Renderer 点击停止按钮取消受控 Runtime 自检，界面收到“任务已取消”，无“任务完成”事件，当前源码包证据截图见 `docs/desktop/evidence/d2-runtime-lifecycle-persist-2026-11-27.jpg`。
+- Electron 窗口已显示 Runtime 在线、最近项目及 Git 状态。2026-11-27 在隔离用户数据目录的含空格源码包副本中，从 Renderer 点击停止按钮取消受控 Runtime 自检，界面收到“任务已取消”，会话 JSONL 记录 task.cancelled 且无 task.completed，证据见 `docs/desktop/evidence/d2-runtime-lifecycle-persist-2026-11-27.jpg`。
 - 已修复 Host 内 Git 状态子进程继承 JSONL 输入管道后挂起的问题。Host 集成测试覆盖非 Git 目录、嵌套 Git 仓库、工作区范围内的已跟踪与未跟踪改动，以及 Git 超时后的文件列表保留。2026-11-27 已在 NSIS 安装版复验最近项目恢复和 Git 状态，已有模型会话的安装版恢复仍待验证。
 - 尚未完成安装版中已有模型会话的完整恢复及真实任务恢复流程。
 - 2026-11-27 安装验证包位于忽略目录 `desktop/release/d2-ui-cancel-manual-2026-11-26-60s`，其自检间隔为临时 60 秒版本。当前源码使用 6 秒间隔。新源码 NSIS 包已构建，但尚未由 NSIS 安装向导安装。已从含空格路径的 unpacked 包副本启动 Runtime 并完成 UI 取消验证。
