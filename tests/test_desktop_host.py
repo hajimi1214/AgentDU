@@ -424,7 +424,7 @@ class DesktopHostTests(unittest.TestCase):
         self.assertGreaterEqual(completed_record["payload"]["modelCalls"], 1)
         self.assertNotIn("response", completed_record["payload"])
 
-    def test_runtime_host_crash_persists_interrupted_task_once_after_restart(self) -> None:
+    def test_runtime_host_restart_recovers_task_when_workspace_is_reopened(self) -> None:
         started = self.host.request("test.start")["result"]
         task_id = started["taskId"]
         session_id = started["sessionId"]
@@ -438,15 +438,10 @@ class DesktopHostTests(unittest.TestCase):
         crashed_host.close()
         self.host = RuntimeHostProcess(self.root)
 
-        recovered = self.host.request(
-            "task.recoverInterrupted",
-            {
-                "taskId": task_id,
-                "sessionId": session_id,
-                "workspacePath": workspace_path,
-            },
-        )
-        self.assertEqual(recovered["result"]["status"], "task.interrupted")
+        # A fresh Electron Main process has no in-memory interruptedTaskCandidates.
+        # Opening the persisted project must discover and reconcile the task itself.
+        reopened = self.host.request("workspace.open", {"path": workspace_path})
+        self.assertNotIn("error", reopened)
         interrupted_event = self.host.wait_event("task.interrupted")
         self.assertEqual(interrupted_event["payload"]["taskId"], task_id)
         self.assertTrue(interrupted_event["payload"]["recovered"])
@@ -455,6 +450,15 @@ class DesktopHostTests(unittest.TestCase):
             "Runtime stopped before this task recorded a result. Review the workspace before retrying it.",
         )
 
+        recovered = self.host.request(
+            "task.recoverInterrupted",
+            {
+                "taskId": task_id,
+                "sessionId": session_id,
+                "workspacePath": workspace_path,
+            },
+        )
+        self.assertEqual(recovered["result"]["status"], "already_terminal")
         repeated = self.host.request(
             "task.recoverInterrupted",
             {
@@ -465,8 +469,6 @@ class DesktopHostTests(unittest.TestCase):
         )
         self.assertEqual(repeated["result"]["status"], "already_terminal")
 
-        restored = self.host.request("workspace.open", {"path": workspace_path})
-        self.assertNotIn("error", restored)
         session = self.host.request("session.read", {"sessionId": session_id})
         self.assertNotIn("error", session)
         terminal_events = [
@@ -477,6 +479,53 @@ class DesktopHostTests(unittest.TestCase):
             }
         ]
         self.assertEqual([event["kind"] for event in terminal_events], ["task.interrupted"])
+
+    def test_corrupt_session_restore_returns_a_visible_reason(self) -> None:
+        workspace = self.root / "corrupt session workspace"
+        workspace.mkdir()
+        self.host.request("workspace.open", {"path": str(workspace)})
+        session_id = self.host.request("session.create")["result"]["sessionId"]
+        session_file = workspace / ".agentdu" / "sessions" / f"{session_id}.jsonl"
+        session_file.write_text("not-json\n", encoding="utf-8")
+
+        restored = self.host.request("session.read", {"sessionId": session_id})
+
+        self.assertEqual(restored["error"]["code"], "SESSION_READ_FAILED")
+        self.assertIn("Invalid event 1", restored["error"]["message"])
+
+    def test_unavailable_workspace_recovery_reports_reason_without_mutation(self) -> None:
+        from agentdu.sessions import SessionStore
+
+        workspace = self.root / "workspace removed during recovery"
+        workspace.mkdir()
+        self.host.request("workspace.open", {"path": str(workspace)})
+        session_id = self.host.request("session.create")["result"]["sessionId"]
+        task_id = "unavailable-workspace-task"
+        store = SessionStore(workspace / ".agentdu")
+        store.append(
+            session_id,
+            "task.accepted",
+            {"taskId": task_id, "sessionId": session_id, "source": "provider"},
+        )
+        unavailable_workspace = self.root / "workspace temporarily unavailable"
+        workspace.rename(unavailable_workspace)
+
+        recovery = self.host.request(
+            "task.recoverInterrupted",
+            {
+                "taskId": task_id,
+                "sessionId": session_id,
+                "workspacePath": str(workspace),
+            },
+        )
+
+        self.assertEqual(recovery["error"]["code"], "INVALID_WORKSPACE")
+        self.assertIn("workspace is unavailable", recovery["error"]["message"])
+        events = SessionStore(unavailable_workspace / ".agentdu").read_events(session_id)
+        self.assertNotIn(
+            "task.interrupted",
+            [event["kind"] for event in events if event["payload"].get("taskId") == task_id],
+        )
 
     def test_repeated_request_id_does_not_start_a_second_test_task(self) -> None:
         first_id = self.host.send("test.start", {}, request_id="stable-test")
