@@ -84,6 +84,7 @@ class AgentRuntime:
         self.context = context or ContextManager()
         self.event_bus = event_bus or EventBus()
         self.system_prompt = system_prompt
+        self.session_event_metadata: dict[str, object] = {}
         self.max_steps = max_steps
         self.max_model_calls = max_model_calls
         self._model_call_count: ContextVar[int] = ContextVar(
@@ -307,8 +308,14 @@ class AgentRuntime:
             return lock
 
     async def _emit(self, session_id: str, kind: str, payload: dict[str, object]) -> None:
-        safe_payload = self.sessions.redact(payload)
+        safe_payload = self.sessions.redact({**self.session_event_metadata, **payload})
         event = AgentEvent.create(session_id, kind, safe_payload)
+        if kind == "run_started" and isinstance(self.session_event_metadata.get("taskId"), str):
+            self.sessions.append(
+                session_id,
+                "task.accepted",
+                {"sessionId": session_id, **self.session_event_metadata},
+            )
         if kind != "assistant_delta":
             self.sessions.append(
                 session_id,

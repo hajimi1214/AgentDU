@@ -36,6 +36,10 @@ let mainWindow: BrowserWindow | null = null;
 let runtimeHost: RuntimeHostClient | null = null;
 let runtimeStatus: RuntimeStatus = { state: "starting" };
 let activeWorkspace: string | null = null;
+const interruptedTaskCandidates = new Map<string, {
+  sessionId: string;
+  workspacePath: string | null;
+}>();
 let isQuitting = false;
 let runtimeHadUnexpectedExit = false;
 let runtimeLogPath = "";
@@ -344,7 +348,21 @@ async function startRuntimeHost(): Promise<void> {
   const client = new RuntimeHostClient(child);
   runtimeHost = client;
   client.on("stderr", (chunk: Buffer) => void appendRuntimeStderr(chunk));
-  client.on("event", (event: EventMessage) => mainWindow?.webContents.send("runtime.event", event));
+  client.on("event", (event: EventMessage) => {
+    const payload = event.payload;
+    const taskId = typeof payload.taskId === "string" ? payload.taskId : null;
+    const sessionId = typeof payload.sessionId === "string" ? payload.sessionId : null;
+    if (event.event === "task.accepted" && taskId && sessionId) {
+      interruptedTaskCandidates.set(taskId, {
+        sessionId,
+        workspacePath: typeof payload.workspacePath === "string" ? payload.workspacePath : activeWorkspace,
+      });
+    }
+    if (["task.completed", "task.failed", "task.cancelled", "task.interrupted"].includes(event.event) && taskId) {
+      interruptedTaskCandidates.delete(taskId);
+    }
+    mainWindow?.webContents.send("runtime.event", event);
+  });
   client.on("status", (status: RuntimeStatus) => {
     if (status.state === "error" && runtimeStatus.state !== "error") {
       runtimeHadUnexpectedExit = true;
@@ -612,6 +630,10 @@ function registerIpcHandlers(): void {
     if (typeof result.taskId !== "string" || typeof result.sessionId !== "string") {
       throw new Error("Runtime 没有返回有效的测试任务标识。");
     }
+    interruptedTaskCandidates.set(result.taskId, {
+      sessionId: result.sessionId,
+      workspacePath: typeof result.workspacePath === "string" ? result.workspacePath : null,
+    });
     return { taskId: result.taskId, sessionId: result.sessionId };
   });
   trustedInvoke("desktop.startTask", async (_event, payload) => {
@@ -626,6 +648,10 @@ function registerIpcHandlers(): void {
     if (typeof result.taskId !== "string" || typeof result.sessionId !== "string") {
       throw new Error("Runtime 没有返回有效的任务标识。");
     }
+    interruptedTaskCandidates.set(result.taskId, {
+      sessionId: result.sessionId,
+      workspacePath: typeof result.workspacePath === "string" ? result.workspacePath : activeWorkspace,
+    });
     return { taskId: result.taskId, sessionId: result.sessionId };
   });
   trustedInvoke("desktop.cancelTask", async (_event, payload) => {
@@ -656,6 +682,48 @@ function registerIpcHandlers(): void {
     if (runtimeStatus.state !== "ready") {
       throw new Error(runtimeStatus.error ?? "Runtime 重启失败。");
     }
+    const restartedHost = requireHost();
+    const recoveryWarnings: string[] = [];
+    for (const [taskId, task] of interruptedTaskCandidates) {
+      const workspacePath = task.workspacePath ?? activeWorkspace;
+      if (!workspacePath) {
+        recoveryWarnings.push(`任务 ${taskId} 缺少工作区路径，无法核对其状态。`);
+        continue;
+      }
+      try {
+        const result = await restartedHost.request("task.recoverInterrupted", {
+          taskId,
+          sessionId: task.sessionId,
+          workspacePath,
+        });
+        const recoveryStatus = typeof result.status === "string" ? result.status : "unknown";
+        if (recoveryStatus === "session_busy") {
+          recoveryWarnings.push(`任务 ${taskId} 的会话仍被占用，稍后可以重新核对。`);
+        } else if (recoveryStatus === "not_found") {
+          interruptedTaskCandidates.delete(taskId);
+          recoveryWarnings.push(`任务 ${taskId} 的会话记录不存在。`);
+        } else if (recoveryStatus === "unknown") {
+          recoveryWarnings.push(`任务 ${taskId} 返回了无法识别的恢复状态。`);
+        } else {
+          interruptedTaskCandidates.delete(taskId);
+        }
+      } catch (error) {
+        recoveryWarnings.push(
+          `任务 ${taskId} 的状态核对失败：${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+    if (activeWorkspace) {
+      try {
+        const opened = await restartedHost.request("workspace.open", { path: activeWorkspace });
+        activeWorkspace = typeof opened.path === "string" ? opened.path : activeWorkspace;
+      } catch (error) {
+        recoveryWarnings.push(
+          `Runtime 已恢复，但项目重新连接失败：${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+    return { recoveryWarnings };
   });
   trustedInvoke("desktop.debugCrashRuntime", () => {
     if (app.isPackaged) throw new Error("该诊断操作仅在开发模式可用。");

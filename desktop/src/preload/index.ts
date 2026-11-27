@@ -23,7 +23,7 @@ export type AgentDUDesktopApi = {
   startTask(prompt: string, sessionId: string, profile?: string): Promise<{ taskId: string; sessionId: string }>;
   cancelTask(taskId: string): Promise<{ status: string }>;
   respondToPermission(approvalId: string, decision: "allow" | "deny"): Promise<void>;
-  restartRuntime(): Promise<void>;
+  restartRuntime(): Promise<{ recoveryWarnings: string[] }>;
   onEvent(callback: (event: EventMessage) => void): () => void;
   onStatus(callback: (status: RuntimeStatus) => void): () => void;
 };

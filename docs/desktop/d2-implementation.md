@@ -90,15 +90,21 @@
 - 基于当前源码构建 NSIS 安装器 `desktop/release/d2-runtime-recovery-2026-11-27/AgentDU-Setup-0.1.0-x64.exe`，SHA-256 为 `E25AEE5DC79E4B12CB5F6AC0866CFA27EC3E503D6471823E6426423356E103C8`。安装到含空格目录 `desktop/release/d2-runtime-recovery-2026-11-27/nsis-install/AgentDU Installed App With Spaces`。以隔离 profile 启动，并将父进程 `PATH` 限制为 `%WINDIR%\System32`。进程检查确认 Runtime Host 使用该安装目录下的 embedded Python。
 - 在没有打开项目、没有活动任务的隔离实例中，手动终止唯一的 bundled Python Host。UI 显示 Runtime 异常、退出码 `4294967295`、异常恢复提示和“重新启动 Runtime”按钮。点击按钮后状态短暂进入“启动中”，随后恢复“Runtime 已连接”，异常恢复提示仍显示未完成任务不会自动重放。两次故障注入均成功恢复。
 - 错误状态截图见 [Runtime 异常与恢复入口](evidence/d2-nsis-runtime-restart-error-2026-11-27.jpg)，恢复截图见 [Runtime 重新连接](evidence/d2-nsis-runtime-restart-recovered-2026-11-27.jpg)。[Host 日志](evidence/d2-nsis-runtime-restart-2026-11-27-host.log)记录初次启动、两次重启启动和正常关闭。关闭应用后检查确认 bundled Host 进程均已退出。该验证证明空闲 Runtime 发生异常后的手动恢复，不证明活动模型任务可以自动恢复。
-2026-11-27 又在隔离 profile 的最新 NSIS 安装版中执行活动任务 Host 崩溃注入。Runtime 异常和任务失败在界面可见，任务没有自动重放；但会话 JSONL 在 `model_request` 后结束，没有 `task.failed`、`task.interrupted` 或其他终态记录，因此重启后无法从持久化会话准确核对该任务。复现记录见 [活动任务崩溃会话 JSONL](evidence/d2-nsis-active-task-crash-2026-11-27-session.jsonl)。这是已复现的缺陷，活动任务中断的持久化与恢复仍未通过验收。
+- 修复前的首次活动任务 Host 崩溃复现中，Runtime 异常和任务失败在界面可见，任务没有自动重放；会话 JSONL 在 `model_request` 后结束，缺少终态事件。原始记录见 [修复前活动任务崩溃 JSONL](evidence/d2-nsis-active-task-crash-2026-11-27-session.jsonl)。
+
+## 2026-11-27 NSIS 安装版活动任务中断恢复
+
+- 使用当前源码构建的 NSIS 安装器 SHA-256 为 `3DF305D28D980B76C8ECE77BB4394CD268BEDCA85025BDD85D853D354C3151BA`，安装目录含空格。通过安装目录内的 embedded Python Host 启动受控流任务，在 `model_request` 后终止 Host，再重启 Host 并核对同一任务、会话和工作区。任务没有自动重放。
+- 恢复后的 [会话 JSONL](evidence/d2-nsis-active-task-recovery-2026-11-27-session.jsonl) 记录唯一的 `task.interrupted` 终态。打包 Host 协议复核记录见 [Host 协议 JSONL](evidence/d2-nsis-active-task-recovery-2026-11-27-host-protocol.jsonl)，连续两次恢复请求均返回 `already_terminal`。对应 Host stderr 记录见 [Host 日志](evidence/d2-nsis-active-task-recovery-2026-11-27-host-stderr.log)。Python 回归测试也覆盖重复恢复、保留已有终态、Host 重启后的会话恢复和单一终态事件。
+- 该安装版故障注入使用受控测试任务，没有调用真实 Provider 或修改真实项目代码。真实模型任务中的故障恢复仍待验证。
 
 ## 仍未验证的 D2 验收项
 
 - AgentDU 当前 Windows 安全 Provider 档案为空。用户提供的 Codex 配置使用 `wire_api = "responses"`，现已实现对应适配。用户给定 Endpoint 的未认证 `/models` 请求返回 HTTP 401。未读取或复用 Codex 凭据。真实 Provider 连通性、跨文件模型修改、真实测试修复、真实 Git Diff 审查和已有模型对话恢复均未执行。
 - 较早 NSIS 安装版的 Electron 主进程和 Runtime Host 已联合启动，Runtime 在线。安装版最近项目和 Git 状态已复验并保存截图。新源码包的 Provider 设置表单和 Responses 选项已目视复核。
 - 已验证较早 NSIS 包安装、带空格路径、embedded Python 启动、Host 初始化和关闭，以及最近项目与 Git 状态恢复。新源码 NSIS 包已安装到隔离的含空格路径并启动，受限 `PATH` 下 Runtime 在线且使用包内 Python。较早的人工取消包使用 60 秒间隔，当前源码使用 6 秒间隔。
-- 已验证最新 NSIS 安装版正常关闭、Runtime 有序退出、空闲 Host 异常退出后的 UI 重启与重新连接，以及 Renderer UI 取消受控任务。尚未验证活动模型任务中断后的恢复、已有模型对话恢复和真实 Provider 任务。
+- 已验证最新 NSIS 安装版正常关闭、Runtime 有序退出、空闲 Host 异常退出后的 UI 重启与重新连接、Renderer UI 取消受控任务，以及受控活动任务在 Host 崩溃后的终态恢复。真实 Provider 任务、真实模型运行中断恢复和已有模型对话恢复仍未验证。
 
 ## 当前结论
 
-D2 的主要桌面工作流和 Runtime IPC 已经落地，自动化及 AppContainer 命令隔离测试通过。最新 NSIS 安装版在含空格路径和受限 `PATH` 下使用 bundled Python 启动 Runtime，并完成 Renderer 取消、会话 JSONL 终态核对、Host 正常关闭，以及空闲 Host 异常退出后的 UI 重启恢复验证。新源码包的隔离 profile 也完成最近项目与空白会话恢复。AgentDU 没有 Provider 凭据，因此真实 Provider 任务、已有模型对话恢复及活动模型任务中断后的恢复仍未完成。空闲 Host 的恢复结果不能替代任务恢复验收。D2 继续为 NOT VERIFIED，不进入 D3。完成真实任务验收需要在 AgentDU 桌面 Provider 设置中安全保存 API Key，并完成真实项目任务。
+D2 的主要桌面工作流和 Runtime IPC 已经落地，Python 94 项测试、Desktop 19 项测试和生产构建通过。最新 NSIS 安装版已验证空闲 Host 重启恢复，也通过受控活动任务的 Host 崩溃注入验证 `task.interrupted` 持久化、重复恢复幂等和任务不自动重放。新源码包隔离 profile 恢复了最近项目与空白会话。真实 Provider 编程任务、真实模型运行中断恢复和已有模型对话恢复仍未完成，因此 D2 继续为 NOT VERIFIED，不进入 D3。

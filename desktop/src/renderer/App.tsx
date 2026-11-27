@@ -55,6 +55,7 @@ const EVENT_LABELS: Record<string, string> = {
   "terminal.command.finished": "终端命令结果",
   "task.cancel_requested": "正在取消",
   "task.cancelled": "任务已取消",
+  "task.interrupted": "任务已中断",
   "task.failed": "任务失败",
   "protocol.error": "协议错误",
 };
@@ -245,7 +246,7 @@ export function App() {
         });
       }
       if (event.event === "permission.resolved" && payload.approvalId === permission?.approvalId) setPermission(null);
-      if (["run_completed", "task.completed", "task.cancelled", "task.failed"].includes(event.event)) {
+      if (["run_completed", "task.completed", "task.cancelled", "task.failed", "task.interrupted"].includes(event.event)) {
         const taskId = typeof payload.taskId === "string" ? payload.taskId : null;
         if (taskId) {
           dispatchTaskLifecycle({ type: "finished", taskId });
@@ -255,7 +256,7 @@ export function App() {
           setRuntimeCheckStatus(
             event.event === "task.cancelled"
               ? "cancelled"
-              : event.event === "task.failed"
+              : event.event === "task.failed" || event.event === "task.interrupted"
                 ? "failed"
                 : "completed",
           );
@@ -361,6 +362,16 @@ export function App() {
       setSessionId(record.sessionId);
       setMessages(record.messages);
       setActivities(record.events.map(eventToActivity));
+      for (const event of record.events) {
+        const taskId = event.payload.taskId;
+        if (typeof taskId !== "string") continue;
+        if (event.kind === "task.accepted") {
+          dispatchTaskLifecycle({ type: "accepted", taskId });
+        }
+        if (["task.completed", "task.cancelled", "task.failed", "task.interrupted"].includes(event.kind)) {
+          dispatchTaskLifecycle({ type: "finished", taskId });
+        }
+      }
       const terminalOperations = new Map<string, TerminalRecord>();
       for (const event of record.events) {
         const payload = event.payload;
@@ -495,14 +506,14 @@ export function App() {
     setRuntimeRestarting(true);
     setNotice("正在重新启动 Python Runtime。");
     try {
-      await window.agentdu.restartRuntime();
+      const recovery = await window.agentdu.restartRuntime();
       const nextStatus = await window.agentdu.getStatus();
       setStatus(nextStatus);
       if (nextStatus.state !== "ready") {
         throw new Error(nextStatus.error ?? "Runtime 重启失败。");
       }
       if (sessionId) await restoreSession(sessionId);
-      else setNotice(null);
+      setNotice(recovery.recoveryWarnings.length > 0 ? recovery.recoveryWarnings.join("；") : null);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Runtime 重启失败。");
     } finally {

@@ -24,7 +24,7 @@ from .models import AssistantMessage, Message, ModelStreamEvent, ToolSchema
 from .permissions import PermissionRequest, ReadOnlyPolicy
 from .provider import OpenAICompatibleModel
 from .settings import ModelSettings, default_config_path, resolve_profile_options
-from .sessions import SessionStore
+from .sessions import SessionCorruptionError, SessionStore
 from .tools import _atomic_write, _git_command, _iter_workspace_files, _workspace_file
 from .windows_sandbox import run_appcontainer_command
 
@@ -54,6 +54,7 @@ class ActiveTask:
     task_id: str
     session_id: str
     source: str
+    workspace: Path
     runtime: AgentRuntime
     task: asyncio.Task[None]
 
@@ -346,6 +347,7 @@ class RuntimeHost:
             self._remember_workspace(resolved)
             payload = {"path": str(resolved), "name": resolved.name}
             self._write_event("workspace.opened", payload)
+            self._recover_workspace_tasks(resolved)
             return payload
         if method == "workspace.list":
             return {"workspaces": self._recent_workspaces()}
@@ -454,11 +456,50 @@ class RuntimeHost:
                 raise HostRequestError("INVALID_PARAMS", "A session ID is required.")
             store = self._session_store(workspace)
             try:
+                self._recover_session_tasks(store, session_id)
                 events = store.read_events(session_id)
                 messages = store.read_messages(session_id)
-            except (OSError, ValueError) as error:
+            except (OSError, ValueError, SessionCorruptionError) as error:
                 raise HostRequestError("SESSION_READ_FAILED", str(error)) from error
             return {"sessionId": session_id, "events": events[-500:], "messages": messages[-200:]}
+        if method == "task.recoverInterrupted":
+            task_id = params.get("taskId")
+            session_id = params.get("sessionId")
+            workspace_path = params.get("workspacePath")
+            if not isinstance(task_id, str) or not task_id or len(task_id) > 128:
+                raise HostRequestError("INVALID_PARAMS", "A valid task ID is required.")
+            if not isinstance(session_id, str) or not re.fullmatch(r"[a-f0-9-]{16,64}", session_id):
+                raise HostRequestError("INVALID_PARAMS", "A valid session ID is required.")
+            if not isinstance(workspace_path, str) or not workspace_path or len(workspace_path) > 32_768:
+                raise HostRequestError("INVALID_PARAMS", "A valid workspace path is required.")
+            candidate = Path(workspace_path)
+            if not candidate.is_absolute():
+                raise HostRequestError("INVALID_WORKSPACE", "Workspace paths must be absolute.")
+            try:
+                resolved = candidate.resolve(strict=True)
+            except OSError as error:
+                raise HostRequestError("INVALID_WORKSPACE", "The task workspace is unavailable.") from error
+            if not resolved.is_dir():
+                raise HostRequestError("INVALID_WORKSPACE", "The task workspace is unavailable.")
+            store = self._session_store(resolved)
+            try:
+                recovered = self._recover_session_tasks(store, session_id, {task_id})
+                if recovered is None:
+                    return {"status": "session_busy", "taskId": task_id, "sessionId": session_id}
+                if recovered:
+                    return {"status": recovered[0]["kind"], "taskId": task_id, "sessionId": session_id}
+                events = store.read_events(session_id)
+            except (OSError, ValueError, SessionCorruptionError) as error:
+                raise HostRequestError("TASK_RECOVERY_FAILED", "The interrupted task state could not be reconciled.") from error
+            terminal_kinds = {"task.completed", "task.failed", "task.cancelled", "task.interrupted"}
+            terminal = next(
+                (event for event in reversed(events)
+                 if event.get("kind") in terminal_kinds
+                 and event.get("payload", {}).get("taskId") == task_id),
+                None,
+            )
+            status = "already_terminal" if terminal else "not_found"
+            return {"status": status, "taskId": task_id, "sessionId": session_id}
         if method == "test.start":
             if params:
                 raise HostRequestError("INVALID_PARAMS", "test.start does not accept params.")
@@ -471,7 +512,11 @@ class RuntimeHost:
                 permission_policy=ReadOnlyPolicy(),
                 prompt="Run the deterministic AgentDU desktop IPC streaming smoke test.",
             )
-            return {"taskId": active.task_id, "sessionId": active.session_id}
+            return {
+                "taskId": active.task_id,
+                "sessionId": active.session_id,
+                "workspacePath": str(active.workspace),
+            }
         if method == "turn.start":
             prompt = params.get("prompt")
             if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 16_000:
@@ -505,7 +550,11 @@ class RuntimeHost:
                 prompt=prompt.strip(),
                 session_id=session_id,
             )
-            return {"taskId": active.task_id, "sessionId": active.session_id}
+            return {
+                "taskId": active.task_id,
+                "sessionId": active.session_id,
+                "workspacePath": str(active.workspace),
+            }
         if method == "turn.cancel":
             task_id = params.get("taskId")
             if not isinstance(task_id, str) or len(task_id) > 128:
@@ -552,6 +601,9 @@ class RuntimeHost:
             max_steps=12,
             command_runner=run_appcontainer_command,
         )
+        runtime.session_event_metadata.update(
+            {"taskId": task_id, "source": source, "workspacePath": str(workspace.resolve())}
+        )
         if session_id is None:
             session_id = runtime.sessions.create()
         elif not runtime.sessions.exists(session_id):
@@ -561,20 +613,51 @@ class RuntimeHost:
             self._run_task(task_id, session_id, source, runtime, prompt),
             name=f"agentdu-desktop-{task_id}",
         )
-        active = ActiveTask(task_id, session_id, source, runtime, task)
+        active = ActiveTask(task_id, session_id, source, workspace.resolve(), runtime, task)
         self._tasks[task_id] = active
         runtime.event_bus.subscribe(
             lambda event: self._runtime_event(task_id, source, event)
         )
-        task_payload = {"taskId": task_id, "sessionId": session_id, "source": source}
-        self._persist_task_event(runtime, task_id, session_id, source, "task.accepted")
-        self._write_event("task.accepted", task_payload)
         return active
 
     def _require_workspace(self) -> Path:
         if self.workspace is None:
             raise HostRequestError("WORKSPACE_REQUIRED", "Open a local workspace first.")
         return self.workspace
+
+    def _recover_session_tasks(
+        self,
+        store: SessionStore,
+        session_id: str,
+        task_ids: set[str] | None = None,
+    ) -> list[dict[str, Any]] | None:
+        active_task_ids = {
+            task.task_id
+            for task in self._tasks.values()
+            if task.session_id == session_id and not task.task.done()
+        }
+        recovered = store.recover_interrupted_tasks(
+            session_id, active_task_ids=active_task_ids, task_ids=task_ids
+        )
+        if recovered is None:
+            return None
+        for event in recovered:
+            self._write_event(
+                event["kind"],
+                {**event["payload"], "occurred_at": event["occurred_at"]},
+            )
+        return recovered
+
+    def _recover_workspace_tasks(self, workspace: Path) -> None:
+        store = self._session_store(workspace)
+        for session in store.list_sessions():
+            session_id = session.get("session_id")
+            if not isinstance(session_id, str):
+                continue
+            try:
+                self._recover_session_tasks(store, session_id)
+            except (OSError, ValueError, SessionCorruptionError):
+                LOG.exception("Failed to recover task state for session %s", session_id)
 
     @staticmethod
     def _session_store(workspace: Path) -> SessionStore:
@@ -691,6 +774,31 @@ class RuntimeHost:
         except Exception:
             LOG.exception("Failed to persist %s for Agent task %s", event, task_id)
 
+    async def _persist_terminal_task_event(
+        self,
+        runtime: AgentRuntime,
+        task_id: str,
+        session_id: str,
+        source: str,
+        event: str,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        payload = {
+            **(details or {}),
+            "taskId": task_id,
+            "sessionId": session_id,
+            "source": source,
+        }
+        try:
+            await asyncio.to_thread(
+                runtime.sessions.append_task_terminal_if_missing,
+                session_id,
+                event,
+                payload,
+            )
+        except Exception:
+            LOG.exception("Failed to persist %s for Agent task %s", event, task_id)
+
     async def _run_task(
         self,
         task_id: str,
@@ -703,7 +811,7 @@ class RuntimeHost:
             result = await runtime.run(prompt, session_id)
         except asyncio.CancelledError:
             payload = {"taskId": task_id, "sessionId": session_id, "source": source}
-            self._persist_task_event(runtime, task_id, session_id, source, "task.cancelled")
+            await self._persist_terminal_task_event(runtime, task_id, session_id, source, "task.cancelled")
             self._write_event("task.cancelled", payload)
             raise
         except Exception as error:
@@ -716,7 +824,7 @@ class RuntimeHost:
                 "source": source,
                 "message": str(safe_error)[:2000],
             }
-            self._persist_task_event(
+            await self._persist_terminal_task_event(
                 runtime,
                 task_id,
                 session_id,
@@ -728,7 +836,7 @@ class RuntimeHost:
             LOG.exception("Agent task %s failed", task_id)
         else:
             payload = _result_payload(task_id, source, result)
-            self._persist_task_event(
+            await self._persist_terminal_task_event(
                 runtime,
                 task_id,
                 session_id,
@@ -748,6 +856,16 @@ class RuntimeHost:
             "source": source,
             "occurred_at": event.occurred_at,
         }
+        if event.kind == "run_started":
+            self._write_event(
+                "task.accepted",
+                {
+                    "taskId": task_id,
+                    "sessionId": event.session_id,
+                    "source": source,
+                    "workspacePath": payload.get("workspacePath"),
+                },
+            )
         self._write_event(event.kind, payload)
 
     async def _cancel_task(self, task_id: str) -> dict[str, str]:

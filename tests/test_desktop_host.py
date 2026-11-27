@@ -21,7 +21,7 @@ class RuntimeHostProcess:
     def __init__(self, root: Path) -> None:
         self.root = root
         self.data_dir = root / "runtime-data"
-        self.data_dir.mkdir(parents=True)
+        self.data_dir.mkdir(parents=True, exist_ok=True)
         self.config_path = root / "missing-config.toml"
         self.messages: queue.Queue[dict[str, Any] | None] = queue.Queue()
         self.backlog: list[dict[str, Any]] = []
@@ -423,6 +423,60 @@ class DesktopHostTests(unittest.TestCase):
         )
         self.assertGreaterEqual(completed_record["payload"]["modelCalls"], 1)
         self.assertNotIn("response", completed_record["payload"])
+
+    def test_runtime_host_crash_persists_interrupted_task_once_after_restart(self) -> None:
+        started = self.host.request("test.start")["result"]
+        task_id = started["taskId"]
+        session_id = started["sessionId"]
+        accepted = self.host.wait_event("task.accepted")
+        workspace_path = accepted["payload"]["workspacePath"]
+        self.host.wait_event("assistant_delta", timeout=8.0)
+
+        crashed_host = self.host
+        crashed_host.process.kill()
+        crashed_host.process.wait(timeout=5)
+        crashed_host.close()
+        self.host = RuntimeHostProcess(self.root)
+
+        recovered = self.host.request(
+            "task.recoverInterrupted",
+            {
+                "taskId": task_id,
+                "sessionId": session_id,
+                "workspacePath": workspace_path,
+            },
+        )
+        self.assertEqual(recovered["result"]["status"], "task.interrupted")
+        interrupted_event = self.host.wait_event("task.interrupted")
+        self.assertEqual(interrupted_event["payload"]["taskId"], task_id)
+        self.assertTrue(interrupted_event["payload"]["recovered"])
+        self.assertEqual(
+            interrupted_event["payload"]["message"],
+            "Runtime stopped before this task recorded a result. Review the workspace before retrying it.",
+        )
+
+        repeated = self.host.request(
+            "task.recoverInterrupted",
+            {
+                "taskId": task_id,
+                "sessionId": session_id,
+                "workspacePath": workspace_path,
+            },
+        )
+        self.assertEqual(repeated["result"]["status"], "already_terminal")
+
+        restored = self.host.request("workspace.open", {"path": workspace_path})
+        self.assertNotIn("error", restored)
+        session = self.host.request("session.read", {"sessionId": session_id})
+        self.assertNotIn("error", session)
+        terminal_events = [
+            event for event in session["result"]["events"]
+            if event["payload"].get("taskId") == task_id
+            and event["kind"] in {
+                "task.completed", "task.failed", "task.cancelled", "task.interrupted"
+            }
+        ]
+        self.assertEqual([event["kind"] for event in terminal_events], ["task.interrupted"])
 
     def test_repeated_request_id_does_not_start_a_second_test_task(self) -> None:
         first_id = self.host.send("test.start", {}, request_id="stable-test")

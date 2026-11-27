@@ -500,6 +500,82 @@ class RuntimeTests(unittest.TestCase):
         }
         self.assertEqual(assistant_calls, tool_results)
 
+    def test_task_lifecycle_recovery_is_idempotent_and_preserves_terminal_events(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = SessionStore(Path(directory))
+            session_id = store.create()
+            accepted_tasks = [
+                "completed-task",
+                "failed-task",
+                "cancelled-task",
+                "completion-boundary-task",
+                "interrupted-task",
+                "active-task",
+            ]
+            for task_id in accepted_tasks:
+                store.append(
+                    session_id,
+                    "task.accepted",
+                    {"taskId": task_id, "sessionId": session_id, "source": "provider"},
+                )
+                if task_id == "completed-task":
+                    store.append(session_id, "run_completed", {"step": 2})
+                    store.append(session_id, "task.completed", {"taskId": task_id})
+                elif task_id == "failed-task":
+                    store.append(session_id, "task.failed", {"taskId": task_id})
+                elif task_id == "cancelled-task":
+                    store.append(session_id, "task.cancelled", {"taskId": task_id})
+                elif task_id == "completion-boundary-task":
+                    store.append(session_id, "run_completed", {"step": 3})
+                elif task_id == "interrupted-task":
+                    store.append(session_id, "run_started", {"prompt_chars": 8})
+                    store.append(session_id, "model_request", {"step": 1})
+
+            recovered = store.recover_interrupted_tasks(
+                session_id,
+                active_task_ids={"active-task"},
+            )
+            self.assertIsNotNone(recovered)
+            self.assertEqual(
+                [(event["kind"], event["payload"]["taskId"]) for event in recovered or []],
+                [
+                    ("task.completed", "completion-boundary-task"),
+                    ("task.interrupted", "interrupted-task"),
+                ],
+            )
+            self.assertEqual(
+                recovered[0]["payload"],
+                {
+                    "recovered": True,
+                    "recoveryReason": "run_completed_persisted",
+                    "modelSteps": 3,
+                    "taskId": "completion-boundary-task",
+                    "sessionId": session_id,
+                    "source": "provider",
+                },
+            )
+            self.assertEqual(
+                store.recover_interrupted_tasks(
+                    session_id,
+                    active_task_ids={"active-task"},
+                ),
+                [],
+            )
+
+            event_kinds = [event["kind"] for event in store.read_events(session_id)]
+            self.assertEqual(event_kinds.count("task.completed"), 2)
+            self.assertEqual(event_kinds.count("task.failed"), 1)
+            self.assertEqual(event_kinds.count("task.cancelled"), 1)
+            self.assertEqual(event_kinds.count("task.interrupted"), 1)
+            self.assertNotIn(
+                "task.interrupted",
+                [
+                    event["kind"]
+                    for event in store.read_events(session_id)
+                    if event["payload"].get("taskId") == "active-task"
+                ],
+            )
+
     def test_interrupted_tool_call_is_closed_without_reexecution(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             store = SessionStore(Path(directory))

@@ -217,6 +217,121 @@ class SessionStore:
                 records.append(record)
             return records
 
+    def append_task_terminal_if_missing(
+        self, session_id: str, kind: str, payload: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        terminal_kinds = {
+            "task.completed",
+            "task.failed",
+            "task.cancelled",
+            "task.interrupted",
+        }
+        task_id = payload.get("taskId")
+        if kind not in terminal_kinds or not isinstance(task_id, str):
+            raise ValueError("A task terminal event requires a valid kind and task ID")
+
+        process_lock = self.acquire_process_lock(session_id)
+        try:
+            with self._lock:
+                for event in reversed(self.read_events(session_id)):
+                    if (
+                        event.get("kind") in terminal_kinds
+                        and event.get("payload", {}).get("taskId") == task_id
+                    ):
+                        return None
+                return self.append(session_id, kind, payload)
+        finally:
+            process_lock.release()
+
+    def recover_interrupted_tasks(
+        self,
+        session_id: str,
+        *,
+        active_task_ids: set[str] | None = None,
+        task_ids: set[str] | None = None,
+    ) -> list[dict[str, Any]] | None:
+        process_lock = self.try_acquire_process_lock(session_id)
+        if process_lock is None:
+            return None
+
+        active_task_ids = active_task_ids or set()
+        recovered: list[dict[str, Any]] = []
+        terminal_kinds = {
+            "task.completed",
+            "task.failed",
+            "task.cancelled",
+            "task.interrupted",
+        }
+        try:
+            with self._lock:
+                events = self.read_events(session_id)
+                pending: dict[str, dict[str, Any]] = {}
+                current_task_id: str | None = None
+
+                for event in events:
+                    kind = event.get("kind")
+                    payload = event.get("payload", {})
+                    task_id = payload.get("taskId")
+                    if kind == "task.accepted" and isinstance(task_id, str):
+                        pending[task_id] = {
+                            "source": payload.get("source"),
+                            "run_completed": None,
+                        }
+                        current_task_id = task_id
+                    elif kind == "run_completed":
+                        completed_task_id = payload.get("taskId")
+                        if isinstance(completed_task_id, str) and completed_task_id in pending:
+                            pending[completed_task_id]["run_completed"] = payload
+                        elif current_task_id in pending:
+                            pending[current_task_id]["run_completed"] = payload
+                    elif kind in terminal_kinds and isinstance(task_id, str):
+                        pending.pop(task_id, None)
+                        if current_task_id == task_id:
+                            current_task_id = None
+
+                for task_id, task in pending.items():
+                    if task_id in active_task_ids:
+                        continue
+                    if task_ids is not None and task_id not in task_ids:
+                        continue
+
+                    source = task["source"] if isinstance(task["source"], str) else "unknown"
+                    run_completed = task["run_completed"]
+                    if isinstance(run_completed, dict):
+                        details: dict[str, Any] = {
+                            "recovered": True,
+                            "recoveryReason": "run_completed_persisted",
+                        }
+                        step = run_completed.get("step")
+                        if isinstance(step, int) and not isinstance(step, bool) and step >= 0:
+                            details["modelSteps"] = step
+                        kind = "task.completed"
+                    else:
+                        details = {
+                            "recovered": True,
+                            "message": (
+                                "Runtime stopped before this task recorded a result. "
+                                "Review the workspace before retrying it."
+                            ),
+                        }
+                        kind = "task.interrupted"
+
+                    recovered.append(
+                        self.append(
+                            session_id,
+                            kind,
+                            {
+                                **details,
+                                "taskId": task_id,
+                                "sessionId": session_id,
+                                "source": source,
+                            },
+                        )
+                    )
+            return recovered
+        finally:
+            process_lock.release()
+
     def read_messages(self, session_id: str) -> list[Message]:
         return [
             record["payload"]["message"]

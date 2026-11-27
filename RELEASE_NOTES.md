@@ -13,3 +13,8 @@
 - G1 尚未验证，后续阶段 G2–G8 保持 `NOT VERIFIED`。详见 [阶段状态](IMPLEMENTATION_STATUS.md) 和 [路线图](ROADMAP.md)。
 
 本记录不创建安装发行版本，也不宣称性能或真实模型能力结论。
+## 2026-11-27 D2 活动任务恢复进度
+
+- 增加 Runtime Host 崩溃后的任务生命周期核对，受控活动任务恢复为唯一的 `task.interrupted` 终态，并且不会自动重放。
+- NSIS embedded Python Host 协议复核连续两次返回 `already_terminal`。恢复会话和协议证据已存入 `docs/desktop/evidence`。
+- Python 94 项、Desktop 19 项测试和生产构建通过。D2 仍为 `NOT VERIFIED`，真实 Provider 编程任务、真实模型故障恢复及已有模型会话恢复仍未完成。
