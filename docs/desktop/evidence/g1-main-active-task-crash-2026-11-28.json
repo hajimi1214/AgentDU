@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-28",
+  "installDirectory": "C:\\AgentDU\\desktop\\release\\g1-main-reconnect-final-2026-11-28\\artifacts\\nsis-install\\AgentDU Installed With Spaces",
+  "installerSha256": "1f3112b4972fb26f41d99cce9f6ce0413a94db60f73ccb1e3aa6195ca5d55569",
+  "installedExecutableSha256": "2c3f5cc9b939436da25317e6b430caf73261de8c570aaa4d2dc095701eeb90d4",
+  "isolatedUserDataDirectory": "C:\\AgentDU\\desktop\\release\\g1-cancel-fix-2026-11-27\\artifacts\\isolated user data",
+  "termination": {
+    "process": "Electron Main only",
+    "pid": 39636,
+    "processTreeKill": false,
+    "capturedAt": "2026-11-28T00:30:51.3328550+08:00",
+    "priorMainAndHostPidsAbsentAfterRestart": true
+  },
+  "runtimeHost": {
+    "pid": 32684,
+    "exitedAfterMainTermination": true,
+    "processWasAbsentAfterRestart": true
+  },
+  "sessionId": "cc9eef7a42c345e995b4984dbf30cdd5",
+  "initialTask": {
+    "taskId": "b7b0bd26-6552-4cae-b117-7b374cf15f76",
+    "taskAcceptedPersisted": true,
+    "taskAcceptedSequence": 4,
+    "modelRequestPersisted": true,
+    "modelRequestSequence": 6,
+    "interruptedSequence": 7,
+    "interruptedEventCount": 1,
+    "automaticReplay": false
+  },
+  "restart": {
+    "installedApplicationRestarted": true,
+    "originalWorkspaceRestored": true,
+    "originalSessionRestored": true,
+    "uiDisplayedInterruptedEvent": true,
+    "uiDisplayedNoAutomaticReplayNotice": true,
+    "modelRequestsBeforeManualRetry": 1
+  },
+  "manualRetry": {
+    "taskId": "9e0efdf7-f6d1-4895-9aa2-d7ccc13e8073",
+    "distinctTaskId": true,
+    "taskAcceptedSequence": 9,
+    "modelRequestSequence": 11,
+    "cancelRequestedSequence": 12,
+    "cancelledSequence": 13,
+    "terminalStatus": "task.cancelled",
+    "workspaceWriteEvents": 0,
+    "terminalCommandEvents": 0
+  },
+  "stalledStreamCancellation": {
+    "taskCancelRequestedAndCancelledAt": "2026-11-28T00:34:44+08:00",
+    "providerClientDisconnectedAt": "2026-11-28T00:34:45+08:00",
+    "runtimeIpcTimeoutObserved": false,
+    "syntheticProviderRequestCount": 2
+  },
+  "evidence": {
+    "persistedEventSummary": "g1-main-active-task-events-2026-11-28.json",
+    "sessionEventsFile": "controlled main-crash workspace/.agentdu/sessions/cc9eef7a42c345e995b4984dbf30cdd5.jsonl",
+    "providerRequestLog": "synthetic-provider-requests.jsonl",
+    "rawSessionAndProviderLogsAreLocalReleaseArtifacts": true
+  }
+}

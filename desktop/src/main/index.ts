@@ -793,6 +793,12 @@ async function ensureRuntimeCanRestart(): Promise<void> {
   }
 }
 
+async function reopenActiveWorkspace(): Promise<void> {
+  if (!activeWorkspace) return;
+  const opened = await requireHost().request("workspace.open", { path: activeWorkspace });
+  activeWorkspace = typeof opened.path === "string" ? opened.path : activeWorkspace;
+}
+
 async function rollbackProviderStore(previous: ProviderStore, cause: unknown): Promise<never> {
   const originalError = cause instanceof Error ? cause.message : String(cause);
   try {
@@ -801,6 +807,7 @@ async function rollbackProviderStore(previous: ProviderStore, cause: unknown): P
     runtimeHadUnexpectedExit = false;
     await startRuntimeHost();
     if (runtimeStatus.state !== "ready") throw new Error(runtimeStatus.error ?? "Runtime 未能恢复到可用状态。");
+    await reopenActiveWorkspace();
   } catch (recoveryError) {
     const recoveryMessage = recoveryError instanceof Error ? recoveryError.message : String(recoveryError);
     throw new Error(`Provider 更新失败：${originalError}。恢复旧配置也失败：${recoveryMessage}`);
@@ -820,6 +827,7 @@ async function restartProviderRuntime(): Promise<void> {
   runtimeHadUnexpectedExit = false;
   await startRuntimeHost();
   if (runtimeStatus.state !== "ready") throw new Error(runtimeStatus.error ?? "Runtime 重启失败。");
+  await reopenActiveWorkspace();
 }
 
 registerIpcHandlers();

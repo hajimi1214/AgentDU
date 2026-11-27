@@ -1,0 +1,86 @@
+{
+  "date": "2026-11-28",
+  "sessionId": "cc9eef7a42c345e995b4984dbf30cdd5",
+  "rawSessionTranscriptRetainedLocally": true,
+  "promptAndResponseContentIncluded": false,
+  "events": [
+    {
+      "sequence": 1,
+      "occurredAt": "11/27/2026 23:57:45",
+      "kind": "session_created",
+      "taskId": null
+    },
+    {
+      "sequence": 2,
+      "occurredAt": "11/28/2026 00:26:18",
+      "kind": "message",
+      "taskId": null
+    },
+    {
+      "sequence": 3,
+      "occurredAt": "11/28/2026 00:26:18",
+      "kind": "message",
+      "taskId": null
+    },
+    {
+      "sequence": 4,
+      "occurredAt": "11/28/2026 00:26:18",
+      "kind": "task.accepted",
+      "taskId": "b7b0bd26-6552-4cae-b117-7b374cf15f76"
+    },
+    {
+      "sequence": 5,
+      "occurredAt": "11/28/2026 00:26:18",
+      "kind": "run_started",
+      "taskId": "b7b0bd26-6552-4cae-b117-7b374cf15f76"
+    },
+    {
+      "sequence": 6,
+      "occurredAt": "11/28/2026 00:26:18",
+      "kind": "model_request",
+      "taskId": "b7b0bd26-6552-4cae-b117-7b374cf15f76"
+    },
+    {
+      "sequence": 7,
+      "occurredAt": "11/28/2026 00:31:09",
+      "kind": "task.interrupted",
+      "taskId": "b7b0bd26-6552-4cae-b117-7b374cf15f76"
+    },
+    {
+      "sequence": 8,
+      "occurredAt": "11/28/2026 00:33:47",
+      "kind": "message",
+      "taskId": null
+    },
+    {
+      "sequence": 9,
+      "occurredAt": "11/28/2026 00:33:47",
+      "kind": "task.accepted",
+      "taskId": "9e0efdf7-f6d1-4895-9aa2-d7ccc13e8073"
+    },
+    {
+      "sequence": 10,
+      "occurredAt": "11/28/2026 00:33:47",
+      "kind": "run_started",
+      "taskId": "9e0efdf7-f6d1-4895-9aa2-d7ccc13e8073"
+    },
+    {
+      "sequence": 11,
+      "occurredAt": "11/28/2026 00:33:47",
+      "kind": "model_request",
+      "taskId": "9e0efdf7-f6d1-4895-9aa2-d7ccc13e8073"
+    },
+    {
+      "sequence": 12,
+      "occurredAt": "11/28/2026 00:34:44",
+      "kind": "task.cancel_requested",
+      "taskId": "9e0efdf7-f6d1-4895-9aa2-d7ccc13e8073"
+    },
+    {
+      "sequence": 13,
+      "occurredAt": "11/28/2026 00:34:44",
+      "kind": "task.cancelled",
+      "taskId": "9e0efdf7-f6d1-4895-9aa2-d7ccc13e8073"
+    }
+  ]
+}

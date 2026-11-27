@@ -426,10 +426,18 @@ class DesktopHostTests(unittest.TestCase):
         self.assertNotIn("response", completed_record["payload"])
 
     def test_stalled_provider_stream_can_be_cancelled_through_host_protocol(self) -> None:
-        request_received = threading.Event()
+        embedded_python = os.environ.get("AGENTDU_TEST_PYTHON")
+        if embedded_python:
+            self.assertEqual(
+                Path(self.host.process.args[0]).resolve(), Path(embedded_python).resolve()
+            )
+            self.assertEqual(self.host.initial_response["result"]["pythonVersion"], "3.14.10")
+
         release_response = threading.Event()
 
         class Handler(BaseHTTPRequestHandler):
+            protocol_version = "HTTP/1.1"
+
             def do_POST(self) -> None:
                 self.rfile.read(int(self.headers.get("Content-Length", "0")))
                 body = (
@@ -438,10 +446,15 @@ class DesktopHostTests(unittest.TestCase):
                 )
                 self.send_response(200)
                 self.send_header("Content-Type", "text/event-stream")
+                self.send_header("Transfer-Encoding", "chunked")
+                self.send_header("Connection", "close")
                 self.end_headers()
-                self.wfile.write(body)
-                self.wfile.flush()
-                request_received.set()
+                split_at = len(body) // 2
+                for part in (body[:split_at], body[split_at:]):
+                    frame = f"{len(part):X}\r\n".encode("ascii") + part + b"\r\n"
+                    self.wfile.write(frame)
+                    self.wfile.flush()
+                    time.sleep(0.02)
                 release_response.wait(timeout=10)
 
             def log_message(self, format: str, *args: object) -> None:
@@ -472,7 +485,6 @@ class DesktopHostTests(unittest.TestCase):
             self.host.wait_event("task.accepted")
             self.host.wait_event("model_request")
             self.host.wait_event("assistant_delta")
-            self.assertTrue(request_received.is_set())
 
             cancel_request_id = self.host.send("turn.cancel", {"taskId": task_id})
             started_at = time.monotonic()

@@ -1,0 +1,8 @@
+$ python -m unittest tests.test_desktop_host.DesktopHostTests.test_stalled_provider_stream_can_be_cancelled_through_host_protocol -v
+
+test_stalled_provider_stream_can_be_cancelled_through_host_protocol ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.782s
+
+OK

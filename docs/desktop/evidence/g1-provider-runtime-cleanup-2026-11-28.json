@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-28",
+  "environment": "Installed Windows NSIS Electron application using native safeStorage and a loopback-only synthetic provider",
+  "safeStorageAcceptance": "See g1-provider-security-2026-11-27.json for the two-profile lifecycle, default switching, API key update, provider deletion and forced Runtime restart-failure rollback",
+  "rendererBoundary": "See g1-renderer-provider-boundary-2026-11-27.json for Electron Renderer runtime inspection",
+  "thisRun": {
+    "syntheticProfileDeletedThroughProviderUi": true,
+    "providerDeletionStatusDisplayed": true,
+    "providerStoreProfileCount": 0,
+    "runtimeProviderConfigBytes": 0,
+    "runtimeHostRestarted": true,
+    "runtimeHostEnvironmentRead": true,
+    "runtimeProviderCredentialVariableNames": [],
+    "runtimeSyntheticCredentialMarkerMatches": 0,
+    "runtimeEnvironmentVariableCount": 3,
+    "runtimeLogAndSmallUserDataFilesScanned": 84,
+    "syntheticCredentialPlaintextMatches": 0
+  },
+  "cancellation": {
+    "stalledStreamManualRetryTaskId": "9e0efdf7-f6d1-4895-9aa2-d7ccc13e8073",
+    "taskCancelRequestedAndCancelledAt": "2026-11-28T00:34:44+08:00",
+    "endpointClientDisconnectedAt": "2026-11-28T00:34:45+08:00",
+    "targetedHostCancellationTest": "1 passed"
+  },
+  "finalProviderState": {
+    "providerProfiles": 0,
+    "defaultProfile": null,
+    "runtimeConfigBytes": 0,
+    "noRealProviderRequestSent": true
+  },
+  "credentialsWereNotCopiedFromOtherApplications": true
+}
