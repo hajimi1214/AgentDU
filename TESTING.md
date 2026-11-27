@@ -1,21 +1,22 @@
 # AgentDU 测试与验证记录
 
-最后全量 Python 自动化复测：2026-11-27，工作目录 `C:\AgentDU`，分支 `main`，基线 `b1a645e342cb2dca4086313895280628ae82b801`，覆盖活动任务中断恢复。Python 全量 94 项、Desktop Host 20 项、Desktop 19 项测试及生产构建均通过。
+最近全量自动化验证日期为 2026-11-27。被测代码 SHA 为 `aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e`，分支为 `main`。G1 验收矩阵和未完成项见 [G1 验收报告](docs/desktop/g1-closeout-2026-11-27.md)。本轮文件更改是报告与架构文档，测试目标 SHA 保留为实际测试时 HEAD。
 
-## 本次复测
+## 本轮验证
 
 | 验证 | 命令 | 结果 |
 | --- | --- | --- |
 | Python 编译 | `python -m compileall -q src tests` | PASS |
-| Python 自动化测试 | `python -m unittest discover -s tests -v` | PASS，94 项测试，约 95 秒 |
-| Desktop Host 专项测试 | `python -m unittest discover -s tests -p test_desktop_host.py -v` | PASS，20 项测试。全量 Python 测试中包含这些 Host 测试 |
-| Desktop 自动化测试 | `cd desktop; pnpm test` | PASS，4 个测试文件、19 项测试，含 Runtime Host 退出等待回归测试 |
-| Desktop TypeScript 检查与生产构建 | `cd desktop; pnpm run build` | PASS，主进程/Renderer 类型检查、Vite Renderer 构建及 Electron 构建通过 |
-| Windows AppContainer 探针 | `cd desktop; pnpm run verify:appcontainer` | PASS，项目目录读写拒绝、loopback 网络阻断、子进程仍受 AppContainer 限制 |
-| Windows Runtime 和 NSIS 包 | `cd desktop; pnpm run prepare:runtime` 后运行 electron-builder | PASS，embedded Python 与 NSIS 安装器成功构建；2026-11-27 已在含空格隔离目录完成静默安装和 Runtime 启动验证 |
-| Git 差异空白检查 | `git diff --check` | PASS |
+| Python 自动化测试 | `python -m unittest discover -s tests -v` | PASS，96 项，约 94 秒 |
+| Desktop Host 专项测试 | `python -m unittest discover -s tests -p test_desktop_host.py -v` | PASS。22 项专项结果来自 `f5fc15d7b05b7ab4bf76c636fe7385e66c3c6a5c`；`aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e` 上的 96 项全量测试也包含这些 Host 测试 |
+| Desktop 自动化测试 | `cd desktop; pnpm test` | PASS，4 个测试文件、19 项 |
+| Desktop TypeScript 检查与生产构建 | `cd desktop; pnpm run build` | PASS，类型检查、Vite Renderer 构建和 Electron 构建通过 |
+| Windows AppContainer 探针 | `cd desktop; pnpm run verify:appcontainer` | PASS，项目读写限制、loopback 网络限制和子进程限制 |
+| NSIS 构建 | `pnpm run prepare:runtime` 后运行 electron-builder | PASS，Electron 45.4.1 与嵌入式 Python 3.14.10 |
 
-Python 测试包含本地 HTTP Provider 夹具、Runtime、会话、工具、CLI Handoff、编排、MCP、Skills、插件及 Windows AppContainer 集成测试。使用模拟 Provider 的测试不能代表外部 Provider 的真实兼容性、质量、延迟或费用。
+本轮 NSIS 安装器位于 `desktop/release/g1-closeout-aacf3c2-2026-11-27/AgentDU-Setup-0.1.0-x64.exe`，SHA-256 为 `B5446953C8DB27D0B2EC704830C770F0B8644A6C720EEA60D2B60D8355945FC6`。该产物已构建但没有在隔离 Windows profile 中安装和运行。较早的 `c030c6c` 安装版已验证含空格安装路径、受限 PATH 和嵌入式 Python 启动。尝试以 `APPDATA` 隔离 Electron `userData` 失败后，本轮在主进程增加 `AGENTDU_DESKTOP_USER_DATA_DIR` 覆盖并重建安装器。新覆盖已通过 TypeScript/Electron 构建，但尚未在安装版启动验证。详细结果见 G1 报告。
+
+Python 自动化包含本地 HTTP Provider 夹具、Runtime、会话、工具、CLI Handoff、编排、MCP、Skills、插件及 Windows AppContainer 集成测试。模拟 Provider 结果不代表外部 Provider 的兼容性、质量、延迟或费用。
 
 ## 已有桌面运行证据
 

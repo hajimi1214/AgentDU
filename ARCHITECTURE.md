@@ -1,7 +1,7 @@
 # AgentDU 架构基线
 
-最后更新：2026-11-26
-基线：`85789531927c597c75d213b8a7f5fd68cc65d374`
+最后更新：2026-11-27
+代码与自动化验证基线：`aacf3c2a7dc8ba5536079fbc6f848bfffa62b48e`
 
 ## 运行时结构
 
@@ -36,7 +36,8 @@ Electron、Renderer 和 Host 的职责与数据流记录在 [D1 实施记录](do
 - 模型调用经统一 `ChatModel` 契约进入 `src/agentdu/provider.py`。当前实现覆盖 OpenAI-compatible Chat Completions 和 Responses 协议。
 - CLI 已在 `src/agentdu/cli.py` 中创建自主协调器。`src/agentdu/orchestration.py` 管理有界 Worker 调度、依赖、独立会话和结果验证。Worker 工作区由 Git Worktree 相关模块隔离。
 - 桌面 Host 当前通过默认 Runtime 启动桌面任务，限制单个活动任务。桌面 Host 尚未接入 `AutonomousCoordinator`，CLI DAG 调度与固定 Handoff 流程也尚未统一成桌面任务协议。
-- 会话以 JSONL 持久化。恢复路径应根据记录状态继续处理，未确认的副作用操作不能因重启而被自动重放。
+- 会话以 JSONL 持久化。`workspace.open` 会扫描项目会话并恢复没有终态的 Desktop Host 任务。2026-11-27 新增 Host 重启后仅重新打开项目的测试，证明任务发现不依赖 Electron Main 的内存候选表。该证据覆盖 Python Host 与 IPC 路径，尚未覆盖 Electron Main 的安装版异常退出端到端流程。
+- 中断恢复不重放模型请求或工具副作用。损坏会话返回具体读取错误，工作区不可用时返回 `INVALID_WORKSPACE` 并保留原任务状态。
 
 ## 信任与权限边界
 
@@ -51,4 +52,6 @@ Electron、Renderer 和 Host 的职责与数据流记录在 [D1 实施记录](do
 2. 桌面没有接入 CLI 已有的自主多 Agent 调度。
 3. 桌面任务生命周期、恢复、并发与协作事件缺少统一协议。
 4. 真实 Provider 兼容性和真实编程任务尚无本地运行证据。
-5. 当前构建脚本将 Windows 打包输出目录固定为 `desktop/release/d2-final`，复用该路径前需要考虑已有安装测试副本。
+5. 最新验证 SHA 的 NSIS 包已构建，安装版隔离用户数据目录、Provider 持久化和真实模型任务仍待验证。
+
+G2 的 Host 服务边界、任务注册、事件与状态契约见 [G2 Runtime 集成方案](docs/desktop/g2-runtime-integration.md)。该文档是设计方案，Desktop Host 当前仍保持单活动任务限制。
