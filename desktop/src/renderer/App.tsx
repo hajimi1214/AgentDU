@@ -92,6 +92,7 @@ function eventToActivity(item: SessionEvent, index: number): Activity {
 
 export function App() {
   const [status, setStatus] = useState<RuntimeStatus>({ state: "starting" });
+  const [runtimeRestarting, setRuntimeRestarting] = useState(false);
   const [projects, setProjects] = useState<WorkspaceEntry[]>([]);
   const [project, setProject] = useState<Project | null>(null);
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
@@ -489,6 +490,26 @@ export function App() {
     }
   }
 
+  async function restartRuntime() {
+    if (status.state !== "error" || runtimeRestarting) return;
+    setRuntimeRestarting(true);
+    setNotice("正在重新启动 Python Runtime。");
+    try {
+      await window.agentdu.restartRuntime();
+      const nextStatus = await window.agentdu.getStatus();
+      setStatus(nextStatus);
+      if (nextStatus.state !== "ready") {
+        throw new Error(nextStatus.error ?? "Runtime 重启失败。");
+      }
+      if (sessionId) await restoreSession(sessionId);
+      else setNotice(null);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Runtime 重启失败。");
+    } finally {
+      setRuntimeRestarting(false);
+    }
+  }
+
   async function runTerminalCommand() {
     if (!sessionId || !terminalCommand.trim() || terminalBusy || busy || pendingFileWriteId) return;
     setTerminalBusy(true);
@@ -621,7 +642,19 @@ export function App() {
           </div>
         </header>
         {status.recoveredAfterCrash && <div className="recovery-banner"><strong>检测到上次异常关闭</strong><span>未完成操作没有自动重放。请检查会话与项目状态后再继续。</span></div>}
-        {notice && <div className="notice-banner" role="alert">{notice}<button type="button" onClick={() => setNotice(null)}>关闭</button></div>}
+        {status.state === "error" ? (
+          <div className="notice-banner" role="alert">
+            <span>{status.error ?? notice ?? "Python Runtime 异常。"}</span>
+            <button
+              className="secondary-button"
+              type="button"
+              disabled={runtimeRestarting}
+              onClick={() => void restartRuntime()}
+            >
+              {runtimeRestarting ? "正在重启…" : "重新启动 Runtime"}
+            </button>
+          </div>
+        ) : notice && <div className="notice-banner" role="alert">{notice}<button type="button" onClick={() => setNotice(null)}>关闭</button></div>}
         {!project ? <div className="welcome-state">
           <div className="welcome-mark">A</div>
           <h1>开始一个编程任务</h1>

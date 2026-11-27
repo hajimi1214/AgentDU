@@ -87,6 +87,24 @@ describe("Runtime Host process client", () => {
     });
   });
 
+  it("waits for an exited Runtime process before it can be restarted", async () => {
+    const child = new FakeRuntimeChild();
+    const client = createClient(child);
+    await client.initialize();
+
+    const exit = client.waitForExit(100);
+    child.crash(71);
+
+    await expect(exit).resolves.toBe(true);
+  });
+
+  it("keeps waiting when the Runtime process has not exited", async () => {
+    const client = createClient(new FakeRuntimeChild());
+    await client.initialize();
+
+    await expect(client.waitForExit(0)).resolves.toBe(false);
+  });
+
   it("surfaces a Runtime process launch error", async () => {
     const child = new FakeRuntimeChild(false);
     const client = createClient(child);

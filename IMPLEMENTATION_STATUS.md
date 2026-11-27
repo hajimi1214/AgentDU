@@ -8,8 +8,8 @@
 
 | 阶段 | 状态 | 当前证据与未完成项 |
 | --- | --- | --- |
-| G0 仓库审计与基线 | CONDITIONAL PASS | 已检查分支、提交和工作区，审阅 Python Runtime、Provider、CLI 编排、Handoff、桌面 Host、IPC 与已有验收记录。当前复测 Python 92 项、Desktop 17 项测试通过，Desktop 生产构建通过。长期审计随新发现继续更新。 |
-| G1 桌面基础能力稳定化 | NOT VERIFIED | D1/D2 已有实现、自动化和安装版运行证据。安装版在含空格目录启动 Runtime 并恢复最近项目和 Git 状态，且通过 Renderer 按钮取消受控任务，截图已保存。新源码包隔离 profile 恢复了最近项目与空白会话；最新 NSIS 包已安装到含空格隔离目录，并在受限 `PATH` 下启动内置 Python Runtime。真实 Provider 任务、安装版 UI 取消和已有模型对话恢复仍未验收。 |
+| G0 仓库审计与基线 | CONDITIONAL PASS | 已检查分支、提交和工作区，审阅 Python Runtime、Provider、CLI 编排、Handoff、桌面 Host、IPC 与已有验收记录。当前复测 Python 92 项、Desktop 19 项测试通过，Desktop 生产构建通过。长期审计随新发现继续更新。 |
+| G1 桌面基础能力稳定化 | NOT VERIFIED | D1/D2 已有实现、自动化和安装版运行证据。最新 NSIS 包在含空格隔离目录、受限 `PATH` 下使用 embedded Python 启动 Runtime，并通过 Renderer 取消和空闲 Host 异常后的 UI 重启恢复测试，截图、会话 JSONL 和 Host 日志已保存。新源码包隔离 profile 恢复最近项目与空白会话。真实 Provider 任务、活动任务中断恢复和已有模型对话恢复仍未验收。 |
 | G2 多 Agent Runtime 集成 | NOT VERIFIED | CLI 有 `AutonomousCoordinator`。桌面 Host 仍为单活动任务执行路径，尚未接入协调器。 |
 | G3 多 Agent 并行执行 | NOT VERIFIED | CLI 协调器具备并行 Worker、依赖和隔离 Worktree 的实现与测试。桌面多 Agent 运行路径未验收。 |
 | G4 桌面多 Agent 工作台 | NOT VERIFIED | 尚无桌面多 Agent 任务和 Worker 管理完整验收。 |
@@ -33,6 +33,6 @@
 - Electron 窗口已显示 Runtime 在线、最近项目及 Git 状态。2026-11-27 在隔离用户数据目录的含空格源码包副本中，从 Renderer 点击停止按钮取消受控 Runtime 自检，界面收到“任务已取消”，会话 JSONL 记录 task.cancelled 且无 task.completed，证据见 `docs/desktop/evidence/d2-runtime-lifecycle-persist-2026-11-27.jpg`。
 - 已修复 Host 内 Git 状态子进程继承 JSONL 输入管道后挂起的问题。Host 集成测试覆盖非 Git 目录、嵌套 Git 仓库、工作区范围内的已跟踪与未跟踪改动，以及 Git 超时后的文件列表保留。2026-11-27 已在 NSIS 安装版复验最近项目恢复和 Git 状态，并在新源码包隔离 profile 中复验最近项目与空白会话恢复。已有模型对话的安装版恢复仍待验证。
 - 尚未完成安装版中已有模型会话的完整恢复及真实任务恢复流程。
-- 2026-11-27 安装验证包位于忽略目录 `desktop/release/d2-ui-cancel-manual-2026-11-26-60s`，其自检间隔为临时 60 秒版本。当前源码使用 6 秒间隔。新源码 NSIS 包已于 2026-11-27 安装到隔离含空格目录；`PATH` 限制为 `%WINDIR%\System32` 时 Runtime 在线，Python Host 来自安装目录。Renderer UI 取消仍在 unpacked 副本验证，安装版按钮取消复测未完成。
+- 2026-11-27 早期安装验证包位于忽略目录 `desktop/release/d2-ui-cancel-manual-2026-11-26-60s`，其自检间隔为临时 60 秒版本。当前源码使用 6 秒间隔。当前 NSIS 包已于 2026-11-27 安装到隔离含空格目录，且已验证安装版 Renderer 取消和空闲 Host 异常后的 UI 重启恢复。活动模型任务恢复仍待验证。
 
 下一阶段门槛和长期顺序见 [路线图](ROADMAP.md)。

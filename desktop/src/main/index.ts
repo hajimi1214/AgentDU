@@ -647,9 +647,15 @@ function registerIpcHandlers(): void {
     if (runtimeHost && runtimeStatus.state === "ready") {
       throw new Error("Runtime 正在运行。请先正常关闭应用再重启。");
     }
+    if (runtimeHost && !(await runtimeHost.waitForExit())) {
+      throw new Error("旧的 Python Runtime 尚未退出，暂时无法安全重新启动。");
+    }
     runtimeHost = null;
     runtimeHadUnexpectedExit = true;
     await startRuntimeHost();
+    if (runtimeStatus.state !== "ready") {
+      throw new Error(runtimeStatus.error ?? "Runtime 重启失败。");
+    }
   });
   trustedInvoke("desktop.debugCrashRuntime", () => {
     if (app.isPackaged) throw new Error("该诊断操作仅在开发模式可用。");
