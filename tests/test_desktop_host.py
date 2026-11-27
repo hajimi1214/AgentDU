@@ -374,8 +374,8 @@ class DesktopHostTests(unittest.TestCase):
         self.assertTrue(task_id)
         self.host.wait_event("task.accepted")
 
-        first_delta = self.host.wait_event("assistant_delta")
-        second_delta = self.host.wait_event("assistant_delta")
+        first_delta = self.host.wait_event("assistant_delta", timeout=8.0)
+        second_delta = self.host.wait_event("assistant_delta", timeout=8.0)
         self.assertIn("stdio JSONL", first_delta["payload"]["text"])
         self.assertIn("受控 Runtime", second_delta["payload"]["text"])
 
