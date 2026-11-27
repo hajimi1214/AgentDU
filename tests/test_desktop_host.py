@@ -9,6 +9,7 @@ import tempfile
 import threading
 import time
 import unittest
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
@@ -423,6 +424,85 @@ class DesktopHostTests(unittest.TestCase):
         )
         self.assertGreaterEqual(completed_record["payload"]["modelCalls"], 1)
         self.assertNotIn("response", completed_record["payload"])
+
+    def test_stalled_provider_stream_can_be_cancelled_through_host_protocol(self) -> None:
+        request_received = threading.Event()
+        release_response = threading.Event()
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self) -> None:
+                self.rfile.read(int(self.headers.get("Content-Length", "0")))
+                body = (
+                    b'data: {"choices":[{"index":0,"delta":{"content":"ready"},'
+                    b'"finish_reason":null}]}\n\n'
+                )
+                self.send_response(200)
+                self.send_header("Content-Type", "text/event-stream")
+                self.end_headers()
+                self.wfile.write(body)
+                self.wfile.flush()
+                request_received.set()
+                release_response.wait(timeout=10)
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        server_worker = threading.Thread(target=server.serve_forever, daemon=True)
+        server_worker.start()
+        self.host.config_path.write_text(
+            'default_profile = "synthetic"\n\n'
+            '[profiles.synthetic]\n'
+            'model = "cancel-test-model"\n'
+            f'base_url = "http://127.0.0.1:{server.server_port}/v1"\n'
+            'timeout = 30\n',
+            encoding="utf-8",
+        )
+
+        workspace = self.root / "stalled provider workspace"
+        workspace.mkdir()
+        try:
+            self.host.request("workspace.open", {"path": str(workspace)})
+            session_id = self.host.request("session.create")["result"]["sessionId"]
+            started = self.host.request(
+                "turn.start",
+                {"prompt": "Inspect the workspace and report its state.", "sessionId": session_id},
+            )["result"]
+            task_id = started["taskId"]
+            self.host.wait_event("task.accepted")
+            self.host.wait_event("model_request")
+            self.host.wait_event("assistant_delta")
+            self.assertTrue(request_received.is_set())
+
+            cancel_request_id = self.host.send("turn.cancel", {"taskId": task_id})
+            started_at = time.monotonic()
+            cancel_response = self.host.wait_for(
+                lambda item: item.get("type") == "response"
+                and item.get("requestId") == cancel_request_id,
+                timeout=2,
+            )
+            cancel_elapsed = time.monotonic() - started_at
+            self.assertEqual(cancel_response["result"]["status"], "cancelled")
+            self.assertLess(cancel_elapsed, 2)
+            cancelled_event = self.host.wait_event("task.cancelled")
+            self.assertEqual(cancelled_event["payload"]["taskId"], task_id)
+            self.assertFalse(release_response.is_set())
+
+            session_file = next(workspace.rglob(f"{session_id}.jsonl"))
+            persisted_kinds = [
+                json.loads(line)["kind"]
+                for line in session_file.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            self.assertIn("task.accepted", persisted_kinds)
+            self.assertIn("model_request", persisted_kinds)
+            self.assertIn("task.cancel_requested", persisted_kinds)
+            self.assertEqual(persisted_kinds.count("task.cancelled"), 1)
+        finally:
+            release_response.set()
+            server.shutdown()
+            server.server_close()
+            server_worker.join(timeout=2)
 
     def test_runtime_host_restart_recovers_task_when_workspace_is_reopened(self) -> None:
         started = self.host.request("test.start")["result"]

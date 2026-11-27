@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+import select
+import ssl
 import threading
+import time
 import urllib.error
 import urllib.request
 from collections.abc import AsyncIterator, Iterator
@@ -10,6 +13,204 @@ from typing import Any, Sequence
 
 from .models import AssistantMessage, Message, ModelStreamEvent, ToolCall, ToolSchema
 
+
+def _prepare_stream_socket(response: Any) -> Any:
+    response_file = getattr(response, "fp", None)
+    raw_socket = getattr(getattr(response_file, "raw", None), "_sock", None)
+    if raw_socket is None:
+        raise ProviderError("Model stream transport does not expose a cancellable socket")
+    # urllib's blocking line reader cannot observe cancellation during an idle SSE stream.
+    raw_socket.setblocking(False)
+    return raw_socket
+
+
+def _iter_stream_lines(
+    response: Any,
+    raw_socket: Any,
+    cancelled: threading.Event,
+    timeout: float,
+) -> Iterator[bytes]:
+    pending = bytearray()
+    for chunk in _iter_http_body(response, raw_socket, cancelled, timeout):
+        if cancelled.is_set():
+            return
+        pending.extend(chunk)
+        while True:
+            newline = pending.find(b"\n")
+            if newline < 0:
+                break
+            yield bytes(pending[: newline + 1])
+            del pending[: newline + 1]
+    if pending and not cancelled.is_set():
+        yield bytes(pending)
+
+
+def _iter_http_body(
+    response: Any,
+    raw_socket: Any,
+    cancelled: threading.Event,
+    timeout: float,
+) -> Iterator[bytes]:
+    response_file = response.fp
+    raw_chunks = _iter_raw_http_chunks(response_file, raw_socket, cancelled, timeout)
+    if response.chunked:
+        yield from _iter_chunked_body(raw_chunks, cancelled)
+        return
+
+    remaining = response.length
+    if remaining is None:
+        yield from raw_chunks
+        return
+
+    for chunk in raw_chunks:
+        if cancelled.is_set():
+            return
+        body_chunk = chunk[:remaining]
+        if body_chunk:
+            yield body_chunk
+            remaining -= len(body_chunk)
+        if remaining == 0:
+            return
+    if remaining and not cancelled.is_set():
+        raise ProviderError("Model HTTP response ended before its content length")
+
+
+def _iter_raw_http_chunks(
+    response_file: Any,
+    raw_socket: Any,
+    cancelled: threading.Event,
+    timeout: float,
+) -> Iterator[bytes]:
+    deadline = time.monotonic() + timeout
+    while not cancelled.is_set():
+        try:
+            buffered = response_file.peek(1)
+        except ssl.SSLWantReadError:
+            _wait_for_stream_socket(raw_socket, deadline)
+            continue
+        except ssl.SSLWantWriteError:
+            _wait_for_stream_socket(raw_socket, deadline, writable=True)
+            continue
+        except BlockingIOError:
+            _wait_for_stream_socket(raw_socket, deadline)
+            continue
+
+        if buffered:
+            chunk = _read_buffered_stream_chunk(response_file, raw_socket, deadline)
+        else:
+            readable, _, _ = select.select(
+                [raw_socket], [], [], _poll_timeout(deadline)
+            )
+            if not readable:
+                continue
+            chunk = _read_buffered_stream_chunk(response_file, raw_socket, deadline)
+
+        if chunk is None:
+            continue
+        if not chunk:
+            return
+        deadline = time.monotonic() + timeout
+        yield chunk
+
+
+def _read_buffered_stream_chunk(
+    response_file: Any,
+    raw_socket: Any,
+    deadline: float,
+) -> bytes | None:
+    try:
+        return response_file.read1(8192)
+    except ssl.SSLWantReadError:
+        _wait_for_stream_socket(raw_socket, deadline)
+    except ssl.SSLWantWriteError:
+        _wait_for_stream_socket(raw_socket, deadline, writable=True)
+    except BlockingIOError:
+        _wait_for_stream_socket(raw_socket, deadline)
+    return None
+
+
+def _iter_chunked_body(
+    raw_chunks: Iterator[bytes],
+    cancelled: threading.Event,
+) -> Iterator[bytes]:
+    buffered = bytearray()
+
+    def read_line() -> bytes | None:
+        while True:
+            if cancelled.is_set():
+                return None
+            newline = buffered.find(b"\r\n")
+            if newline >= 0:
+                line = bytes(buffered[:newline])
+                del buffered[: newline + 2]
+                return line
+            try:
+                buffered.extend(next(raw_chunks))
+            except StopIteration:
+                if cancelled.is_set():
+                    return None
+                raise ProviderError("Model HTTP chunked response ended unexpectedly")
+
+    def read_exact(length: int) -> bytes | None:
+        while len(buffered) < length:
+            if cancelled.is_set():
+                return None
+            try:
+                buffered.extend(next(raw_chunks))
+            except StopIteration:
+                if cancelled.is_set():
+                    return None
+                raise ProviderError("Model HTTP chunked response ended unexpectedly")
+        result = bytes(buffered[:length])
+        del buffered[:length]
+        return result
+
+    while not cancelled.is_set():
+        size_line = read_line()
+        if size_line is None:
+            return
+        size_text = size_line.split(b";", 1)[0].strip()
+        try:
+            chunk_size = int(size_text, 16)
+        except ValueError as error:
+            raise ProviderError("Model HTTP response contained an invalid chunk size") from error
+        if chunk_size < 0:
+            raise ProviderError("Model HTTP response contained a negative chunk size")
+        if chunk_size == 0:
+            while trailer := read_line():
+                if cancelled.is_set():
+                    return
+            return
+
+        chunk = read_exact(chunk_size)
+        if chunk is None:
+            return
+        delimiter = read_exact(2)
+        if delimiter is None:
+            return
+        if delimiter != b"\r\n":
+            raise ProviderError("Model HTTP response contained an invalid chunk delimiter")
+        yield chunk
+
+
+def _wait_for_stream_socket(
+    raw_socket: Any,
+    deadline: float,
+    *,
+    writable: bool = False,
+) -> None:
+    timeout = _poll_timeout(deadline)
+    if writable:
+        select.select([], [raw_socket], [], timeout)
+    else:
+        select.select([raw_socket], [], [], timeout)
+
+
+def _poll_timeout(deadline: float) -> float:
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise TimeoutError("Model stream read timed out")
+    return min(0.1, remaining)
 
 class ProviderError(RuntimeError):
     def __init__(self, message: str, retryable: bool = False) -> None:
@@ -60,11 +261,10 @@ class OpenAICompatibleModel:
         events: asyncio.Queue[ModelStreamEvent | BaseException | None] = asyncio.Queue()
         loop = asyncio.get_running_loop()
         cancelled = threading.Event()
-        response_ref: dict[str, Any] = {}
 
         def produce() -> None:
             try:
-                for event in self._stream_request(payload, cancelled, response_ref):
+                for event in self._stream_request(payload, cancelled):
                     if not cancelled.is_set():
                         loop.call_soon_threadsafe(events.put_nowait, event)
             except BaseException as error:
@@ -86,9 +286,6 @@ class OpenAICompatibleModel:
                 yield event
         finally:
             cancelled.set()
-            response = response_ref.get("response")
-            if response is not None:
-                response.close()
             if not worker.done():
                 await asyncio.shield(worker)
 
@@ -128,10 +325,9 @@ class OpenAICompatibleModel:
         self,
         payload: dict[str, Any],
         cancelled: threading.Event,
-        response_ref: dict[str, Any],
     ) -> Iterator[ModelStreamEvent]:
         if self.wire_api == "responses":
-            yield from self._stream_responses_request(payload, cancelled, response_ref)
+            yield from self._stream_responses_request(payload, cancelled)
             return
 
         request = urllib.request.Request(
@@ -146,11 +342,11 @@ class OpenAICompatibleModel:
         saw_done = False
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                response_ref["response"] = response
                 if cancelled.is_set():
                     return
+                raw_socket = _prepare_stream_socket(response)
                 data_lines: list[str] = []
-                while line := response.readline():
+                for line in _iter_stream_lines(response, raw_socket, cancelled, self.timeout):
                     if cancelled.is_set():
                         return
                     if line in {b"\n", b"\r\n"}:
@@ -235,7 +431,6 @@ class OpenAICompatibleModel:
         self,
         payload: dict[str, Any],
         cancelled: threading.Event,
-        response_ref: dict[str, Any],
     ) -> Iterator[ModelStreamEvent]:
         request = urllib.request.Request(
             self.endpoint,
@@ -245,11 +440,11 @@ class OpenAICompatibleModel:
         final_message: AssistantMessage | None = None
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                response_ref["response"] = response
                 if cancelled.is_set():
                     return
+                raw_socket = _prepare_stream_socket(response)
                 data_lines: list[str] = []
-                for line in response:
+                for line in _iter_stream_lines(response, raw_socket, cancelled, self.timeout):
                     if cancelled.is_set():
                         return
                     if line in {b"\n", b"\r\n"}:

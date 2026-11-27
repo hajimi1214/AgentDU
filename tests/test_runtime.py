@@ -1231,6 +1231,180 @@ class RuntimeTests(unittest.TestCase):
             server.server_close()
             worker.join(timeout=2)
 
+    def test_openai_stream_decodes_chunked_http_responses(self) -> None:
+        request_received = threading.Event()
+
+        class Handler(BaseHTTPRequestHandler):
+            protocol_version = "HTTP/1.1"
+
+            def do_POST(self) -> None:
+                self.rfile.read(int(self.headers.get("Content-Length", "0")))
+                events = [
+                    {"choices": [{"delta": {"content": "chunked response"}}]},
+                    {"choices": [{"delta": {}, "finish_reason": "stop"}]},
+                ]
+                self.send_response(200)
+                self.send_header("Content-Type", "text/event-stream")
+                self.send_header("Transfer-Encoding", "chunked")
+                self.send_header("Connection", "close")
+                self.end_headers()
+                body_chunks = [
+                    f"data: {json.dumps(event)}\n\n".encode("utf-8")
+                    for event in events
+                ]
+                body_chunks.append(b"data: [DONE]\n\n")
+                for body in body_chunks:
+                    frame = f"{len(body):X}\r\n".encode("ascii") + body + b"\r\n"
+                    self.wfile.write(frame)
+                    self.wfile.flush()
+                self.wfile.write(b"0\r\nX-AgentDU-Test: complete\r\n\r\n")
+                self.wfile.flush()
+                request_received.set()
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        server_worker = threading.Thread(target=server.serve_forever, daemon=True)
+        server_worker.start()
+        model = OpenAICompatibleModel(
+            f"http://127.0.0.1:{server.server_port}/v1", "test-model", timeout=3
+        )
+
+        async def collect_stream() -> list[ModelStreamEvent]:
+            return [event async for event in model.stream([], [])]
+
+        try:
+            events = asyncio.run(asyncio.wait_for(collect_stream(), timeout=5))
+            self.assertTrue(request_received.is_set())
+            self.assertEqual([event.content_delta for event in events[:-1]], ["chunked response"])
+            self.assertEqual(events[-1].message.content, "chunked response")
+        finally:
+            server.shutdown()
+            server.server_close()
+            server_worker.join(timeout=2)
+
+    def test_openai_stream_cancellation_interrupts_stalled_socket_read(self) -> None:
+        release_response = threading.Event()
+
+        class Handler(BaseHTTPRequestHandler):
+            protocol_version = "HTTP/1.1"
+
+            def do_POST(self) -> None:
+                self.rfile.read(int(self.headers.get("Content-Length", "0")))
+                if self.path.endswith("/responses"):
+                    payload = {"type": "response.output_text.delta", "delta": "first chunk"}
+                else:
+                    payload = {"choices": [{"delta": {"content": "first chunk"}}]}
+                body = f"data: {json.dumps(payload)}\n\n".encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/event-stream")
+                self.send_header("Transfer-Encoding", "chunked")
+                self.send_header("Connection", "keep-alive")
+                self.end_headers()
+                split_at = len(body) // 2
+                for part in (body[:split_at], body[split_at:]):
+                    frame = f"{len(part):X}\r\n".encode("ascii") + part + b"\r\n"
+                    self.wfile.write(frame)
+                    self.wfile.flush()
+                    time.sleep(0.02)
+                release_response.wait(timeout=10)
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        server_worker = threading.Thread(target=server.serve_forever, daemon=True)
+        server_worker.start()
+
+        async def cancel_stalled_stream(wire_api: str) -> tuple[bool, float, bool]:
+            first_delta_seen = asyncio.Event()
+            model = OpenAICompatibleModel(
+                f"http://127.0.0.1:{server.server_port}/v1",
+                "test-model",
+                timeout=30,
+                wire_api=wire_api,
+            )
+
+            async def consume_stream() -> None:
+                async for event in model.stream([], []):
+                    if event.content_delta:
+                        first_delta_seen.set()
+
+            consumer = asyncio.create_task(consume_stream())
+            try:
+                await asyncio.wait_for(first_delta_seen.wait(), timeout=5)
+                started_at = time.monotonic()
+                consumer.cancel()
+                done, _ = await asyncio.wait({consumer}, timeout=2)
+                elapsed = time.monotonic() - started_at
+                provider_kept_stream_open = not release_response.is_set()
+                return consumer in done, elapsed, provider_kept_stream_open
+            finally:
+                release_response.set()
+                if not consumer.done():
+                    consumer.cancel()
+                await asyncio.gather(consumer, return_exceptions=True)
+
+        try:
+            for wire_api in ("chat_completions", "responses"):
+                with self.subTest(wire_api=wire_api):
+                    release_response.clear()
+                    completed, elapsed, provider_kept_stream_open = asyncio.run(
+                        cancel_stalled_stream(wire_api)
+                    )
+                    self.assertTrue(completed, "cancelling a stalled SSE stream should finish promptly")
+                    self.assertLess(elapsed, 2, "cancellation should not wait for the provider request timeout")
+                    self.assertTrue(provider_kept_stream_open, "the endpoint must remain stalled during cancellation")
+        finally:
+            release_response.set()
+            server.shutdown()
+            server.server_close()
+            server_worker.join(timeout=2)
+
+    def test_openai_stream_timeout_is_preserved_for_an_idle_sse_response(self) -> None:
+        request_received = threading.Event()
+        release_response = threading.Event()
+
+        class Handler(BaseHTTPRequestHandler):
+            protocol_version = "HTTP/1.1"
+
+            def do_POST(self) -> None:
+                self.rfile.read(int(self.headers.get("Content-Length", "0")))
+                self.send_response(200)
+                self.send_header("Content-Type", "text/event-stream")
+                self.send_header("Transfer-Encoding", "chunked")
+                self.send_header("Connection", "keep-alive")
+                self.end_headers()
+                request_received.set()
+                release_response.wait(timeout=5)
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        server_worker = threading.Thread(target=server.serve_forever, daemon=True)
+        server_worker.start()
+        model = OpenAICompatibleModel(
+            f"http://127.0.0.1:{server.server_port}/v1", "test-model", timeout=0.25
+        )
+
+        async def collect_stream() -> list[ModelStreamEvent]:
+            return [event async for event in model.stream([], [])]
+
+        try:
+            started_at = time.monotonic()
+            with self.assertRaisesRegex(ProviderError, "Model stream read timed out"):
+                asyncio.run(asyncio.wait_for(collect_stream(), timeout=2))
+            elapsed = time.monotonic() - started_at
+            self.assertTrue(request_received.is_set())
+            self.assertLess(elapsed, 1.5)
+        finally:
+            release_response.set()
+            server.shutdown()
+            server.server_close()
+            server_worker.join(timeout=2)
+
     def test_openai_stream_reassembles_fragmented_tool_calls(self) -> None:
         request_received = threading.Event()
 
