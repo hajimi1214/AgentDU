@@ -13,7 +13,7 @@
 | 阶段 | 目标 | 当前状态 | 进入下一步前的主要条件 |
 | --- | --- | --- | --- |
 | G0 | 现有仓库审计与基线 | CONDITIONAL PASS | 已核对 Git 基线、主要 Runtime 与桌面边界，并复跑本地测试。后续审计发现仍需持续记入状态和决策文档。 |
-| G1 | 桌面基础能力稳定化 | NOT VERIFIED | Renderer UI 取消端到端及任务生命周期持久化已验证。新源码包副本在隔离 profile 下恢复最近项目与空白会话。仍需真实 Provider 编程任务、已有模型对话恢复、最新 NSIS 包安装和 Windows 安装版完整工作流。 |
+| G1 | 桌面基础能力稳定化 | NOT VERIFIED | Renderer UI 取消端到端及任务生命周期持久化已验证。新源码包副本在隔离 profile 下恢复最近项目与空白会话；最新 NSIS 包已在含空格隔离目录安装并于受限 `PATH` 下启动。仍需真实 Provider 编程任务、已有模型对话恢复、安装版 UI 取消和完整 Windows 工作流。 |
 | G2 | 多 Agent Runtime 集成 | NOT VERIFIED | 将现有 `AutonomousCoordinator` 接入桌面 Host，定义统一任务生命周期、事件和并发约束。 |
 | G3 | 多 Agent 并行执行 | NOT VERIFIED | 验证独立工作区、依赖调度、结果验证、冲突处理和集成恢复。 |
 | G4 | 桌面多 Agent 工作台 | NOT VERIFIED | 将 Agent、任务、依赖、事件、审批和结果审查接入桌面交互。 |
