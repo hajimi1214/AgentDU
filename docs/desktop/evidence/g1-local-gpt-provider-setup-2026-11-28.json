@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-28",
+  "observedAtLocal": "2026-11-28T09:30:38.7953606+08:00",
+  "repositoryHeadAtObservation": "44f1696d845c3c5371fdc05c9f6d2adbdcb71405",
+  "installedExecutablePath": "C:\\AgentDU\\desktop\\release\\g1-main-reconnect-final-2026-11-28\\artifacts\\nsis-install\\AgentDU Installed With Spaces\\AgentDU.exe",
+  "installedExecutableSha256": "2c3f5cc9b939436da25317e6b430caf73261de8c570aaa4d2dc095701eeb90d4",
+  "processStartedThroughIsolatedLauncher": true,
+  "isolationMarkerPresent": true,
+  "isolatedUserDataDirectory": "C:\\AgentDU\\desktop\\release\\g1-main-reconnect-final-2026-11-28\\artifacts\\gpt-profile-isolated-data",
+  "providerStoreFile": "providers.secure.json",
+  "providerProfileCount": 1,
+  "defaultProfile": "OpenAI",
+  "providerProfile": {
+    "name": "OpenAI",
+    "endpoint": "https://apikey.casa/v1",
+    "modelId": "gpt-6.1-sol",
+    "wireApi": "responses",
+    "credentialAvailable": false,
+    "encryptedCredentialBlobPresent": false
+  },
+  "runtimeProviderConfig": {
+    "path": "runtime/providers.toml",
+    "bytes": 252,
+    "credentialEnvironmentVariableDeclared": true,
+    "credentialValuePresent": false
+  },
+  "uiObservation": {
+    "providerSettingsOpen": true,
+    "profileStatus": "无凭据",
+    "savedStatus": "已保存",
+    "apiKeyFieldWasLeftBlankAtSave": true
+  },
+  "realModelRequestSent": false,
+  "realCodingTaskExecuted": false,
+  "credentialReadFromOrCopiedFromAnotherClient": false,
+  "originalProfileRecheck": {
+    "baselineManifest": "g1-original-profile-manifests-2026-11-28.json",
+    "result": {
+      "baselineFiles": 240,
+      "currentFiles": 240,
+      "baselineDirectories": 119,
+      "currentDirectories": 119,
+      "newFiles": 0,
+      "missingFiles": 0,
+      "fileContentOrSizeDifferences": 0,
+      "fileTimestampDifferences": 0,
+      "newDirectories": 0,
+      "missingDirectories": 0,
+      "directoryTimestampDifferences": 0,
+      "fileReadErrors": 0,
+      "directoryReadErrors": 0
+    }
+  },
+  "g1Status": "BLOCKED",
+  "blocker": "等待用户在 AgentDU Provider 设置中输入真实 API Key 并安全保存",
+  "userActionRequired": "在当前 AgentDU 窗口填写 API Key 并点击安全保存"
+}
