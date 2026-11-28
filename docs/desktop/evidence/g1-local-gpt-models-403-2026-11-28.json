@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-28",
+  "observedAtLocal": "2026-11-28T10:58:48.2945591+08:00",
+  "repositoryHeadAtObservation": "38a560d94c79507b82cbcb66365cbb4b580f9720",
+  "installedExecutablePath": "C:\\AgentDU\\desktop\\release\\g1-main-reconnect-final-2026-11-28\\artifacts\\nsis-install\\AgentDU Installed With Spaces\\AgentDU.exe",
+  "providerProfile": {
+    "name": "OpenAI",
+    "endpoint": "https://apikey.casa/v1",
+    "modelId": "gpt-6.2-astra",
+    "wireApi": "responses",
+    "credentialAvailable": true,
+    "credentialValueRecorded": false
+  },
+  "connectivityTest": {
+    "triggeredThroughInstalledUi": true,
+    "method": "GET",
+    "path": "/v1/models",
+    "statusCode": 403,
+    "reachable": false,
+    "responseBodyRecorded": false
+  },
+  "isolatedWorkspace": {
+    "path": "C:\\AgentDU\\desktop\\release\\g1-real-provider-workspace-2026-11-28",
+    "gitBaselineCommit": "da89d46d4401f7a16e3395b1a61946df7c9db9a5",
+    "workingTreeCleanBeforeTask": true,
+    "copiedSourceHashesMatchOriginal": true,
+    "sourceFiles": [
+      {
+        "path": "02、蜂鸟调试器烧录软件/Hummingbird-M-Production-Tool/py/mv_ads_downloader.py",
+        "sha256": "64A6AC0625ACC2C54E47FC55951C1DDD73D4CC89371F9C99851B934DE65ACEE0"
+      },
+      {
+        "path": "02、蜂鸟调试器烧录软件/Hummingbird-M-Production-Tool/py/O26_Downloader.py",
+        "sha256": "B9ABAAB29A8C01AD7BBEDDAD834169FC411A9D4DDB8044AF67100026775C8B4D"
+      }
+    ]
+  },
+  "realModelRequestSent": false,
+  "realCodingTaskExecuted": false,
+  "sourceProjectOpenedInAgentDU": false,
+  "credentialReadOrCopied": false,
+  "g1Status": "BLOCKED",
+  "blocker": "Saved Provider credentials are present, but the configured /v1/models endpoint returned HTTP 403. No real Responses API coding task has been verified."
+}
