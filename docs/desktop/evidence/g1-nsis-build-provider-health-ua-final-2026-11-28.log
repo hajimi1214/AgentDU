@@ -1,0 +1,21 @@
+  • electron-builder  version=26.18.0 os=10.0.26200
+  • loaded configuration  file=package.json ("build" field)
+  • author is missed in the package.json  appPackageFile=C:\AgentDU\desktop\package.json
+  • detected workspace root for project using lock file  pm=pnpm config=undefined resolved=C:\AgentDU\desktop projectDir=C:\AgentDU\desktop
+  • executing @electron/rebuild  electronVersion=45.4.1 arch=x64 buildFromSource=false workspaceRoot=C:\AgentDU\desktop projectDir=./ appDir=./
+  • installing native dependencies  arch=x64
+  • completed installing native dependencies
+  • packaging       platform=win32 arch=x64 electron=45.4.1 appOutDir=release\g1-provider-health-ua-final-2026-11-28\win-unpacked
+  • using custom unpacked Electron distribution  electronDist=node_modules\electron\dist
+  • copying unpacked Electron  source=C:\AgentDU\desktop\node_modules\electron\dist destination=C:\AgentDU\desktop\release\g1-provider-health-ua-final-2026-11-28\win-unpacked
+  • searching for node modules  pm=pnpm searchDir=C:\AgentDU\desktop
+  • updating asar integrity executable resource  executablePath=release\g1-provider-health-ua-final-2026-11-28\win-unpacked\AgentDU.exe
+  • no code signing certificate configured, signing is skipped  path=release\g1-provider-health-ua-final-2026-11-28\win-unpacked\resources\agentdu-runtime\python\python.exe
+  • no code signing certificate configured, signing is skipped  path=release\g1-provider-health-ua-final-2026-11-28\win-unpacked\resources\agentdu-runtime\python\pythonw.exe
+  • default Electron icon is used  reason=application icon is not set
+  • no code signing certificate configured, signing is skipped  path=release\g1-provider-health-ua-final-2026-11-28\win-unpacked\AgentDU.exe
+  • building        target=nsis file=release\g1-provider-health-ua-final-2026-11-28\AgentDU-Setup-0.1.0-x64.exe archs=x64 oneClick=false perMachine=false
+  • no code signing certificate configured, signing is skipped  path=C:\Users\ASUS\AppData\Local\Temp\t-Z4Tdqu\elevate-staging-2\resources\elevate.exe
+  • no code signing certificate configured, signing is skipped  path=release\g1-provider-health-ua-final-2026-11-28\AgentDU-Setup-0.1.0-x64.__uninstaller.exe
+  • no code signing certificate configured, signing is skipped  path=release\g1-provider-health-ua-final-2026-11-28\AgentDU-Setup-0.1.0-x64.exe
+  • building block map  blockMapFile=release\g1-provider-health-ua-final-2026-11-28\AgentDU-Setup-0.1.0-x64.exe.blockmap

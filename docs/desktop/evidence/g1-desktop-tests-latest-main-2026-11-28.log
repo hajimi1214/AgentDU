@@ -1,0 +1,12 @@
+$ vitest run
+
+ RUN  v4.1.12 C:/AgentDU/desktop
+
+
+ Test Files  4 passed (4)
+      Tests  19 passed (19)
+   Start at  16:55:39
+   Duration  231ms (transform 166ms, setup 0ms, import 229ms, tests 24ms, environment 0ms)
+
+
+Exit code: 0

@@ -4,7 +4,7 @@ import { access, appendFile, mkdir, readFile, rename, stat, unlink, writeFile } 
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { RuntimeHostClient } from "./host-client";
-import type { EventMessage, RuntimeStatus } from "../shared/protocol";
+import type { EventMessage, ProviderTestFailureKind, ProviderTestResult, RuntimeStatus } from "../shared/protocol";
 
 // Packaged acceptance runs can isolate app data without borrowing the user's profile.
 const isolatedUserDataDirectory = process.env.AGENTDU_DESKTOP_USER_DATA_DIR?.trim();
@@ -607,7 +607,27 @@ function registerIpcHandlers(): void {
   trustedInvoke("desktop.testProvider", async (_event, payload) => {
     if (!isRecord(payload) || typeof payload.name !== "string") throw new Error("Provider 档案名称无效。");
     const result = await requireHost().request("provider.test", { profile: payload.name }, 130_000);
-    return { reachable: result.reachable === true, model: typeof result.model === "string" ? result.model : "", statusCode: typeof result.statusCode === "number" ? result.statusCode : null };
+    const failureKinds: ProviderTestFailureKind[] = [
+      "authentication_failed",
+      "access_denied",
+      "model_or_endpoint_not_found",
+      "rate_limited",
+      "provider_unavailable",
+      "http_error",
+      "network_error",
+      "invalid_response",
+      "empty_response",
+    ];
+    const response: ProviderTestResult = {
+      reachable: result.reachable === true,
+      model: typeof result.model === "string" ? result.model : "",
+      checkType: result.checkType === "responses" ? "responses" : "chat_completions",
+      statusCode: typeof result.statusCode === "number" ? result.statusCode : null,
+      failureKind: failureKinds.includes(result.failureKind as ProviderTestFailureKind)
+        ? (result.failureKind as ProviderTestFailureKind)
+        : null,
+    };
+    return response;
   });
   trustedInvoke("desktop.listSessions", async () => {
     const result = await requireHost().request("sessions.list", {});

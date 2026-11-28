@@ -1,0 +1,3 @@
+$ tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.electron.json
+
+Exit code: 0

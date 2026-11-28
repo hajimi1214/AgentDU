@@ -1,0 +1,2 @@
+$ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/prepare-runtime.ps1
+Prepared isolated AgentDU Runtime with Python 3.14.10 (90905e64a840557d8c1bc4f5b74db3d7ee85e3ffb217611cac1c7813acea4159).

@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-28",
+  "sourceHeadBeforeCommit": "dede56a12e48758a858f625a99f2903385551bed",
+  "sourceWorkingTreeChangesIncluded": true,
+  "build": {
+    "runtimePythonVersion": "3.14.10",
+    "runtimeProviderSourceSha256": "27DFE81FF0D421A92A04716BE07F48B654ACC611CCBA1AE11EC57154674EFC97",
+    "installerPath": "desktop/release/g1-latest-main-2026-11-28/AgentDU-Setup-0.1.0-x64.exe",
+    "installerSha256": "65C2043692C0982AAFE5B8B0226AFB525F8A12609D4619466FE2CEFFF7A20336"
+  },
+  "nsisInstall": {
+    "exitCode": 0,
+    "installPath": "desktop/release/g1-latest-main-2026-11-28/artifacts/nsis-install/AgentDU G1 Latest With Spaces",
+    "pathContainsSpaces": true,
+    "executableSha256": "CDC0D1BE9BAE0C313815EB78DC452B6B4F7B9ACBB782B70F024773AE67973774",
+    "asarSha256": "F67CF1E0E3D9B212C9B54E56348BB357085408F70FDD365345322C3A1FD88065",
+    "providerModuleSha256": "27DFE81FF0D421A92A04716BE07F48B654ACC611CCBA1AE11EC57154674EFC97"
+  },
+  "isolatedLaunch": {
+    "launcher": "desktop/scripts/run-isolated-acceptance.ps1",
+    "userDataDirectory": "desktop/release/g1-latest-main-2026-11-28/artifacts/g1-latest-main-user-data",
+    "originalUserProfileUsed": false,
+    "pathRestrictedToWindowsSystem32": true,
+    "mainProcessId": 26948,
+    "runtimeHostProcessId": 52896,
+    "runtimeExecutable": "resources/agentdu-runtime/python/python.exe",
+    "runtimeDataDirectory": "desktop/release/g1-latest-main-2026-11-28/artifacts/g1-latest-main-user-data/runtime",
+    "runtimeStarted": true,
+    "providerProfilesAtFirstLaunch": 0
+  },
+  "binaryEquivalence": {
+    "installedAndUnpackedExecutableHashesMatch": true,
+    "installedAndUnpackedAsarHashesMatch": true,
+    "unpackedExecutablePath": "desktop/release/g1-latest-main-2026-11-28/win-unpacked/AgentDU.exe"
+  },
+  "notYetVerified": [
+    "The latest NSIS install has not yet completed a close-and-restart cycle.",
+    "The latest NSIS install has not yet restored a recent project from its isolated profile."
+  ],
+  "result": "IN_PROGRESS"
+}

@@ -51,6 +51,25 @@ export type RuntimeStatus = {
   workspace?: string | null;
 };
 
+export type ProviderTestFailureKind =
+  | "authentication_failed"
+  | "access_denied"
+  | "model_or_endpoint_not_found"
+  | "rate_limited"
+  | "provider_unavailable"
+  | "http_error"
+  | "network_error"
+  | "invalid_response"
+  | "empty_response";
+
+export type ProviderTestResult = {
+  reachable: boolean;
+  model: string;
+  checkType: "chat_completions" | "responses";
+  statusCode: number | null;
+  failureKind: ProviderTestFailureKind | null;
+};
+
 export type WorkspaceEntry = { path: string; name: string; openedAt?: string };
 export type WorkspaceFile = { path: string; size: number };
 export type SessionSummary = {

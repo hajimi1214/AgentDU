@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import type { EventMessage, ProviderProfileInput, RuntimeStatus, SessionEvent, SessionMessage, SessionSummary, WorkspaceEntry, WorkspaceFile } from "../shared/protocol";
+import type { EventMessage, ProviderProfileInput, ProviderTestResult, RuntimeStatus, SessionEvent, SessionMessage, SessionSummary, WorkspaceEntry, WorkspaceFile } from "../shared/protocol";
 
 export type AgentDUDesktopApi = {
   getStatus(): Promise<RuntimeStatus>;
@@ -14,7 +14,7 @@ export type AgentDUDesktopApi = {
   getGitDiff(path?: string, staged?: boolean): Promise<string>;
   saveProviderProfile(profile: ProviderProfileInput): Promise<RuntimeStatus["providerProfiles"]>;
   deleteProviderProfile(name: string): Promise<RuntimeStatus["providerProfiles"]>;
-  testProvider(name: string): Promise<{ reachable: boolean; model: string; statusCode: number | null }>;
+  testProvider(name: string): Promise<ProviderTestResult>;
   listSessions(): Promise<SessionSummary[]>;
   createSession(): Promise<string>;
   readSession(sessionId: string): Promise<{ sessionId: string; events: SessionEvent[]; messages: SessionMessage[] }>;

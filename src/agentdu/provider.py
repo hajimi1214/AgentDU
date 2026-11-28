@@ -218,6 +218,9 @@ class ProviderError(RuntimeError):
         self.retryable = retryable
 
 
+AGENTDU_USER_AGENT = "AgentDU/0.6.0"
+
+
 class OpenAICompatibleModel:
     """Chat Completions adapter for OpenAI-compatible hosted and local APIs."""
 
@@ -391,15 +394,19 @@ class OpenAICompatibleModel:
                     elif final_data.strip():
                         raise ProviderError("SSE stream ended before its event delimiter")
         except urllib.error.HTTPError as error:
-            detail = error.read(4096).decode("utf-8", errors="replace")
+            error.close()
             raise ProviderError(
-                f"Model API returned HTTP {error.code}: {detail}",
+                f"Model API returned HTTP {error.code}",
                 retryable=error.code == 429 or error.code >= 500,
             ) from error
-        except (urllib.error.URLError, TimeoutError, OSError) as error:
+        except TimeoutError as error:
             if cancelled.is_set():
                 return
-            raise ProviderError(f"Model stream failed: {error}", retryable=True) from error
+            raise ProviderError("Model stream read timed out", retryable=True) from error
+        except (urllib.error.URLError, OSError) as error:
+            if cancelled.is_set():
+                return
+            raise ProviderError("Model stream failed", retryable=True) from error
 
         if cancelled.is_set():
             return
@@ -464,15 +471,19 @@ class OpenAICompatibleModel:
                     if message is not None:
                         final_message = message
         except urllib.error.HTTPError as error:
-            detail = error.read(4096).decode("utf-8", errors="replace")
+            error.close()
             raise ProviderError(
-                f"Model API returned HTTP {error.code}: {detail}",
+                f"Model API returned HTTP {error.code}",
                 retryable=error.code == 429 or error.code >= 500,
             ) from error
-        except (urllib.error.URLError, TimeoutError, OSError) as error:
+        except TimeoutError as error:
             if cancelled.is_set():
                 return
-            raise ProviderError(f"Model stream failed: {error}", retryable=True) from error
+            raise ProviderError("Model stream read timed out", retryable=True) from error
+        except (urllib.error.URLError, OSError) as error:
+            if cancelled.is_set():
+                return
+            raise ProviderError("Model stream failed", retryable=True) from error
 
         if cancelled.is_set():
             return
@@ -509,7 +520,9 @@ class OpenAICompatibleModel:
                 error = response.get("error") if isinstance(response, dict) else None
             message = error.get("message") if isinstance(error, dict) else None
             raise ProviderError(
-                message if isinstance(message, str) else "Responses API reported a failed response"
+                self._redact_api_key(message)
+                if isinstance(message, str)
+                else "Responses API reported a failed response"
             )
         if event_type in {"response.completed", "response.incomplete"}:
             response = event.get("response")
@@ -520,7 +533,10 @@ class OpenAICompatibleModel:
 
     def _request(self, payload: dict[str, Any]) -> AssistantMessage:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": AGENTDU_USER_AGENT,
+        }
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
         request = urllib.request.Request(self.endpoint, data=body, headers=headers)
@@ -528,17 +544,24 @@ class OpenAICompatibleModel:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
                 result = json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as error:
-            detail = error.read(4096).decode("utf-8", errors="replace")
+            error.close()
             raise ProviderError(
-                f"Model API returned HTTP {error.code}: {detail}",
+                f"Model API returned HTTP {error.code}",
                 retryable=error.code == 429 or error.code >= 500,
             ) from error
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
-            raise ProviderError(f"Model request failed: {error}", retryable=True) from error
+        except TimeoutError as error:
+            raise ProviderError("Model request timed out", retryable=True) from error
+        except (urllib.error.URLError, json.JSONDecodeError) as error:
+            raise ProviderError("Model request failed", retryable=True) from error
 
         if self.wire_api == "responses":
             try:
                 return _parse_responses_message(result)
+            except ProviderError as error:
+                raise ProviderError(
+                    self._redact_api_key(str(error)),
+                    retryable=error.retryable,
+                ) from error
             except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError) as error:
                 raise ProviderError(f"Responses API returned an invalid response: {error}") from error
 
@@ -570,25 +593,116 @@ class OpenAICompatibleModel:
             raise ProviderError(f"Model API returned an invalid chat completion: {error}") from error
 
     def _headers(self) -> dict[str, str]:
-        headers = {"Content-Type": "application/json", "Accept": "text/event-stream"}
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "text/event-stream",
+            "User-Agent": AGENTDU_USER_AGENT,
+        }
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
         return headers
 
+    def _redact_api_key(self, message: str) -> str:
+        if self.api_key:
+            return message.replace(self.api_key, "[REDACTED]")
+        return message
+
     async def test_connection(self) -> dict[str, Any]:
-        def request_models() -> dict[str, Any]:
-            suffix = "/responses" if self.wire_api == "responses" else "/chat/completions"
-            models_endpoint = self.endpoint.removesuffix(suffix) + "/models"
-            request = urllib.request.Request(models_endpoint, headers=self._headers(), method="GET")
+        def request_model() -> dict[str, Any]:
+            if self.wire_api == "responses":
+                payload = {
+                    "model": self.model,
+                    "input": [{"role": "user", "content": "Reply with OK."}],
+                    "max_output_tokens": 8,
+                }
+            else:
+                payload = {
+                    "model": self.model,
+                    "messages": [{"role": "user", "content": "Reply with OK."}],
+                    "temperature": 0,
+                    "max_tokens": 8,
+                }
+            headers = self._headers()
+            headers["Accept"] = "application/json"
+            request = urllib.request.Request(
+                self.endpoint,
+                data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+                headers=headers,
+                method="POST",
+            )
             try:
                 with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                    return {"reachable": 200 <= response.status < 300, "statusCode": response.status}
+                    status_code = response.status
+                    response_body = response.read(262_145)
             except urllib.error.HTTPError as error:
-                return {"reachable": False, "statusCode": error.code}
+                status_code = error.code
+                error.close()
+                failure_kinds = {
+                    401: "authentication_failed",
+                    403: "access_denied",
+                    404: "model_or_endpoint_not_found",
+                    429: "rate_limited",
+                }
+                failure_kind = failure_kinds.get(
+                    error.code,
+                    "provider_unavailable" if error.code >= 500 else "http_error",
+                )
+                return {
+                    "reachable": False,
+                    "statusCode": status_code,
+                    "checkType": self.wire_api,
+                    "failureKind": failure_kind,
+                }
             except (urllib.error.URLError, TimeoutError, OSError):
-                return {"reachable": False, "statusCode": None}
+                return {
+                    "reachable": False,
+                    "statusCode": None,
+                    "checkType": self.wire_api,
+                    "failureKind": "network_error",
+                }
 
-        return await asyncio.to_thread(request_models)
+            if len(response_body) > 262_144:
+                return {
+                    "reachable": False,
+                    "statusCode": status_code,
+                    "checkType": self.wire_api,
+                    "failureKind": "invalid_response",
+                }
+
+            try:
+                result = json.loads(response_body.decode("utf-8"))
+                if self.wire_api == "responses":
+                    if not isinstance(result, dict):
+                        raise TypeError("response body must be an object")
+                    message = _parse_responses_message(result)
+                    has_text = isinstance(message.content, str) and bool(message.content.strip())
+                else:
+                    if not isinstance(result, dict):
+                        raise TypeError("response body must be an object")
+                    choices = result.get("choices")
+                    if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+                        raise TypeError("response must contain a choice")
+                    response_message = choices[0].get("message")
+                    if not isinstance(response_message, dict):
+                        raise TypeError("response choice must contain a message")
+                    content = response_message.get("content")
+                    has_text = isinstance(content, str) and bool(content.strip())
+            except (UnicodeDecodeError, json.JSONDecodeError, KeyError, IndexError, TypeError, ValueError, ProviderError):
+                return {
+                    "reachable": False,
+                    "statusCode": status_code,
+                    "checkType": self.wire_api,
+                    "failureKind": "invalid_response",
+                }
+
+            return {
+                "reachable": has_text,
+                "statusCode": status_code,
+                "checkType": self.wire_api,
+                "failureKind": None if has_text else "empty_response",
+            }
+
+        return await asyncio.to_thread(request_model)
 
     @staticmethod
     def _endpoint(base_url: str, wire_api: str = "chat_completions") -> str:

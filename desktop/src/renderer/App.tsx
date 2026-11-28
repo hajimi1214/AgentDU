@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type {
   PermissionRequestEvent,
+  ProviderTestFailureKind,
   ProviderProfileInput,
   RuntimeStatus,
   SessionEvent,
@@ -33,6 +34,18 @@ const RUNTIME_CHECK_STATUS_LABELS: Record<RuntimeCheckStatus, string> = {
   completed: "运行完成",
   cancelled: "已取消",
   failed: "运行失败",
+};
+
+const PROVIDER_TEST_FAILURE_LABELS: Record<ProviderTestFailureKind, string> = {
+  authentication_failed: "认证失败，请检查已保存的凭据。",
+  access_denied: "服务端拒绝访问，请检查账户权限、IP 限制或网关策略。",
+  model_or_endpoint_not_found: "模型或 API 路径不存在，请检查 Model ID 和 Endpoint。",
+  rate_limited: "服务端触发速率限制。",
+  provider_unavailable: "服务端暂时不可用。",
+  http_error: "服务端返回 HTTP 错误。",
+  network_error: "请求未能连接到服务端。",
+  invalid_response: "服务端响应格式无效，或未完成模型请求。",
+  empty_response: "模型请求已响应，但没有返回文本。",
 };
 
 const EVENT_LABELS: Record<string, string> = {
@@ -575,7 +588,13 @@ export function App() {
     setProviderTest(null);
     try {
       const result = await window.agentdu.testProvider(currentProfile.name);
-      setProviderTest(result.reachable ? `连接成功，HTTP ${result.statusCode}。已验证 /models 端点可访问，模型工具能力尚未验证。` : `连接失败${result.statusCode ? `，HTTP ${result.statusCode}` : ""}。`);
+      const protocolName = result.checkType === "responses" ? "Responses API" : "Chat Completions";
+      if (result.reachable) {
+        setProviderTest(`模型请求成功，HTTP ${result.statusCode}。已完成一次无工具的 ${protocolName} 请求，工具调用能力尚未验证。`);
+      } else {
+        const failure = result.failureKind ? PROVIDER_TEST_FAILURE_LABELS[result.failureKind] : "模型请求未成功。";
+        setProviderTest(`模型请求失败${result.statusCode ? `，HTTP ${result.statusCode}` : ""}。${failure}`);
+      }
     } catch (error) {
       setProviderTest(error instanceof Error ? error.message : "Provider 连通性测试失败。");
     } finally {
@@ -768,7 +787,7 @@ export function App() {
       {showProviderSettings && <div className="modal-backdrop" role="presentation"><section className="provider-modal" role="dialog" aria-modal="true" aria-labelledby="provider-title"><header><div><div className="panel-kicker">MODEL PROFILES</div><h2 id="provider-title">模型与 Provider</h2></div><button className="icon-button" type="button" onClick={() => setShowProviderSettings(false)} aria-label="关闭">×</button></header>
         <div className="provider-profile-list">{profiles.map((profile) => <button type="button" className={`provider-profile-row ${providerName === profile.name ? "selected" : ""}`} key={profile.name} onClick={() => { setProviderName(profile.name); setSelectedProfile(profile.name); setProviderBaseUrl(profile.baseUrl ?? "https://api.openai.com/v1"); setProviderModel(profile.model ?? ""); setProviderWireApi(profile.wireApi ?? "chat_completions"); setMakeDefault(profile.default); setProviderTest(null); }}><span><strong>{profile.name}</strong><small>{profile.baseUrl ?? "配置文件 Provider"} · {profile.model}</small></span><span>{profile.credentialAvailable ? "凭据可用" : "无凭据"}{profile.default ? " · 默认" : ""}</span></button>)}</div>
         <div className="provider-form"><label>档案名称<input value={providerName} onChange={(event) => setProviderName(event.target.value)} placeholder="例如 openai-main" /></label><label>Endpoint<input value={providerBaseUrl} onChange={(event) => setProviderBaseUrl(event.target.value)} placeholder="https://api.example.com/v1" /></label><label>Model ID<input value={providerModel} onChange={(event) => setProviderModel(event.target.value)} placeholder="模型 ID" /></label><label>API 协议<select value={providerWireApi} onChange={(event) => setProviderWireApi(event.target.value as "chat_completions" | "responses")}><option value="chat_completions">Chat Completions</option><option value="responses">Responses API</option></select></label><label>API Key<input type="password" autoComplete="new-password" value={providerKey} onChange={(event) => setProviderKey(event.target.value)} placeholder={profiles.find((item) => item.name === providerName)?.credentialAvailable ? "已保存凭据，留空则保留" : "输入 API Key"} /></label><label className="default-profile"><input type="checkbox" checked={makeDefault} onChange={(event) => setMakeDefault(event.target.checked)} />设为默认模型档案</label>
-          {profiles.find((profile) => profile.name === providerName) && <div className="provider-capability-note"><div>协议：{profiles.find((profile) => profile.name === providerName)?.protocol ?? "未确认"}</div><div>流式输出：{profiles.find((profile) => profile.name === providerName)?.streaming ? "已配置" : "未配置"}</div><div>配置声明能力：{profiles.find((profile) => profile.name === providerName)?.configuredCapabilities?.join("、") || "未声明"}</div></div>}<div className="provider-capability-note">连通性测试只验证 /models 响应。配置声明不代表模型已具备工具调用等能力，实际能力仍需通过真实任务验证。</div><div className="provider-actions">{providerName && profiles.some((profile) => profile.name === providerName) && <button className="secondary-button" type="button" disabled={providerBusy} onClick={() => void deleteProvider()}>删除档案</button>}<button className="secondary-button" type="button" disabled={!currentProfile || providerBusy} onClick={() => void testProvider()}>测试连通性</button><button className="primary-button" type="button" disabled={providerBusy || !providerName.trim() || !providerModel.trim()} onClick={() => void saveProvider()}>{providerBusy ? "处理中…" : "安全保存"}</button></div>{providerTest && <div className="provider-result" role="status">{providerTest}</div>}
+          {profiles.find((profile) => profile.name === providerName) && <div className="provider-capability-note"><div>协议：{profiles.find((profile) => profile.name === providerName)?.protocol ?? "未确认"}</div><div>流式输出：{profiles.find((profile) => profile.name === providerName)?.streaming ? "已配置" : "未配置"}</div><div>配置声明能力：{profiles.find((profile) => profile.name === providerName)?.configuredCapabilities?.join("、") || "未声明"}</div></div>}<div className="provider-capability-note">连通性测试会发送一次简短的无工具模型请求，可能产生少量用量，不验证工具调用能力。</div><div className="provider-actions">{providerName && profiles.some((profile) => profile.name === providerName) && <button className="secondary-button" type="button" disabled={providerBusy} onClick={() => void deleteProvider()}>删除档案</button>}<button className="secondary-button" type="button" disabled={!currentProfile || providerBusy} onClick={() => void testProvider()}>测试连通性</button><button className="primary-button" type="button" disabled={providerBusy || !providerName.trim() || !providerModel.trim()} onClick={() => void saveProvider()}>{providerBusy ? "处理中…" : "安全保存"}</button></div>{providerTest && <div className="provider-result" role="status">{providerTest}</div>}
         </div></section></div>}
     </div>
   );

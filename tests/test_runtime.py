@@ -836,10 +836,12 @@ class RuntimeTests(unittest.TestCase):
 
     def test_openai_compatible_http_tool_round_trip(self) -> None:
         state: dict[str, list[dict[str, object]]] = {"requests": []}
+        user_agents: list[str | None] = []
 
         class Handler(BaseHTTPRequestHandler):
             def do_POST(self) -> None:
                 size = int(self.headers["Content-Length"])
+                user_agents.append(self.headers.get("User-Agent"))
                 state["requests"].append(json.loads(self.rfile.read(size)))
                 if len(state["requests"]) == 1:
                     message = {
@@ -893,9 +895,161 @@ class RuntimeTests(unittest.TestCase):
                 self.assertEqual(result.content, "HTTP flow complete.")
                 self.assertEqual((root / "http.txt").read_text(encoding="utf-8"), "via http")
                 self.assertEqual(len(state["requests"]), 2)
+                self.assertEqual(user_agents, ["AgentDU/0.6.0", "AgentDU/0.6.0"])
                 sent_messages = state["requests"][1]["messages"]
                 self.assertEqual(sent_messages[-1]["role"], "tool")
                 self.assertEqual(sent_messages[-1]["tool_call_id"], "http-call-1")
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=2)
+
+    def test_provider_connection_check_calls_the_configured_model_protocol(self) -> None:
+        state: dict[str, list[dict[str, object]]] = {"requests": []}
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self) -> None:
+                self.send_error(403)
+
+            def do_POST(self) -> None:
+                size = int(self.headers["Content-Length"])
+                state["requests"].append(
+                    {
+                        "path": self.path,
+                        "authorization": self.headers.get("Authorization"),
+                        "user_agent": self.headers.get("User-Agent"),
+                        "payload": json.loads(self.rfile.read(size)),
+                    }
+                )
+                if self.path == "/v1/responses":
+                    result = {
+                        "status": "completed",
+                        "output": [
+                            {
+                                "type": "message",
+                                "content": [{"type": "output_text", "text": "OK"}],
+                            }
+                        ],
+                    }
+                else:
+                    result = {
+                        "choices": [{"message": {"content": "OK"}, "finish_reason": "stop"}]
+                    }
+                response_body = json.dumps(result).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(response_body)))
+                self.end_headers()
+                self.wfile.write(response_body)
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            for wire_api, expected_path in (
+                ("responses", "/v1/responses"),
+                ("chat_completions", "/v1/chat/completions"),
+            ):
+                with self.subTest(wire_api=wire_api):
+                    model = OpenAICompatibleModel(
+                        f"http://127.0.0.1:{server.server_port}/v1",
+                        "test-model",
+                        "health-check-key",
+                        wire_api=wire_api,
+                    )
+                    result = asyncio.run(model.test_connection())
+
+                    self.assertTrue(result["reachable"])
+                    self.assertEqual(result["statusCode"], 200)
+                    self.assertEqual(result["checkType"], wire_api)
+                    request = state["requests"][-1]
+                    self.assertEqual(request["path"], expected_path)
+                    self.assertEqual(request["authorization"], "Bearer health-check-key")
+                    self.assertEqual(request["user_agent"], "AgentDU/0.6.0")
+                    payload = request["payload"]
+                    self.assertEqual(payload["model"], "test-model")
+                    self.assertNotIn("tools", payload)
+                    self.assertNotIn("tool_choice", payload)
+                    self.assertEqual(payload.get("max_output_tokens", payload.get("max_tokens")), 8)
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=2)
+
+    def test_provider_connection_check_distinguishes_http_403_and_errors_do_not_log_secrets(self) -> None:
+        secret = "synthetic-provider-secret"
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self) -> None:
+                self.rfile.read(int(self.headers["Content-Length"]))
+                response_body = json.dumps({"error": {"message": secret}}).encode("utf-8")
+                self.send_response(403)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(response_body)))
+                self.end_headers()
+                self.wfile.write(response_body)
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            model = OpenAICompatibleModel(
+                f"http://127.0.0.1:{server.server_port}/v1",
+                "test-model",
+                secret,
+                wire_api="responses",
+            )
+            result = asyncio.run(model.test_connection())
+            self.assertFalse(result["reachable"])
+            self.assertEqual(result["statusCode"], 403)
+            self.assertEqual(result["failureKind"], "access_denied")
+
+            with self.assertRaisesRegex(ProviderError, "HTTP 403") as raised:
+                asyncio.run(model.complete([], []))
+            self.assertNotIn(secret, str(raised.exception))
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=2)
+
+    def test_responses_provider_error_redacts_a_secret_echoed_by_the_provider(self) -> None:
+        secret = "synthetic-provider-secret"
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self) -> None:
+                self.rfile.read(int(self.headers["Content-Length"]))
+                response_body = json.dumps(
+                    {"status": "failed", "error": {"message": secret}}
+                ).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(response_body)))
+                self.end_headers()
+                self.wfile.write(response_body)
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            model = OpenAICompatibleModel(
+                f"http://127.0.0.1:{server.server_port}/v1",
+                "test-model",
+                secret,
+                wire_api="responses",
+            )
+            with self.assertRaises(ProviderError) as raised:
+                asyncio.run(model.complete([], []))
+            self.assertIn("[REDACTED]", str(raised.exception))
+            self.assertNotIn(secret, str(raised.exception))
         finally:
             server.shutdown()
             server.server_close()

@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-28",
+  "workspace": "desktop/release/g1-real-provider-workspace-2026-11-28",
+  "baselineCommit": "da89d46d4401f7a16e3395b1a61946df7c9db9a5",
+  "sourceHashesMatchedOriginal": true,
+  "provider": {
+    "endpoint": "https://apikey.casa/v1",
+    "model": "gpt-6.2-astra",
+    "wireApi": "responses",
+    "credentialReadOrCopied": false,
+    "providerErrorEvents": 0
+  },
+  "agentduTask": {
+    "taskId": "955d580b-5b75-48ff-bdfd-2bb30f0b860c",
+    "sessionId": "bc283b10d9814912ad3d249be8cef87e",
+    "startedAt": "2026-11-28T16:04:53+08:00",
+    "endedAt": "2026-11-28T16:13:10+08:00",
+    "modelRequests": 12,
+    "modelUsageEvents": 12,
+    "inputTokens": 55374,
+    "outputTokens": 1959,
+    "totalTokens": 57333,
+    "numericCostAvailable": false,
+    "toolCalls": 19,
+    "toolCallCounts": {
+      "list_files": 6,
+      "git_status": 2,
+      "git_log": 1,
+      "read_file": 3,
+      "search_text": 3,
+      "write_file": 2,
+      "edit_file": 1,
+      "run_command": 1
+    },
+    "runCommandExitCode": 255,
+    "terminalState": "failed",
+    "failure": "MaxStepsExceeded after 12 model steps",
+    "codingTaskCompletedByAgentDU": false,
+    "rawProviderBodyOrCredentialIncluded": false
+  },
+  "isolatedManualCompletionCheck": {
+    "scope": "MVA parser extraction module and GUI delegation in the isolated copy only",
+    "command": "python -m unittest -v test_mva_parser",
+    "testsPassed": 7,
+    "testsFailed": 0,
+    "automatedByAgentDU": false,
+    "countsAsRealAgentDUCodingAcceptance": false
+  },
+  "result": "BLOCKED"
+}

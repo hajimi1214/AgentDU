@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-28",
+  "observedAtUtc": "2026-11-28T04:46:40Z",
+  "repositoryHeadAtObservation": "dede56a12e48758a858f625a99f2903385551bed",
+  "installedExecutablePath": "C:\\AgentDU\\desktop\\release\\g1-main-reconnect-final-2026-11-28\\artifacts\\nsis-install\\AgentDU Installed With Spaces\\AgentDU.exe",
+  "isolatedUserDataDirectory": "C:\\AgentDU\\desktop\\release\\g1-main-reconnect-final-2026-11-28\\artifacts\\gpt-profile-isolated-data",
+  "isolatedRuntimeProcessId": 45480,
+  "providerProfile": {
+    "name": "OpenAI",
+    "endpoint": "https://apikey.casa/v1",
+    "modelId": "gpt-6.2-astra",
+    "wireApi": "responses",
+    "credentialAvailable": true,
+    "credentialValueRecorded": false
+  },
+  "workspace": {
+    "path": "C:\\AgentDU\\desktop\\release\\g1-real-provider-workspace-2026-11-28",
+    "gitBaselineCommit": "da89d46d4401f7a16e3395b1a61946df7c9db9a5",
+    "gitHeadAfterRequest": "da89d46d4401f7a16e3395b1a61946df7c9db9a5",
+    "workingTreeCleanBeforeAndAfter": true
+  },
+  "task": {
+    "submittedThroughInstalledUi": true,
+    "sessionId": "9800b2d2c65a45f0b82a18ab1c50efe9",
+    "taskAcceptedEventObserved": true,
+    "modelRequestEventObserved": true,
+    "modelRequestRound": 1,
+    "providerErrorEventObserved": true,
+    "httpStatus": 403,
+    "errorCategory": "Cloudflare 1010 Access denied",
+    "providerResponse": {
+      "errorCode": 1010,
+      "rayId": "a616baee1d4b9dea",
+      "message": "The site owner blocked the request based on the client's browser signature.",
+      "rawBodyIncludedInEvidence": false
+    },
+    "taskTerminalState": "failed",
+    "toolExecutionEvents": 0,
+    "filesChanged": false,
+    "testsRun": false,
+    "realCodingTaskCompleted": false,
+    "rawProviderErrorPersistedInUiEvent": true,
+    "providerErrorBodyType": "Cloudflare HTML Access denied page",
+    "rawResponseBodyIncludedInEvidence": false,
+    "rayIdPresentInUiEvent": true,
+    "rayIdIncludedInEvidence": true,
+    "credentialValueRecorded": false
+  },
+  "g1Status": "BLOCKED",
+  "blocker": "The configured endpoint rejected the real Responses API request with HTTP 403 before returning a model result."
+}
